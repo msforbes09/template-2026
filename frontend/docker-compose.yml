@@ -10,22 +10,21 @@ services:
         # Server-side, but needed at build time too: the public pages are
         # prerendered by `next build`, and their reads go through this. See the
         # Dockerfile for why it is a builder-stage-only ARG.
-        API_URL: ${API_URL:-https://egov-api-ws.oueg.info/api/v1}
+        API_URL: ${API_URL:-http://localhost:8000/api}
+        NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-App}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://egov-api-ws.oueg.info/api/v1}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
         NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-1x00000000000000000000AA}
-        NEXT_PUBLIC_EGOV_SSO_PARTNER_CODE: ${NEXT_PUBLIC_EGOV_SSO_PARTNER_CODE:-TEST_AGENCY}
-        NEXT_PUBLIC_REVERB_APP_KEY: ${NEXT_PUBLIC_REVERB_APP_KEY:-2uqlqvzghsgamqp93hzp}
-        NEXT_PUBLIC_REVERB_HOST: ${NEXT_PUBLIC_REVERB_HOST:-egov-api-ws.oueg.info}
-        NEXT_PUBLIC_REVERB_PORT: ${NEXT_PUBLIC_REVERB_PORT:-443}
-        NEXT_PUBLIC_REVERB_FORCE_TLS: ${NEXT_PUBLIC_REVERB_FORCE_TLS:-true}
+        NEXT_PUBLIC_REVERB_APP_KEY: ${NEXT_PUBLIC_REVERB_APP_KEY:-local}
+        NEXT_PUBLIC_REVERB_HOST: ${NEXT_PUBLIC_REVERB_HOST:-localhost}
+        NEXT_PUBLIC_REVERB_PORT: ${NEXT_PUBLIC_REVERB_PORT:-8080}
+        NEXT_PUBLIC_REVERB_FORCE_TLS: ${NEXT_PUBLIC_REVERB_FORCE_TLS:-false}
         NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB: ${NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB:-5}
-    image: egov-api-ui:latest
+    image: template-frontend:latest
     restart: unless-stopped
-    # Bound to localhost only — the staging host already runs its own
-    # nginx terminating the public domain/TLS, so this container should
-    # be reachable from that nginx (also on the host) but not directly
-    # from the internet. See nginx.conf for the reference config to
+    # Bound to localhost only — the host runs its own nginx terminating the
+    # public domain/TLS, so this container should be reachable from that
+    # nginx (also on the host) but not directly from the internet. See nginx.conf for the reference config to
     # merge into that host-level nginx's server block for this app.
     ports:
       - "127.0.0.1:${PORT:-3000}:${PORT:-3000}"
@@ -36,7 +35,7 @@ services:
       # in sync with the port mapping above, both driven by the same var.
       PORT: ${PORT:-3000}
       HOSTNAME: 0.0.0.0
-      API_URL: ${API_URL:-https://egov-api-ws.oueg.info/api/v1}
+      API_URL: ${API_URL:-http://localhost:8000/api}
       # Signs the Better Auth session cookie — required, no insecure default
       # accepted here (lib/env.ts falls back to a dev-only value if unset,
       # which must never reach production). Generate one with:

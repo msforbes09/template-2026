@@ -1,5 +1,5 @@
 // The permission gating for the nav entries that used to render
-// unconditionally (Users, API Catalog, Content Blocks, Gallery,
+// unconditionally (Users, Content Blocks, Gallery,
 // Administrators, Access Control). Dashboard and Settings stay ungated on
 // purpose: Dashboard is the landing route, and Settings is the admin's own
 // change-password screen — self-service, with no backend permission behind it.
@@ -9,11 +9,10 @@
 // (MobileSidebar), so this module must be importable from either side. The
 // server resolver lives in admin-can.ts.
 
-// Which of the six gated sections an admin may see, as plain booleans the nav
+// Which of the five gated sections an admin may see, as plain booleans the nav
 // can take across the client boundary.
 export type NavSectionPermissions = {
   users: boolean;
-  catalogs: boolean;
   contents: boolean;
   gallery: boolean;
   administrators: boolean;
@@ -25,7 +24,6 @@ export type NavSectionPermissions = {
 // recoverable, a rendered one that should not exist is not.
 export const NO_NAV_SECTIONS: NavSectionPermissions = {
   users: false,
-  catalogs: false,
   contents: false,
   gallery: false,
   administrators: false,
@@ -41,7 +39,6 @@ export function navSectionPermissions(permissions: readonly string[]): NavSectio
 
   return {
     users: has("users-view"),
-    catalogs: has("api-catalogs-view"),
     contents: has("contents-view"),
     gallery: has("gallery-view"),
     administrators: has("administrators-view"),

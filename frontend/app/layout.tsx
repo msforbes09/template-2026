@@ -17,11 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
   title: {
-    default: "eGov API Developer Portal",
-    template: "%s · eGov API",
+    default: env.NEXT_PUBLIC_APP_NAME,
+    template: `%s · ${env.NEXT_PUBLIC_APP_NAME}`,
   },
-  description:
-    "The developer portal for Philippine government APIs. Register, get approved, and integrate eVerify, eGov SSO, eGovPay and more.",
+  description: `${env.NEXT_PUBLIC_APP_NAME} account portal and administration console.`,
 };
 
 export default function RootLayout({

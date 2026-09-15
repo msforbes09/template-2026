@@ -23,10 +23,3 @@ next-env.d.ts
 Dockerfile
 .dockerignore
 docker-compose.yml
-
-# Service-account keys — the builder stage does `COPY . .`, so without this a
-# key sitting in the working tree lands in that layer. Mounted at runtime
-# instead (see docker-compose.yml).
-*-sa.json
-*service-account*.json
-secrets/

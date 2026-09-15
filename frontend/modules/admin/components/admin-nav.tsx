@@ -1,11 +1,8 @@
 import { Suspense } from "react";
 import {
-  CalendarRange,
   FileText,
-  FolderKanban,
   Images,
   LayoutDashboard,
-  LayoutGrid,
   Lock,
   Megaphone,
   ScrollText,
@@ -16,10 +13,6 @@ import { NavGroup } from "@/modules/admin/components/nav-group";
 import { NavLink } from "@/modules/admin/components/nav-link";
 import { LogsNav } from "@/modules/admin/components/logs-nav";
 import { UsersStatusNav, UsersStatusNavFallback } from "@/modules/admin/components/users-status-nav";
-import {
-  ProjectsStatusNav,
-  ProjectsStatusNavFallback,
-} from "@/modules/admin/components/projects-status-nav";
 import {
   LOG_NAV_LINKS,
   visibleLogLinks,
@@ -38,7 +31,6 @@ import { SettingsNav } from "@/modules/admin/components/settings-nav";
 // down as plain booleans — this component is also part of a client tree, so it
 // can't read the admin's permissions itself.
 const NO_LOGS: LogNavPermissions = {
-  gateway: false,
   connection: false,
   auth: false,
   audit: false,
@@ -47,12 +39,6 @@ const NO_LOGS: LogNavPermissions = {
 export function AdminNav({
   onNavigate,
   logs = NO_LOGS,
-  // Hidden without `projects-view` — the API answers 403 either way, this
-  // just keeps a destination the admin can't use out of the menu.
-  canViewProjects = false,
-  // Hidden without `egov-events-view`, which is granted separately from the
-  // projects permissions.
-  canViewEvents = false,
   // Hidden without `notifications-broadcast`. Its own permission group, and
   // no role holds it until it is granted — so this entry being absent right
   // after the deploy is expected, not a bug.
@@ -69,13 +55,11 @@ export function AdminNav({
 }: {
   onNavigate?: () => void;
   logs?: LogNavPermissions;
-  canViewProjects?: boolean;
-  canViewEvents?: boolean;
   canBroadcast?: boolean;
   sections?: NavSectionPermissions;
   canManageFeatureFlags?: boolean;
 }) {
-  // Empty when the admin holds none of the four log permissions, in which case
+  // Empty when the admin holds none of the three log permissions, in which case
   // the parent entry disappears along with its children.
   const logLinks = visibleLogLinks(logs);
 
@@ -93,9 +77,6 @@ export function AdminNav({
       >
         Dashboard
       </NavLink>
-      {/* Account Activation (/admin/activation) is hidden from the menu for
-          now — the route still exists and is reachable by URL. Restore this
-          NavLink (icon: QrCode) when it's ready to be surfaced again. */}
       {sections.users && (
         <NavGroup
           storageKey="users"
@@ -121,39 +102,6 @@ export function AdminNav({
           </div>
         </NavGroup>
       )}
-      {canViewProjects && (
-        // Same shape as Users: a parent entry with an indented status list,
-        // which is how an assessor actually navigates this screen.
-        <NavGroup
-          storageKey="projects"
-          label="Projects"
-          prefixes={["/admin/projects"]}
-          parent={
-            <NavLink
-              href="/admin/projects"
-              icon={<FolderKanban aria-hidden className="size-4" />}
-              onClick={onNavigate}
-            >
-              Projects
-            </NavLink>
-          }
-        >
-          <div className="group-data-[collapsed=true]/sidebar:hidden">
-            <Suspense fallback={<ProjectsStatusNavFallback onNavigate={onNavigate} />}>
-              <ProjectsStatusNav onNavigate={onNavigate} />
-            </Suspense>
-          </div>
-        </NavGroup>
-      )}
-      {sections.catalogs && (
-        <NavLink
-          href="/admin/api-catalogs"
-          icon={<LayoutGrid aria-hidden className="size-4" />}
-          onClick={onNavigate}
-        >
-          API Catalog
-        </NavLink>
-      )}
       {canBroadcast && (
         <NavLink
           href="/admin/broadcasts"
@@ -163,21 +111,12 @@ export function AdminNav({
           Broadcasts
         </NavLink>
       )}
-      {canViewEvents && (
-        <NavLink
-          href="/admin/egov-events"
-          icon={<CalendarRange aria-hidden className="size-4" />}
-          onClick={onNavigate}
-        >
-          eGov Events
-        </NavLink>
-      )}
       {logLinks.length > 0 && (
         // Same shape as Users above: a parent entry with its own indented
         // child list. Unlike Users there's no aggregate "all logs" page to
         // land on, so the parent points at the first viewer this admin is
         // allowed to see — which is also the first child. The group counts as
-        // active on ALL four viewers' routes, not just the visible ones — you
+        // active on ALL three viewers' routes, not just the visible ones — you
         // can't be on a route you can't view anyway.
         <NavGroup
           storageKey="logs"

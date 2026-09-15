@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { completeProfile } from "@/modules/client-auth/actions/profile-actions";
 import { humanize } from "@/lib/humanize";
 
-// Marking the profile complete unlocks reviewing — and starts both 30-day
-// edit cooldowns, which is worth saying before they press it rather than
+// Marking the profile complete starts both 30-day edit cooldowns, which is worth saying before they press it rather than
 // after they discover the lock.
 export function CompleteProfileButton() {
   const router = useRouter();
@@ -21,8 +20,7 @@ export function CompleteProfileButton() {
     startTransition(async () => {
       const result = await completeProfile();
       if (result.ok) {
-        // Back to the dashboard, where the journey stepper now shows step 1
-        // done and applying as a developer as the live step.
+        // Back to the dashboard, which now shows the completed state.
         //
         // push() ALONE — no refresh() alongside it. This runs inside the
         // transition that drives the button's spinner, and refresh() would
@@ -32,7 +30,7 @@ export function CompleteProfileButton() {
         // forever. A dynamic segment is refetched on navigation anyway, so
         // the dashboard still renders the new status.
         router.push("/dashboard");
-        toast.success("Profile completed — you can now rate and review projects");
+        toast.success("Profile completed");
         return;
       }
       // The API names the empty fields, which is far more useful than a

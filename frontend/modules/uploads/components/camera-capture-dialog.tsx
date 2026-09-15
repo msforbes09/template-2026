@@ -15,17 +15,14 @@ import {
 type Status = "loading" | "ready" | "error";
 
 // Raw getUserMedia + canvas capture — no third-party dependency needed for
-// a plain snapshot, unlike qr-code-scanner.tsx's use of the `qr-scanner`
-// package for continuous decode. Lifecycle/error-handling conventions
-// (three-state loading/ready/error, NotAllowedError vs. generic failure,
-// muted+playsInline for iOS Safari, stream cleanup guarded by a `cancelled`
-// flag) mirror that component for consistency.
+// a plain snapshot. Three-state loading/ready/error, NotAllowedError vs.
+// generic failure, muted+playsInline for iOS Safari, stream cleanup guarded
+// by a `cancelled` flag.
 //
 // No `open` prop — FileUploader only mounts this while its capture dialog
 // should be visible, so every mount is already a fresh "just opened" state
-// (matches account-activation-modal.tsx's remount-to-reset convention for
-// its QR scanner, instead of resetting state inside an effect keyed off an
-// `open` prop flip).
+// (remount-to-reset rather than resetting state inside an effect keyed off
+// an `open` prop flip).
 export function CameraCaptureDialog({
   onOpenChange,
   onCapture,
@@ -45,8 +42,7 @@ export function CameraCaptureDialog({
 
     (async () => {
       try {
-        // Front camera — this is a selfie-style profile photo, unlike the
-        // QR scanner's rear-camera ("environment") default.
+        // Front camera — this is a selfie-style profile photo.
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "user" },
         });

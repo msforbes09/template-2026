@@ -13,12 +13,6 @@ type UsersSearchParams = Promise<{
   q?: string;
   is_active?: string;
   status?: string;
-  // The account's capability axis (basic | developer), filtered server-side
-  // and independent of the lifecycle status above.
-  type?: string;
-  // "me" filters to the one user the signed-in admin currently holds an
-  // assessment claim on — the transfer dialog's "go to their record" link.
-  claimed?: string;
   page?: string;
 }>;
 
@@ -31,14 +25,12 @@ async function UsersListForParams({
 }: {
   searchParams: UsersSearchParams;
 }) {
-  const { q = "", is_active = "", status = "", type = "", claimed = "", page = "1" } = await searchParams;
+  const { q = "", is_active = "", status = "", page = "1" } = await searchParams;
   return (
     <UsersList
       q={q}
       isActive={is_active}
       status={status}
-      accountType={type}
-      claimed={claimed}
       page={page}
     />
   );

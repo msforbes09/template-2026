@@ -8,7 +8,7 @@ import { CooldownNotice } from "@/modules/client-auth/components/cooldown-notice
 import { FileUploader } from "@/modules/uploads/components/file-uploader";
 import { updateProfilePhoto } from "@/modules/client-auth/actions/profile-actions";
 import { uploadClientPrivateFile } from "@/modules/uploads/actions/upload-actions";
-import { canEditProfile, photoCooldown } from "@/modules/client-auth/lib/account";
+import { photoCooldown } from "@/modules/client-auth/lib/account";
 import type { ClientUserProfile } from "@/types/client-user";
 import type { UploadedFile } from "@/types/upload";
 
@@ -35,9 +35,8 @@ export function ProfilePhotoCard({ profile }: { profile: ClientUserProfile }) {
 
   const cooldown = photoCooldown(profile);
   const hasNoPhoto = !profile.photo?.uuid;
-  const frozen = !canEditProfile(profile);
   // The lock does not apply to a first upload.
-  const locked = frozen || (cooldown.locked && !hasNoPhoto);
+  const locked = cooldown.locked && !hasNoPhoto;
 
   function save(file: UploadedFile | null) {
     setPhoto(file);
@@ -85,14 +84,8 @@ export function ProfilePhotoCard({ profile }: { profile: ClientUserProfile }) {
           ) : (
             <div className="size-16 rounded-full bg-muted" />
           )}
-          {/* Nothing to say for a cooldown lock — the dated notice under this
-              card is the one explanation. Suspension has no date, so it says
-              its own reason here. */}
-          {frozen && (
-            <p className="text-sm text-muted-foreground">
-              Your account is suspended, so this can&apos;t be changed.
-            </p>
-          )}
+          {/* Nothing to say here — the dated notice under this card is the
+              one explanation. */}
         </div>
       ) : (
         <AppFormField label="Photo">
@@ -107,7 +100,7 @@ export function ProfilePhotoCard({ profile }: { profile: ClientUserProfile }) {
         </AppFormField>
       )}
 
-      {!frozen && !hasNoPhoto && <CooldownNotice cooldown={cooldown} what="photo" />}
+      {!hasNoPhoto && <CooldownNotice cooldown={cooldown} what="photo" />}
     </section>
   );
 }

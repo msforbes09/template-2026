@@ -35,7 +35,7 @@ describe("broadcastSchema", () => {
     expect(broadcastSchema.safeParse({ ...VALID, body: "x".repeat(1000) }).success).toBe(true);
   });
 
-  it("requires a citizen when targeting a single user", () => {
+  it("requires a user when targeting a single user", () => {
     expect(issues({ ...VALID, audience: "user" })).toContain("user_uuid");
     expect(
       broadcastSchema.safeParse({ ...VALID, audience: "user", user_uuid: "9d3f" }).success,
@@ -46,12 +46,9 @@ describe("broadcastSchema", () => {
     // An unfilled "segment" reaches exactly the people the Everyone audience
     // reaches — which is the one case that requires a typed confirmation.
     // Allowing it would be a way around that guard.
-    expect(issues({ ...VALID, audience: "segment" })).toContain("type");
+    expect(issues({ ...VALID, audience: "segment" })).toContain("status");
     expect(
-      broadcastSchema.safeParse({ ...VALID, audience: "segment", type: "developer" }).success,
-    ).toBe(true);
-    expect(
-      broadcastSchema.safeParse({ ...VALID, audience: "segment", status: "approved" }).success,
+      broadcastSchema.safeParse({ ...VALID, audience: "segment", status: "completed" }).success,
     ).toBe(true);
   });
 });
@@ -66,27 +63,22 @@ describe("toBroadcastPayload", () => {
     });
   });
 
-  it("sends only the segment keys that were chosen", () => {
+  it("sends the status for a segment", () => {
     expect(
-      toBroadcastPayload({ ...VALID, audience: "segment", type: "developer", status: "" }),
-    ).toMatchObject({ type: "developer" });
-    expect(
-      toBroadcastPayload({ ...VALID, audience: "segment", type: "developer", status: "" }),
-    ).not.toHaveProperty("status");
+      toBroadcastPayload({ ...VALID, audience: "segment", status: "completed" }),
+    ).toMatchObject({ status: "completed" });
   });
 
-  it("never sends user_uuid alongside type or status", () => {
+  it("never sends user_uuid alongside status", () => {
     // The combination the API answers 422 for. The mode makes it
     // unexpressible; this pins that.
     const payload = toBroadcastPayload({
       ...VALID,
       audience: "user",
       user_uuid: "9d3f",
-      type: "developer",
-      status: "approved",
+      status: "completed",
     });
     expect(payload).toMatchObject({ user_uuid: "9d3f" });
-    expect(payload).not.toHaveProperty("type");
     expect(payload).not.toHaveProperty("status");
   });
 
@@ -97,8 +89,7 @@ describe("toBroadcastPayload", () => {
       toBroadcastPayload({
         ...VALID,
         audience: "everyone",
-        type: "developer",
-        status: "approved",
+        status: "completed",
         user_uuid: "9d3f",
       }),
     ).toEqual({
@@ -121,16 +112,15 @@ describe("toBroadcastValues", () => {
   it("reads null filters back as the everyone mode", () => {
     expect(toBroadcastValues({ ...base, filters: null })).toMatchObject({
       audience: "everyone",
-      type: "",
       status: "",
       user_uuid: "",
     });
   });
 
-  it("reads a segment back into its dropdowns", () => {
+  it("reads a segment back into its dropdown", () => {
     expect(
-      toBroadcastValues({ ...base, filters: { type: "developer", status: "approved" } }),
-    ).toMatchObject({ audience: "segment", type: "developer", status: "approved" });
+      toBroadcastValues({ ...base, filters: { status: "completed" } }),
+    ).toMatchObject({ audience: "segment", status: "completed" });
   });
 
   it("reads a single-user draft back into the user mode", () => {
@@ -141,8 +131,8 @@ describe("toBroadcastValues", () => {
   });
 
   it("round-trips a draft through values and back to a payload", () => {
-    const filters = { type: "developer" };
+    const filters = { status: "draft" };
     const values = toBroadcastValues({ ...base, filters });
-    expect(toBroadcastPayload(values)).toEqual({ title: "T", body: "B", type: "developer" });
+    expect(toBroadcastPayload(values)).toEqual({ title: "T", body: "B", status: "draft" });
   });
 });

@@ -59,3 +59,38 @@ describe("BETTER_AUTH_SECRET", () => {
     expect(env.BETTER_AUTH_SECRET).toBe("dev-only-insecure-secret-change-me-0000");
   });
 });
+
+describe("NEXT_PUBLIC_APP_NAME", () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("exposes the product name with a neutral default", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_NAME", undefined);
+    const { env } = await loadEnv();
+    expect(env.NEXT_PUBLIC_APP_NAME).toBe("App");
+  });
+
+  it("reads the product name from the environment", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_NAME", "Acme Portal");
+    const { env } = await loadEnv();
+    expect(env.NEXT_PUBLIC_APP_NAME).toBe("Acme Portal");
+  });
+});
+
+describe("Reverb defaults", () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  // The template must not point at anyone's real websocket host or key.
+  it("default to a local Reverb", async () => {
+    vi.stubEnv("NEXT_PUBLIC_REVERB_HOST", undefined);
+    vi.stubEnv("NEXT_PUBLIC_REVERB_APP_KEY", undefined);
+    const { env } = await loadEnv();
+    expect(env.NEXT_PUBLIC_REVERB_HOST).toBe("localhost");
+    expect(env.NEXT_PUBLIC_REVERB_APP_KEY).toBe("local");
+    expect(env.NEXT_PUBLIC_REVERB_PORT).toBe(8080);
+    expect(env.NEXT_PUBLIC_REVERB_FORCE_TLS).toBe(false);
+  });
+});

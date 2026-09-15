@@ -19,15 +19,14 @@ import { ResourceModal } from "@/components/ui/resource-modal";
 import { ChangePasswordForm } from "@/modules/client-auth/components/change-password-form";
 import { clearClientSession } from "@/modules/client-auth/actions/session-actions";
 
-// The citizen's account menu — the site header's counterpart to
+// The user's account menu — the site header's counterpart to
 // AdminUserMenu. Same shape, three differences the two audiences don't share:
 //
 // 1. A Dashboard entry. The header nav only shows dashboard links while the
-//    citizen is inside /dashboard; on the marketing pages this menu is the
+//    user is inside /dashboard; on the marketing pages this menu is the
 //    only route back, which is what the old name-as-a-link gave them.
-// 2. Change password is conditional. It's absent for eGovPH SSO accounts
-//    (no local password to change) and for accounts with no email — the
-//    change-password action needs one to rewrite the session cookie.
+// 2. Change password is conditional. It's absent for accounts with no email —
+//    the change-password action needs one to rewrite the session cookie.
 // 3. Sign-out returns to "/" rather than a login page.
 export function ClientUserMenu({
   displayName,

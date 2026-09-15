@@ -1,8 +1,6 @@
-import type { AccountStatus } from "@/modules/client-auth/lib/account";
-
-// Admin broadcasts — an announcement pushed into citizens' notification bells.
+// Admin broadcasts — an announcement pushed into users' notification bells.
 // The receiving side is the `announcement` notification type
-// (types/notification.ts). Per the 2026-08-27 handoff.
+// (types/notification.ts).
 
 // draft -> sending -> sent.
 //
@@ -11,14 +9,13 @@ import type { AccountStatus } from "@/modules/client-auth/lib/account";
 // recalled.
 export type BroadcastStatus = "draft" | "sending" | "sent";
 
-// Which citizens a broadcast targets.
+// Which users a broadcast targets.
 //
 // NULL means every registered user — the absence of targeting, not an empty
-// object. `type` and `status` combine with AND; `user_uuid` is exclusive of
-// both (the API answers 422 if they are sent together).
+// object. `user_uuid` is exclusive of `status` (the API answers 422 if they
+// are sent together).
 export type BroadcastFilters = {
-  type?: "basic" | "developer";
-  status?: AccountStatus;
+  status?: "draft" | "completed";
   user_uuid?: string;
 } | null;
 
@@ -26,14 +23,14 @@ export type AdminBroadcast = {
   id: number;
   status: BroadcastStatus;
   title: string;
-  // Plain text. Citizens see it verbatim in the bell — never rendered as
+  // Plain text. Users see it verbatim in the bell — never rendered as
   // markdown or HTML on either side.
   body: string;
   filters: BroadcastFilters;
   // Null until the fan-out finishes. A row that is `sending` with a null
   // count is normal for a few seconds; minutes means the queue is stuck.
   recipients_count: number | null;
-  // All three are `Y-m-d H:i:s` Asia/Manila wall-clock — render as-is, never
+  // All three are `Y-m-d H:i:s` server wall-clock — render as-is, never
   // re-shift into another zone.
   started_at: string | null;
   completed_at: string | null;

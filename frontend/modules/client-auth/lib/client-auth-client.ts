@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 
 // Direct browser-to-backend auth exchange — no Next.js route in between.
-// See https://egov-api-ws.oueg.info/docs/users?api-docs-users.json
+// See the backend's /api/documentation/users.
 const BASE = `${env.NEXT_PUBLIC_API_URL}/user`;
 
 type ErrorEnvelope = {

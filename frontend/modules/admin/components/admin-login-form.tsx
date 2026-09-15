@@ -201,7 +201,7 @@ export function AdminLoginForm() {
           <Input
             type="email"
             autoComplete="username"
-            placeholder="admin@egov.ph"
+            placeholder="admin@example.com"
             {...credentialsForm.register("email")}
           />
         </AppFormField>

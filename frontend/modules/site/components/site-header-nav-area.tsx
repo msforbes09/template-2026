@@ -3,7 +3,7 @@ import { SiteHeaderNav } from "@/modules/site/components/site-header-nav";
 
 // Supplies the session bit the nav can't read itself: SiteHeaderNav is a
 // client component (it needs usePathname), and the marketing link set gains a
-// Dashboard entry for a signed-in citizen.
+// Dashboard entry for a signed-in user.
 //
 // getClientProfile is cache()-memoized per request, so this shares the fetch
 // SiteHeaderAuthArea already makes rather than adding one. It sits inside the

@@ -5,40 +5,18 @@ import {
 } from "@/modules/feature-flags/lib/normalize-feature-flags";
 
 // The seam between the wire and every gate in the app. Getting a value wrong
-// here does not throw — it silently hides a feature, or shows a maintenance
-// page over a working site.
+// here does not throw — it silently shows a maintenance page over a working
+// site, or hides one that was switched on.
 describe("normalizeFeatureFlags", () => {
   it("reads the documented 1/0 wire shape", () => {
-    expect(
-      normalizeFeatureFlags({
-        developer_applications: 1,
-        project_reviews: 0,
-        api_catalog_reviews: 1,
-        maintenance_mode: 0,
-      }),
-    ).toEqual({
-      developer_applications: true,
-      project_reviews: false,
-      api_catalog_reviews: true,
-      maintenance_mode: false,
-    });
-  });
-
-  it("treats 0 as off rather than as a missing value", () => {
-    // The trap: `0` is falsy AND absent-looking. A `value ?? default` would
-    // turn a deliberate "off" back into the default "on".
-    expect(normalizeFeatureFlags({ project_reviews: 0 }).project_reviews).toBe(false);
-    expect(normalizeFeatureFlags({ maintenance_mode: 1 }).maintenance_mode).toBe(true);
+    expect(normalizeFeatureFlags({ maintenance_mode: 0 })).toEqual({ maintenance_mode: false });
+    expect(normalizeFeatureFlags({ maintenance_mode: 1 })).toEqual({ maintenance_mode: true });
   });
 
   it("falls back to the default for a flag the backend stops sending", () => {
-    // Absent must NOT read as false. For maintenance_mode that is the
-    // difference between a working site and a maintenance page nobody
-    // switched on.
-    const flags = normalizeFeatureFlags({ project_reviews: 0 });
-    expect(flags.maintenance_mode).toBe(false);
-    expect(flags.developer_applications).toBe(true);
-    expect(flags.api_catalog_reviews).toBe(true);
+    // Absent must NOT read as true: that is the difference between a working
+    // site and a maintenance page nobody switched on.
+    expect(normalizeFeatureFlags({}).maintenance_mode).toBe(false);
   });
 
   it("fails open on junk, so one bad response cannot black out the site", () => {
@@ -48,16 +26,20 @@ describe("normalizeFeatureFlags", () => {
   });
 
   it("ignores a flag it does not know about", () => {
-    const flags = normalizeFeatureFlags({ some_future_flag: 1, project_reviews: 0 });
-    expect(flags).toEqual({ ...DEFAULT_FEATURE_FLAGS, project_reviews: false });
+    const flags = normalizeFeatureFlags({ some_future_flag: 1, maintenance_mode: 0 });
+    expect(flags).toEqual({ maintenance_mode: false });
     expect("some_future_flag" in flags).toBe(false);
   });
 
+  it("knows only maintenance_mode", () => {
+    expect(Object.keys(DEFAULT_FEATURE_FLAGS)).toEqual(["maintenance_mode"]);
+  });
+
   it("accepts the booleans and strings a lenient backend might send", () => {
-    expect(normalizeFeatureFlags({ project_reviews: true }).project_reviews).toBe(true);
-    expect(normalizeFeatureFlags({ project_reviews: false }).project_reviews).toBe(false);
-    expect(normalizeFeatureFlags({ project_reviews: "1" }).project_reviews).toBe(true);
-    expect(normalizeFeatureFlags({ project_reviews: "0" }).project_reviews).toBe(false);
+    expect(normalizeFeatureFlags({ maintenance_mode: true }).maintenance_mode).toBe(true);
+    expect(normalizeFeatureFlags({ maintenance_mode: false }).maintenance_mode).toBe(false);
+    expect(normalizeFeatureFlags({ maintenance_mode: "1" }).maintenance_mode).toBe(true);
+    expect(normalizeFeatureFlags({ maintenance_mode: "0" }).maintenance_mode).toBe(false);
   });
 
   it("returns a fresh object, so a caller cannot mutate the defaults", () => {

@@ -23,27 +23,19 @@ describe("describeAudience", () => {
     });
   });
 
-  it("names a type-only audience", () => {
-    expect(describeAudience({ type: "developer" }).label).toBe("All developer accounts");
-    expect(describeAudience({ type: "basic" }).label).toBe("All basic accounts");
-  });
-
-  it("combines type and status with AND, as the API does", () => {
-    expect(describeAudience({ type: "developer", status: "approved" }).label).toBe(
-      "All developer accounts who are approved developers",
+  it("names a status audience", () => {
+    expect(describeAudience({ status: "completed" }).label).toBe(
+      "All users with a completed profile",
     );
-  });
-
-  it("names a status-only audience", () => {
-    expect(describeAudience({ status: "suspended" }).label).toBe(
-      "All users who are suspended",
+    expect(describeAudience({ status: "draft" }).label).toBe(
+      "All users with an incomplete profile",
     );
   });
 
   it("recognises a single-user broadcast and never calls it everyone", () => {
     const audience = describeAudience({ user_uuid: "9d3f-abc" });
     expect(audience).toMatchObject({
-      label: "One citizen",
+      label: "One user",
       isEveryone: false,
       isSingleUser: true,
       // The uuid is surfaced so an admin reading the history can see WHO the
@@ -55,11 +47,11 @@ describe("describeAudience", () => {
 
   it("carries no detail for the broader audiences", () => {
     expect(describeAudience(null).detail).toBeNull();
-    expect(describeAudience({ type: "developer" }).detail).toBeNull();
+    expect(describeAudience({ status: "draft" }).detail).toBeNull();
   });
 
   it("does not mistake a blank uuid for a single-user target", () => {
-    // A cleared input must not silently become "one citizen (nobody)". It is
+    // A cleared input must not silently become "one user (nobody)". It is
     // an absence of targeting, which is everyone — and that difference is the
     // whole reason the Everyone case needs a confirmation.
     expect(describeAudience({ user_uuid: "   " })).toMatchObject({
@@ -68,20 +60,11 @@ describe("describeAudience", () => {
     });
   });
 
-  it("flags a suspended-only campaign so the read-only note can show", () => {
-    expect(describeAudience({ status: "suspended" }).includesSuspendedOnly).toBe(true);
-    expect(describeAudience({ status: "approved" }).includesSuspendedOnly).toBe(false);
-    expect(describeAudience(null).includesSuspendedOnly).toBe(false);
-  });
-
   it("renders an unknown filter value rather than dropping it", () => {
     // The audience line must never understate who is being reached, so an
     // unrecognised value is spelled out instead of ignored.
-    const audience = describeAudience({
-      type: "partner" as never,
-      status: "archived" as never,
-    });
-    expect(audience.label).toBe("All partner accounts with status archived");
+    const audience = describeAudience({ status: "archived" as never });
+    expect(audience.label).toBe("All users with status archived");
     expect(audience.isEveryone).toBe(false);
   });
 });

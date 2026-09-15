@@ -5,7 +5,6 @@ import { isApiError } from "@/lib/api-error";
 import { logError } from "@/lib/log-error";
 import { requireClientSession } from "@/lib/auth/dal";
 import { env } from "@/lib/env";
-import { isFeatureEnabled } from "@/modules/feature-flags/lib/get-feature-flags";
 import type { ActionResult } from "@/lib/action-result";
 import type { ClientUserProfile } from "@/types/client-user";
 import type { ProfileValues } from "@/modules/client-auth/schemas/profile-schema";
@@ -41,53 +40,8 @@ export async function updateClientProfile(
   }
 }
 
-// The message a citizen sees when applications are switched off. Word for word
-// the backend's own copy, so a stale tab that reaches the API and one refused
-// before it leaves here read the same sentence — which half said no is not the
-// citizen's problem.
-//
-// Not exported: this module is "use server", where every export becomes a
-// callable endpoint and only async functions are allowed.
-const APPLICATIONS_CLOSED_MESSAGE = "Developer applications are currently closed.";
-
-// Applying is gated by the `developer_applications` runtime flag (2026-09-02
-// handoff). The UI half hides every "Apply as a developer" control
-// — but a server action is a public HTTP endpoint whose id ships in the client
-// bundle, so hiding the button does not stop a direct POST. Refusing here is
-// what makes the frontend switch real rather than cosmetic (security.md rule
-// 16), and it mirrors the backend's envelope exactly (400 `applications_closed`)
-// so the caller cannot tell which half refused.
-//
-// The backend remains the authority: with only this half off the endpoint is
-// still open, and with only the backend half off this returns nothing and the
-// 400 comes back instead. Callers branch on `code`, so both look the same.
-function applicationsClosed(): ActionResult<never> {
-  return {
-    ok: false,
-    status: 400,
-    message: APPLICATIONS_CLOSED_MESSAGE,
-    errors: {},
-    code: "applications_closed",
-  };
-}
-
-export async function submitForAssessment(): Promise<ActionResult<ClientUserProfile>> {
-  if (!(await isFeatureEnabled("developer_applications"))) return applicationsClosed();
-  await requireClientSession();
-  try {
-    const { data } = await apiFetch<{ data: ClientUserProfile }>(
-      "/profile/submit-for-assessment",
-      { method: "POST" },
-      "client",
-    );
-    return { ok: true, data };
-  } catch (err) {
-    return toActionResult(err, "submitForAssessment action");
-  }
-}
-
 // POST /add-contact's 200 is a bare object (like /register's), not wrapped
-// in `data` — unlike updateClientProfile/submitForAssessment above.
+// in `data` — unlike updateClientProfile above.
 export async function addContact(input: {
   channel: "email" | "sms";
   email?: string;

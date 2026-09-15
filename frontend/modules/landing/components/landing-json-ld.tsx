@@ -1,8 +1,11 @@
 import { env } from "@/lib/env";
 import { serializeJsonLd } from "@/lib/json-ld";
 
+// The site's structured data. The organisation is the product itself; a
+// project with a separate publisher adds it here.
 export function LandingJsonLd() {
   const base = env.NEXT_PUBLIC_SITE_URL;
+  const name = env.NEXT_PUBLIC_APP_NAME;
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -10,17 +13,14 @@ export function LandingJsonLd() {
         "@type": "WebSite",
         "@id": `${base}/#website`,
         url: base,
-        name: "eGov API Developer Portal",
-        description:
-          "The eGov API marketplace — the first Government-as-a-Service platform for Philippine government APIs. Register, get approved, and integrate eVerify, eGov SSO, eGovPay and more.",
+        name,
         publisher: { "@id": `${base}/#organization` },
       },
       {
-        "@type": "GovernmentOrganization",
+        "@type": "Organization",
         "@id": `${base}/#organization`,
-        name: "Department of Information and Communications Technology",
-        alternateName: "DICT",
-        url: "https://dict.gov.ph",
+        name,
+        url: base,
       },
     ],
   };

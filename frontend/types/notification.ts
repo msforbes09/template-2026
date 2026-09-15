@@ -1,20 +1,18 @@
 import type { PaginationMeta } from "@/types/pagination";
 
-// The citizen's in-app notification center — GET/POST user/notifications,
-// plus the `notification.created` broadcast on their existing private channel
-// (the same `user.{uuid}` the gateway-log feed uses).
-//
-// Per the 2026-08-27 handoff.
+// The user's in-app notification center — GET/POST user/notifications, plus
+// the `notification.created` broadcast on their private channel
+// (`private-user.{uuid}`).
 
 // Where a notification points. ALWAYS PRESENT on `data`, either null or an
 // object of stable identifiers — never a URL, because routing is the
 // frontend's. A null reference means "route by the type instead".
-export type NotificationReference =
-  | { type: "project"; uuid: string }
-  | { type: "api_catalog"; identifier: string }
-  | null;
+// The template sends no reference object; the type is kept as a discriminated
+// union so a project can add `{ type: "order"; uuid: string }` and route it in
+// modules/notifications/lib/notification-content.ts.
+export type NotificationReference = { type: string; [key: string]: unknown } | null;
 
-// The 24 types the backend stores today.
+// The six types the backend template stores today.
 //
 // Deliberately a union of literals JOINED WITH `string`: the handoff is
 // explicit that unknown types may appear later and must render gracefully
@@ -24,31 +22,13 @@ export type KnownNotificationType =
   | "welcome"
   | "welcome.back"
   | "profile.completed"
-  | "review.created"
-  | "review.updated"
-  | "review.replied"
-  | "application.received"
-  | "application.approved"
-  | "application.returned"
-  | "project.submitted"
-  | "project.published"
-  | "project.sent_back"
-  | "project.tagged"
-  | "project.hidden"
-  | "project.unhidden"
-  | "project.deleted"
-  | "sanction.suspended"
-  | "sanction.unsuspended"
-  | "sanction.demoted"
-  | "credits.low"
-  | "credits.exhausted"
   | "security.password_changed"
   | "security.account_recovered"
   | "announcement";
 
 export type NotificationType = KnownNotificationType | (string & {});
 
-// The payload varies by type (see the handoff's table). It is read
+// The payload varies by type. It is read
 // defensively rather than typed per-type: a discriminated union would have to
 // be widened for every new backend type before the UI could render it at all,
 // which is the opposite of the graceful-fallback requirement.

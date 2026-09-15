@@ -7,19 +7,17 @@
 // be rendered as a component or passed as a prop — calling it from the server
 // throws. Plain, boundary-free module, importable from either side.
 
-// Which of the four log viewers an admin may see. Each type is gated by its
+// Which of the three log viewers an admin may see. Each type is gated by its
 // own backend permission, so an admin can hold one and not the others.
 export type LogNavPermissions = {
-  gateway: boolean;
   connection: boolean;
   auth: boolean;
   audit: boolean;
 };
 
-// The four viewers, in the order they appear under the Logs parent. Keyed by
+// The three viewers, in the order they appear under the Logs parent. Keyed by
 // the permission flag that reveals each one.
 export const LOG_NAV_LINKS = [
-  { key: "gateway", href: "/admin/gateway-logs", label: "Gateway" },
   { key: "connection", href: "/admin/connection-logs", label: "Connection" },
   { key: "auth", href: "/admin/auth-attempt-logs", label: "Auth Attempts" },
   { key: "audit", href: "/admin/audit-logs", label: "Audit" },

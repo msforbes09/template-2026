@@ -1,4 +1,5 @@
 import { Terminal } from "lucide-react";
+import { env } from "@/lib/env";
 import { getAdminProfile } from "@/modules/admin/lib/get-admin-profile";
 import {
   adminCan,
@@ -15,11 +16,9 @@ export async function AdminHeader() {
   const profile = await getAdminProfile();
   // The mobile sidebar renders the same nav as the desktop one, and can't
   // read permissions itself (it's a client component) — resolve them here.
-  const [logs, sections, canViewProjects, canViewEvents, canBroadcast, canManageFeatureFlags] = await Promise.all([
+  const [logs, sections, canBroadcast, canManageFeatureFlags] = await Promise.all([
     getLogNavPermissions(),
     getNavSectionPermissions(),
-    adminCan(PERMISSIONS.projectsView),
-    adminCan(PERMISSIONS.egovEventsView),
     adminCan(PERMISSIONS.notificationsBroadcast),
     adminCan(PERMISSIONS.developerAccess),
   ]);
@@ -32,8 +31,6 @@ export async function AdminHeader() {
         <MobileSidebar
           logs={logs}
           sections={sections}
-          canViewProjects={canViewProjects}
-          canViewEvents={canViewEvents}
           canBroadcast={canBroadcast}
           canManageFeatureFlags={canManageFeatureFlags}
         />
@@ -45,7 +42,7 @@ export async function AdminHeader() {
         </span>
         <div className="min-w-0 leading-tight">
           <p className="truncate text-sm font-semibold text-foreground">Admin Console</p>
-          <p className="truncate text-xs text-muted-foreground">eGovAPIs Operations</p>
+          <p className="truncate text-xs text-muted-foreground">{env.NEXT_PUBLIC_APP_NAME}</p>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-3 sm:gap-4">

@@ -9,8 +9,8 @@ import {
   ExceptionNotice,
   JsonSection,
 } from "@/components/ui/detail-list";
-import { MethodBadge } from "@/modules/api-docs/components/method-badge";
-import { GatewayStatusBadge } from "@/modules/gateway-logs/components/gateway-status-badge";
+import { MethodBadge } from "@/modules/admin-logs/components/method-badge";
+import { HttpStatusBadge } from "@/modules/admin-logs/components/http-status-badge";
 import { ViewLogModal } from "@/modules/admin-logs/components/view-log-modal";
 import { ModelRefBadge } from "@/modules/admin-logs/components/model-ref-badge";
 import { getConnectionLog } from "@/modules/admin-logs/actions/admin-log-actions";
@@ -28,7 +28,7 @@ function ConnectionLogDetailBody({ log }: { log: ConnectionLogDetail }) {
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center gap-2">
         <MethodBadge method={log.method} />
-        <GatewayStatusBadge statusCode={log.status_code} />
+        <HttpStatusBadge statusCode={log.status_code} />
         <span className="text-xs text-muted-foreground">{log.type}</span>
       </div>
 
@@ -112,7 +112,7 @@ function buildColumns(): ColumnDef<ConnectionLogListItem>[] {
     {
       id: "status_code",
       header: "Status",
-      cell: ({ row }) => <GatewayStatusBadge statusCode={row.original.status_code} />,
+      cell: ({ row }) => <HttpStatusBadge statusCode={row.original.status_code} />,
     },
     {
       id: "duration_ms",

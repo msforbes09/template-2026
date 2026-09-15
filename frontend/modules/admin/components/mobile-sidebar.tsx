@@ -13,15 +13,11 @@ import type { NavSectionPermissions } from "@/modules/admin/lib/nav-sections";
 export function MobileSidebar({
   logs,
   sections,
-  canViewProjects,
-  canViewEvents,
   canBroadcast,
   canManageFeatureFlags,
 }: {
   logs?: LogNavPermissions;
   sections?: NavSectionPermissions;
-  canViewProjects?: boolean;
-  canViewEvents?: boolean;
   canBroadcast?: boolean;
   canManageFeatureFlags?: boolean;
 }) {
@@ -47,8 +43,6 @@ export function MobileSidebar({
           onNavigate={() => setOpen(false)}
           logs={logs}
           sections={sections}
-          canViewProjects={canViewProjects}
-          canViewEvents={canViewEvents}
           canBroadcast={canBroadcast}
           canManageFeatureFlags={canManageFeatureFlags}
         />

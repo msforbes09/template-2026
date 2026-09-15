@@ -11,43 +11,34 @@ import {
 // PermissionEnum values — the API returns 403 regardless of what the UI
 // shows, so these checks only decide whether a control is worth rendering.
 export const PERMISSIONS = {
-  // Gates the dashboard's aggregate views — the realtime panel and the gateway
-  // API usage dashboard both sit behind it (2026-08-26 handoff).
-  dashboardView: "dashboard-view",
   usersView: "users-view",
-  usersGatewayQuota: "users-gateway-quota",
-  gatewayLogsView: "gateway-logs-view",
   connectionLogsView: "connection-logs-view",
   authLogsView: "auth-logs-view",
   auditLogsView: "audit-logs-view",
   usersManage: "users-manage",
-  apiCatalogsView: "api-catalogs-view",
-  apiCatalogsManage: "api-catalogs-manage",
+  contentsView: "contents-view",
   contentsManage: "contents-manage",
+  documentationsView: "documentations-view",
+  documentationsManage: "documentations-manage",
+  galleryView: "gallery-view",
   galleryManage: "gallery-manage",
   administratorsView: "administrators-view",
   administratorsManage: "administrators-manage",
   rolesView: "roles-view",
   rolesManage: "roles-manage",
-  projectsView: "projects-view",
-  projectsManage: "projects-manage",
-  // Their own permission group: a role that manages projects does NOT get
-  // these implicitly, they have to be granted after the access reseed.
-  egovEventsView: "egov-events-view",
-  egovEventsManage: "egov-events-manage",
   // NOT a role permission. `developer-access` is granted at LOGIN to
   // is_developer administrators only, never through a role, and it deliberately
   // does not appear in the role-management permission catalog — so it will
   // never show up in Access Control for anyone to assign. It gates the whole
-  // feature-flag surface (2026-09-02 handoff).
+  // feature-flag surface.
   //
   // Consequence to expect rather than debug: an administrator promoted to
   // developer while signed in does not hold it until they sign in again,
   // because it is stamped on the token.
   developerAccess: "developer-access",
   // Its own `notifications` group, granted separately from everything above.
-  // After the 2026-08-27 deploy NO ROLE HOLDS IT until someone grants it, so
-  // an empty-looking Broadcasts entry is expected rather than a bug.
+  // No role holds it until someone grants it, so an absent Broadcasts entry
+  // is expected rather than a bug.
   notificationsBroadcast: "notifications-broadcast",
 } as const;
 
@@ -58,16 +49,15 @@ export type { LogNavPermissions };
 
 // Resolved once and passed to AdminNav as plain booleans — the nav is part of
 // a client tree and can't read permissions itself. The profile read behind
-// adminCan() is cache()-memoized per request, so the four checks cost one
+// adminCan() is cache()-memoized per request, so the three checks cost one
 // fetch however many callers ask.
 export async function getLogNavPermissions(): Promise<LogNavPermissions> {
-  const [gateway, connection, auth, audit] = await Promise.all([
-    adminCan(PERMISSIONS.gatewayLogsView),
+  const [connection, auth, audit] = await Promise.all([
     adminCan(PERMISSIONS.connectionLogsView),
     adminCan(PERMISSIONS.authLogsView),
     adminCan(PERMISSIONS.auditLogsView),
   ]);
-  return { gateway, connection, auth, audit };
+  return { connection, auth, audit };
 }
 
 // The section flags for the nav entries gated by nav-sections.ts, resolved

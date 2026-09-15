@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { AlertTriangle, CheckCircle2, Clock, FileClock } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireClientSession } from "@/lib/auth/dal";
 import { formatDate } from "@/lib/format-date";
 import { getClientProfile } from "@/modules/site/lib/get-client-profile";
 import { AddContactDialog } from "@/modules/client-auth/components/add-contact-dialog";
-import { AccountTypeBadge } from "@/modules/client-auth/components/account-type-badge";
 import { ProfileEditLink } from "@/modules/client-auth/components/profile-edit-link";
 import { DeleteAccountCard } from "@/modules/client-auth/components/delete-account-card";
 import type { ClientUserAddress } from "@/types/client-user";
@@ -52,17 +50,11 @@ async function ProfileGuard() {
   }
 
   const name = profile.display_name;
-  // Deleting an account requires re-entering its password, and an eGovPH SSO
-  // account doesn't have one — it would meet a 422 it can do nothing about. So
-  // the option is hidden rather than shown-and-broken until the backend adds an
-  // SSO/OTP deletion path. Same pair of conditions the header uses to decide
-  // whether to offer "Change password" (see SiteHeaderAuthArea).
-  // Changing a password needs an email to rewrite the session cookie with the
-  // token it mints; an account registered by mobile has none.
+  // Deleting an account requires re-entering its password. Changing a
+  // password needs an email to rewrite the session cookie with the token it
+  // mints; an account registered by mobile has none. Same condition the
+  // header uses to decide whether to offer "Change password".
   const hasPassword = Boolean(profile.email);
-  const isPending = profile.status === "pending";
-  const isForAssessment = profile.status === "for_assessment";
-  const isApproved = profile.status === "approved";
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -80,44 +72,11 @@ async function ProfileGuard() {
           <div className="flex-1 space-y-1.5">
             <h1 className="text-xl font-semibold tracking-tight">{name}</h1>
             <p className="text-sm text-muted-foreground">{profile.email ?? "—"}</p>
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <AccountTypeBadge profile={profile} />
-              {isPending && (
-                <Badge
-                  variant="outline"
-                  className="w-fit gap-1.5 border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
-                >
-                  <Clock aria-hidden className="size-3.5" />
-                  Pending approval
-                </Badge>
-              )}
-              {isForAssessment && (
-                <Badge
-                  variant="outline"
-                  className="w-fit gap-1.5 border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
-                >
-                  <FileClock aria-hidden className="size-3.5" />
-                  Under review
-                </Badge>
-              )}
-              {isApproved && (
-                <Badge
-                  variant="outline"
-                  className="w-fit gap-1.5 border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                >
-                  <CheckCircle2 aria-hidden className="size-3.5" />
-                  Approved
-                </Badge>
-              )}
-            </div>
           </div>
-          <ProfileEditLink profile={profile} />
+          <ProfileEditLink />
         </CardContent>
       </Card>
 
-      {/* The raw assessment_remarks history is deliberately NOT shown here —
-          it is an unparsed tagged log ([Returned …], [Suspended …] lines).
-          The dashboard journey shows the one entry that matters, parsed. */}
       <Card>
         <CardHeader>
           <CardTitle>Contact information</CardTitle>

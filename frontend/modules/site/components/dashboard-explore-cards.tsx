@@ -1,21 +1,20 @@
 import Link from "next/link";
-import { ArrowRight, LayoutGrid, Rocket } from "lucide-react";
+import { ArrowRight, Bell, UserRound } from "lucide-react";
 
-// Public destinations a draft account can browse right now, so the dashboard
-// is a starting point rather than a dead end while the profile is
-// incomplete. Both link to pages that need no account state at all.
+// Destinations inside the account area, so the dashboard is a starting point
+// rather than a dead end.
 const EXPLORE_LINKS = [
   {
-    href: "/projects",
-    icon: Rocket,
-    title: "See what developers are building",
-    description: "Browse the project showcase — the projects you'll be rating and reviewing.",
+    href: "/dashboard/profile",
+    icon: UserRound,
+    title: "Your profile",
+    description: "Contact details, personal information and your address.",
   },
   {
-    href: "/#catalog",
-    icon: LayoutGrid,
-    title: "Browse the API catalog",
-    description: "The government services you'll get credentials for as a developer.",
+    href: "/dashboard/notifications",
+    icon: Bell,
+    title: "Notifications",
+    description: "Announcements and security notices about your account.",
   },
 ] as const;
 
@@ -23,7 +22,7 @@ export function DashboardExploreCards() {
   return (
     <section aria-labelledby="explore" className="space-y-3">
       <h2 id="explore" className="text-sm font-medium text-muted-foreground">
-        While you&rsquo;re here
+        Your account
       </h2>
       <div className="grid gap-4 sm:grid-cols-2">
         {EXPLORE_LINKS.map((item) => (

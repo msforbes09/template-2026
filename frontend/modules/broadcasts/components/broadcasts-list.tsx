@@ -33,7 +33,7 @@ export async function BroadcastsList({ page }: { page: string }) {
       <EmptyState
         icon={Megaphone}
         title="No broadcasts yet"
-        description="Compose one to announce maintenance, an incident or programme news to citizens."
+        description="Compose one to announce maintenance, an incident or other news to users."
         action={
           <Button nativeButton={false} render={<Link href="/admin/broadcasts/new" />}>
             New broadcast
@@ -91,7 +91,7 @@ export async function BroadcastsList({ page }: { page: string }) {
                 <div>
                   <dt className="text-xs text-muted-foreground">Audience</dt>
                   <dd className="font-medium">{audience.label}</dd>
-                  {/* The uuid behind a single-citizen scope — without it the
+                  {/* The uuid behind a single-user scope — without it the
                       history says a broadcast was narrow but not at whom. */}
                   {audience.detail && (
                     <dd className="mt-0.5 font-mono text-xs text-muted-foreground">

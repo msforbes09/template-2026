@@ -75,7 +75,7 @@ export function StartBroadcastButton({ broadcast }: { broadcast: AdminBroadcast 
             <DialogTitle>Start this broadcast?</DialogTitle>
             <DialogDescription>
               This will notify <strong>{audience.label}</strong>
-              {/* The uuid behind a single-citizen scope, at the moment it
+              {/* The uuid behind a single-user scope, at the moment it
                   matters most — right before the send. */}
               {audience.detail && (
                 <>

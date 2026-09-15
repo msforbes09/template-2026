@@ -11,25 +11,10 @@ import { FeatureFlagToggle } from "@/modules/feature-flags/components/feature-fl
 // the backend can add one before this map knows about it, and hiding it would
 // leave a switch nobody could find.
 const FLAG_COPY: Record<string, { label: string; description: string; destructive?: boolean }> = {
-  developer_applications: {
-    label: "Developer applications",
-    description:
-      "When off, citizens cannot apply for developer access — the “Apply as a developer” step explains that applications are closed instead of offering the button. Administrators can still process applications already in the queue and grant developer access directly.",
-  },
-  project_reviews: {
-    label: "Project reviews",
-    description:
-      "When off, the review thread and the star ratings disappear from project pages, and the review endpoints refuse writes. Reviews already written are kept and reappear when this is switched back on.",
-  },
-  api_catalog_reviews: {
-    label: "API catalog reviews",
-    description:
-      "The same, for the developer review thread on an API catalog. Administrators keep reading what was written while it was on.",
-  },
   maintenance_mode: {
     label: "Maintenance mode",
     description:
-      "Takes the whole citizen portal and public site down behind a maintenance page, and stops non-developer administrators signing in. Sign-in, registration, the project catalogue and the partner gateway all stop responding. Developer administrators are unaffected.",
+      "Takes the whole user portal and public site down behind a maintenance page, and stops non-developer administrators signing in. Sign-in and registration stop responding. Developer administrators are unaffected.",
     destructive: true,
   },
 };
@@ -96,11 +81,11 @@ export async function FeatureFlagsList() {
   );
 }
 
-// Four rows, matching the real list's dimensions.
+// One row, matching the real list's dimensions.
 export function FeatureFlagsListSkeleton() {
   return (
     <div aria-hidden className="rounded-xl border border-border bg-card px-5">
-      {Array.from({ length: 4 }).map((_, index) => (
+      {Array.from({ length: 1 }).map((_, index) => (
         <div key={index} className="flex items-start justify-between gap-6 border-t border-border py-5 first:border-t-0">
           <div className="w-full space-y-2">
             <div className="h-4 w-40 animate-pulse rounded bg-muted" />

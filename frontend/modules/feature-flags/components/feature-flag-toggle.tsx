@@ -101,7 +101,7 @@ export function FeatureFlagToggle({
             </DialogTitle>
             <DialogDescription>
               {dangerous
-                ? "This takes the citizen portal and public site down behind the maintenance page the moment you confirm."
+                ? "This takes the user portal and public site down behind the maintenance page the moment you confirm."
                 : "This changes the live portal immediately — there is no deploy and no restart."}
             </DialogDescription>
           </DialogHeader>

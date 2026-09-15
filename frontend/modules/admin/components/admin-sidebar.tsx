@@ -43,11 +43,9 @@ export async function AdminSidebar() {
 // Passed to the client shell as `children`, which keeps it and the async
 // sub-lists inside it on the server rather than in the client bundle.
 async function AdminSidebarNav() {
-  const [logs, sections, canViewProjects, canViewEvents, canBroadcast, canManageFeatureFlags] = await Promise.all([
+  const [logs, sections, canBroadcast, canManageFeatureFlags] = await Promise.all([
     getLogNavPermissions(),
     getNavSectionPermissions(),
-    adminCan(PERMISSIONS.projectsView),
-    adminCan(PERMISSIONS.egovEventsView),
     adminCan(PERMISSIONS.notificationsBroadcast),
     adminCan(PERMISSIONS.developerAccess),
   ]);
@@ -56,8 +54,6 @@ async function AdminSidebarNav() {
     <AdminNav
       logs={logs}
       sections={sections}
-      canViewProjects={canViewProjects}
-      canViewEvents={canViewEvents}
       canBroadcast={canBroadcast}
       canManageFeatureFlags={canManageFeatureFlags}
     />

@@ -5,7 +5,7 @@ import { env } from "@/lib/env";
 // forgot-password), so it lives at the top level rather than under
 // modules/client-auth/lib or modules/admin/lib. Direct browser-to-backend
 // call, same convention as the audience-specific auth clients.
-// See https://egov-api-ws.oueg.info/docs/common?api-docs-common.json
+// See the backend's /api/documentation/common.
 const BASE = `${env.NEXT_PUBLIC_API_URL}/common`;
 
 type ErrorEnvelope = {

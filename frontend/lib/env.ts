@@ -6,7 +6,7 @@ const DEV_AUTH_SECRET = "dev-only-insecure-secret-change-me-0000";
 
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  // Backend base URL for server-side calls (future apiFetch/server actions).
+  // Backend base URL for server-side calls (apiFetch, server actions).
   API_URL: z.url().default("http://localhost:8000/api"),
   SLACK_ERROR_WEBHOOK_URL: z.url().optional(),
   // Signs the local Better Auth session cookie for BOTH audiences
@@ -60,30 +60,29 @@ const serverEnvSchema = z.object({
 });
 
 const clientEnvSchema = z.object({
+  // The product name. The only place a brand is spelled: metadata, logo text,
+  // header, footer and legal-page titles all read it from here.
+  NEXT_PUBLIC_APP_NAME: z.string().min(1).default("App"),
   NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),
   // Same backend, exposed to the browser: auth endpoints are hit directly
   // from the client (see modules/admin/lib/admin-auth-client.ts), never
   // through a Next.js route — so the browser needs this URL in its bundle.
   NEXT_PUBLIC_API_URL: z.url().default("http://localhost:8000/api"),
-  // Cloudflare Turnstile public site key, rendered on the admin login form.
+  // Cloudflare Turnstile public site key, rendered on the login and
+  // registration forms.
   // Defaults to Cloudflare's always-passes test key so dev/build never breaks
   // without a real one configured.
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1).default("1x00000000000000000000AA"),
-  // Identifies this portal to the eGov gateway in the API-testing collection
-  // (api-docs CollectionViewer). Nothing to do with signing in — eGovPH SSO
-  // login was removed — which is why the matching BASE_URL is gone and this
-  // one stayed.
-  NEXT_PUBLIC_EGOV_SSO_PARTNER_CODE: z.string().min(1).default("TEST_AGENCY"),
-  // Laravel Reverb (Pusher-protocol websocket) connection config for the live
-  // gateway-log feeds (modules/gateway-logs). Echo runs in the browser, so
-  // these must be public. Defaults match the backend team's staging instance.
-  NEXT_PUBLIC_REVERB_APP_KEY: z.string().min(1).default("2uqlqvzghsgamqp93hzp"),
-  NEXT_PUBLIC_REVERB_HOST: z.string().min(1).default("egov-api-ws.oueg.info"),
-  NEXT_PUBLIC_REVERB_PORT: z.coerce.number().int().positive().default(443),
+  // Laravel Reverb (Pusher-protocol websocket) connection for notifications
+  // and broadcasts. Echo runs in the browser, so these must be public.
+  // Defaults match a local `php artisan reverb:start`.
+  NEXT_PUBLIC_REVERB_APP_KEY: z.string().min(1).default("local"),
+  NEXT_PUBLIC_REVERB_HOST: z.string().min(1).default("localhost"),
+  NEXT_PUBLIC_REVERB_PORT: z.coerce.number().int().positive().default(8080),
   // env vars only ever arrive as strings; pusher-js wants a real boolean.
   NEXT_PUBLIC_REVERB_FORCE_TLS: z
     .enum(["true", "false"])
-    .default("true")
+    .default("false")
     .transform((v) => v === "true"),
   // Enforced client-side before an upload even starts (modules/uploads/
   // components/file-uploader.tsx) — matches the backend API's real cap so
@@ -102,10 +101,10 @@ const server = serverEnvSchema.parse({
 });
 
 const client = clientEnvSchema.parse({
+  NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-  NEXT_PUBLIC_EGOV_SSO_PARTNER_CODE: process.env.NEXT_PUBLIC_EGOV_SSO_PARTNER_CODE,
   NEXT_PUBLIC_REVERB_APP_KEY: process.env.NEXT_PUBLIC_REVERB_APP_KEY,
   NEXT_PUBLIC_REVERB_HOST: process.env.NEXT_PUBLIC_REVERB_HOST,
   NEXT_PUBLIC_REVERB_PORT: process.env.NEXT_PUBLIC_REVERB_PORT,

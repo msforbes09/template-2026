@@ -19,27 +19,20 @@ export function EditProfileView({ profile }: { profile: ClientUserProfile }) {
         <div className="mb-5">
           <h2 className="text-base font-semibold tracking-tight">Your details</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Name, birth date and address. These are what an administrator reviews when you apply
-            as a developer.
+            Name, birth date and address.
           </p>
         </div>
         <ProfileForm
           profile={profile}
-          // The two funnel states navigate on save: a draft account moves on
-          // to the review page — a read-only preview with completing as the
-          // only action — and a returned application goes back to the
-          // dashboard, where the journey's Submit-again button is waiting.
-          // Everyone else stays on the page — navigating away on save was
-          // surprising (the photo card above saves in place), and refresh()
-          // re-renders with the server's new state so a freshly-started
-          // cooldown shows as the lock right away.
+          // A draft account moves on to the dashboard on save, where the
+          // Complete profile action is waiting. Everyone else stays on the
+          // page — navigating away on save was surprising (the photo card
+          // above saves in place), and refresh() re-renders with the server's
+          // new state so a freshly-started cooldown shows as the lock right
+          // away.
           onSuccess={() => {
             toast.success("Details saved");
             if (profile.status === "draft") {
-              router.push("/dashboard/profile/review");
-              return;
-            }
-            if (profile.status === "for_resubmission") {
               router.push("/dashboard");
               return;
             }

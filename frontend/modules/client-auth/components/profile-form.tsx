@@ -24,7 +24,7 @@ import {
 import { updateClientProfile } from "@/modules/client-auth/actions/profile-actions";
 import { applyResultErrors } from "@/lib/apply-result-errors";
 import { CooldownNotice } from "@/modules/client-auth/components/cooldown-notice";
-import { canEditProfile, detailsCooldown } from "@/modules/client-auth/lib/account";
+import { detailsCooldown } from "@/modules/client-auth/lib/account";
 import type { ClientUserProfile } from "@/types/client-user";
 import type { PsgcOption } from "@/types/psgc";
 import { useResetOnHide } from "@/hooks/use-reset-on-hide";
@@ -95,11 +95,9 @@ export function ProfileForm({
   submitLabel?: string;
 }) {
   // Details run on their own 30-day clock, separate from the photo's, and the
-  // API is the authority on both — nothing is computed here. A suspended
-  // account is frozen read-only regardless.
+  // API is the authority on both — nothing is computed here.
   const cooldown = detailsCooldown(profile);
-  const frozen = !canEditProfile(profile);
-  const locked = frozen || cooldown.locked;
+  const locked = cooldown.locked;
   const form = useForm<ProfileFormValues, unknown, ProfileValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -193,7 +191,7 @@ export function ProfileForm({
       // PUT /profile's response doesn't reliably echo back resolved
       // relations (country/address parts, photo) the way GET /profile
       // does — override with what's already known locally (selected via
-      // the comboboxes/uploader on this very form) so the review step
+      // the comboboxes/uploader on this very form) so the dashboard
       // always reflects what was actually chosen, not what the mutation
       // response happened to include.
       onSuccess({
@@ -399,16 +397,7 @@ export function ProfileForm({
         <FormRootError />
         {locked ? (
           <div className="space-y-2">
-            {frozen ? (
-              <p
-                role="status"
-                className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive"
-              >
-                Your account is suspended, so your details can&apos;t be changed.
-              </p>
-            ) : (
-              <CooldownNotice cooldown={cooldown} what="details" />
-            )}
+            <CooldownNotice cooldown={cooldown} what="details" />
             <FormSubmitButton className="h-10 w-full" disabled>
               {submitLabel}
             </FormSubmitButton>

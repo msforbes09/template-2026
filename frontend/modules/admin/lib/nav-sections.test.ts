@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { accessControlLinks, navSectionPermissions, settingsLinks } from "@/modules/admin/lib/nav-sections";
 
 // The mapping from the profile's permission list to the always-rendered nav
-// entries that gain gating (Users, API Catalog, Content Blocks, Gallery,
+// entries that gain gating (Users, Content Blocks, Gallery,
 // Administrators, Access Control). Pure, so the one place the menu's
 // visibility rules live is under test — the components just read booleans.
 describe("navSectionPermissions", () => {
@@ -10,7 +10,6 @@ describe("navSectionPermissions", () => {
     expect(
       navSectionPermissions([
         "users-view",
-        "api-catalogs-view",
         "contents-view",
         "gallery-view",
         "administrators-view",
@@ -18,7 +17,6 @@ describe("navSectionPermissions", () => {
       ]),
     ).toEqual({
       users: true,
-      catalogs: true,
       contents: true,
       gallery: true,
       administrators: true,
@@ -38,7 +36,6 @@ describe("navSectionPermissions", () => {
   it("fails closed on an empty list", () => {
     expect(navSectionPermissions([])).toEqual({
       users: false,
-      catalogs: false,
       contents: false,
       gallery: false,
       administrators: false,
@@ -49,9 +46,9 @@ describe("navSectionPermissions", () => {
   // Manage does not imply view here — the WS nests manage INSIDE the view
   // gate, so a manage-only token cannot reach the list screens anyway.
   it("does not treat a manage permission as its view", () => {
-    const sections = navSectionPermissions(["contents-manage", "api-catalogs-manage"]);
+    const sections = navSectionPermissions(["contents-manage", "gallery-manage"]);
     expect(sections.contents).toBe(false);
-    expect(sections.catalogs).toBe(false);
+    expect(sections.gallery).toBe(false);
   });
 });
 

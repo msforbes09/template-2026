@@ -2,7 +2,7 @@
 
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Info, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { AppFormField } from "@/components/ui/app-form-field";
 import { FormRootError } from "@/components/ui/form-root-error";
 import { FormSubmitButton } from "@/components/ui/form-submit-button";
@@ -28,7 +28,6 @@ import {
   TITLE_MAX,
   toBroadcastFilters,
   ACCOUNT_STATUS_OPTIONS,
-  ACCOUNT_TYPE_OPTIONS,
   type BroadcastValues,
 } from "@/modules/broadcasts/schemas/broadcast-schema";
 import type { ActionResult } from "@/lib/action-result";
@@ -81,7 +80,6 @@ export function BroadcastForm({
   const title = form.watch("title");
   const body = form.watch("body");
   const audience = form.watch("audience");
-  const type = form.watch("type");
   const status = form.watch("status");
   const userUuid = form.watch("user_uuid");
 
@@ -91,7 +89,7 @@ export function BroadcastForm({
   // store and would not re-render this line when a dropdown changed, which is
   // the one place a stale audience must never be shown.
   const described = describeAudience(
-    toBroadcastFilters({ title, body, audience, type, status, user_uuid: userUuid }),
+    toBroadcastFilters({ title, body, audience, status, user_uuid: userUuid }),
   );
 
   async function handleSubmit(values: BroadcastValues) {
@@ -134,7 +132,7 @@ export function BroadcastForm({
             // Said explicitly because the temptation to write markdown in a
             // 1000-character box is real, and it would ship as literal
             // asterisks to every recipient.
-            userInfo="Plain text. Citizens see it exactly as written — formatting is not rendered."
+            userInfo="Plain text. Users see it exactly as written — formatting is not rendered."
           >
             <div className="flex flex-col gap-1.5">
               <Textarea
@@ -148,7 +146,7 @@ export function BroadcastForm({
             </div>
           </AppFormField>
 
-          <AppFormField label="Who receives this" isRequired error={errors.type?.message}>
+          <AppFormField label="Who receives this" isRequired error={errors.status?.message}>
             <div className="flex flex-col gap-3">
               <ToggleGroup
                 variant="outline"
@@ -172,36 +170,12 @@ export function BroadcastForm({
                   Segment
                 </ToggleGroupItem>
                 <ToggleGroupItem value="user" className="flex-1">
-                  One citizen
+                  One user
                 </ToggleGroupItem>
               </ToggleGroup>
 
               {audience === "segment" && (
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Select
-                    value={type || NONE}
-                    onValueChange={(value) =>
-                      form.setValue("type", value === NONE ? "" : String(value), {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      })
-                    }
-                  >
-                    <SelectTrigger aria-label="Account type">
-                      <SelectValue placeholder="Any account type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value={NONE}>Any account type</SelectItem>
-                        {ACCOUNT_TYPE_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-
                   <Select
                     value={status || NONE}
                     onValueChange={(value) =>
@@ -230,10 +204,10 @@ export function BroadcastForm({
 
               {audience === "user" && (
                 <AppFormField
-                  label="Citizen UUID"
+                  label="User UUID"
                   isRequired
                   error={errors.user_uuid?.message}
-                  userInfo="From the citizen's row in Users."
+                  userInfo="From the user's row in Users."
                 >
                   <Input
                     className="font-mono"
@@ -254,16 +228,6 @@ export function BroadcastForm({
             </p>
           </div>
 
-          {described.includesSuspendedOnly && (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-              <Info aria-hidden className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <p>
-                Suspended accounts are read-only. They can read this announcement but
-                cannot act on anything it asks them to do.
-              </p>
-            </div>
-          )}
-
           <FormRootError />
 
           <div className="flex flex-wrap items-center gap-3">
@@ -278,7 +242,7 @@ export function BroadcastForm({
         <div className="flex flex-col gap-2 lg:sticky lg:top-6">
           <p className="text-sm font-medium">Preview</p>
           <p className="text-xs text-muted-foreground">
-            Exactly how it appears in a citizen&apos;s notification bell.
+            Exactly how it appears in a user&apos;s notification bell.
           </p>
           <BroadcastPreview title={title} body={body} />
         </div>

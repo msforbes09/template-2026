@@ -1,7 +1,7 @@
 import { NotificationRow } from "@/modules/notifications/components/notification-row";
 import type { AppNotification } from "@/types/notification";
 
-// What the citizen will actually see.
+// What the user will actually see.
 //
 // Renders through the SAME component their bell uses rather than a lookalike,
 // so this is not an approximation — the icon, the tone, the clamp and the

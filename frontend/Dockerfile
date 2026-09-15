@@ -24,31 +24,29 @@ COPY . .
 # lib/env.ts) — they must be passed as build args, not just container env,
 # or every deployment silently ships the schema's dev defaults. Defaults
 # below mirror .env.example for a working `docker build` with no args.
+ARG NEXT_PUBLIC_APP_NAME=App
 ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
-ARG NEXT_PUBLIC_API_URL=https://egov-api-ws.oueg.info/api/v1
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000/api
 ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
-ARG NEXT_PUBLIC_EGOV_SSO_PARTNER_CODE=TEST_AGENCY
-ARG NEXT_PUBLIC_REVERB_APP_KEY=2uqlqvzghsgamqp93hzp
-ARG NEXT_PUBLIC_REVERB_HOST=egov-api-ws.oueg.info
-ARG NEXT_PUBLIC_REVERB_PORT=443
-ARG NEXT_PUBLIC_REVERB_FORCE_TLS=true
+ARG NEXT_PUBLIC_REVERB_APP_KEY=local
+ARG NEXT_PUBLIC_REVERB_HOST=localhost
+ARG NEXT_PUBLIC_REVERB_PORT=8080
+ARG NEXT_PUBLIC_REVERB_FORCE_TLS=false
 ARG NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB=5
 
 # API_URL is the one server-side var that also matters at BUILD time. It is not
 # inlined into any bundle, but `next build` prerenders the public pages, and
-# those reads (the API catalog, the project showcase, the sitemap) go through
-# it. Without it the schema default (http://localhost:8000/api) applies inside
-# the image, nothing answers, and every public page is built from a failed
-# read: the catalog and project detail pages silently disappear from the
-# output. It is set for the builder stage only and never carried into the
+# those reads (the content-driven legal pages) go through it. Without it the
+# schema default applies inside the image, nothing answers, and every public
+# page is built from a failed read. It is set for the builder stage only and never carried into the
 # runtime stage, so the running container still takes it from its environment
 # and one image is not pinned to one backend.
-ARG API_URL=https://egov-api-ws.oueg.info/api/v1
+ARG API_URL=http://localhost:8000/api
 ENV API_URL=$API_URL \
+    NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME \
     NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY \
-    NEXT_PUBLIC_EGOV_SSO_PARTNER_CODE=$NEXT_PUBLIC_EGOV_SSO_PARTNER_CODE \
     NEXT_PUBLIC_REVERB_APP_KEY=$NEXT_PUBLIC_REVERB_APP_KEY \
     NEXT_PUBLIC_REVERB_HOST=$NEXT_PUBLIC_REVERB_HOST \
     NEXT_PUBLIC_REVERB_PORT=$NEXT_PUBLIC_REVERB_PORT \

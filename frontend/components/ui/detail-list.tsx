@@ -1,9 +1,6 @@
-import { CodeBlock } from "@/modules/api-docs/components/code-block";
-
 // The read-only detail primitives every log viewer's modal body is built
 // from — a labelled field, the grid they sit in, and a JSON blob block.
-// Promoted out of modules/gateway-logs once connection, auth-attempt and
-// audit details needed exactly the same treatment.
+// Shared by the connection, auth-attempt and audit log viewers.
 
 export function DetailField({
   label,
@@ -41,7 +38,14 @@ export function hasContent(blob: Blob): boolean {
 
 export function JsonSection({ label, blob }: { label: string; blob: Blob }) {
   if (!hasContent(blob)) return null;
-  return <CodeBlock label={label} code={JSON.stringify(blob, null, 2)} />;
+  return (
+    <section className="min-w-0 space-y-1">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <pre className="max-h-72 overflow-auto rounded-md bg-muted p-3 font-mono text-xs leading-relaxed">
+        {JSON.stringify(blob, null, 2)}
+      </pre>
+    </section>
+  );
 }
 
 // Renders an error/exception string as an alert. Shared because all four log
