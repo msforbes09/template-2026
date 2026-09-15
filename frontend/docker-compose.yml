@@ -1,0 +1,56 @@
+# Copy .env.example to .env and fill in real values before running this in
+# production — see Dockerfile for why the NEXT_PUBLIC_* vars must be build
+# args rather than plain runtime environment variables.
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Server-side, but needed at build time too: the public pages are
+        # prerendered by `next build`, and their reads go through this. See the
+        # Dockerfile for why it is a builder-stage-only ARG.
+        API_URL: ${API_URL:-http://localhost:8000/api}
+        NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-App}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-1x00000000000000000000AA}
+        NEXT_PUBLIC_REVERB_APP_KEY: ${NEXT_PUBLIC_REVERB_APP_KEY:-local}
+        NEXT_PUBLIC_REVERB_HOST: ${NEXT_PUBLIC_REVERB_HOST:-localhost}
+        NEXT_PUBLIC_REVERB_PORT: ${NEXT_PUBLIC_REVERB_PORT:-8080}
+        NEXT_PUBLIC_REVERB_FORCE_TLS: ${NEXT_PUBLIC_REVERB_FORCE_TLS:-false}
+        NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB: ${NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB:-5}
+    image: template-frontend:latest
+    restart: unless-stopped
+    # Bound to localhost only — the host runs its own nginx terminating the
+    # public domain/TLS, so this container should be reachable from that
+    # nginx (also on the host) but not directly from the internet. See nginx.conf for the reference config to
+    # merge into that host-level nginx's server block for this app.
+    ports:
+      - "127.0.0.1:${PORT:-3000}:${PORT:-3000}"
+    environment:
+      NODE_ENV: production
+      # Also controls the port the standalone server.js listens on inside
+      # the container (see the Next.js standalone output docs) — keep this
+      # in sync with the port mapping above, both driven by the same var.
+      PORT: ${PORT:-3000}
+      HOSTNAME: 0.0.0.0
+      API_URL: ${API_URL:-http://localhost:8000/api}
+      # Signs the Better Auth session cookie — required, no insecure default
+      # accepted here (lib/env.ts falls back to a dev-only value if unset,
+      # which must never reach production). Generate one with:
+      #   openssl rand -base64 32
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env (openssl rand -base64 32)}
+      SLACK_ERROR_WEBHOOK_URL: ${SLACK_ERROR_WEBHOOK_URL:-}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${PORT:-3000}/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - app-local-network
+
+networks:
+  app-local-network:
+    driver: bridge

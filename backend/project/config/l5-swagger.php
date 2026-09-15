@@ -1,0 +1,410 @@
+<?php
+
+use App\Http\Middleware\EnsureDocumentationEnabled;
+use L5Swagger\CustomGeneratorInterface;
+use L5Swagger\Generator;
+use OpenApi\scan;
+
+return [
+    'default' => 'administrators',
+    'documentations' => [
+        'administrators' => [
+            'api' => [
+                'title' => 'Administrators API',
+            ],
+
+            'routes' => [
+                /*
+                 * Route for accessing api documentation interface
+                 */
+                'api' => 'api/documentation/administrators',
+            ],
+            'paths' => [
+                /*
+                 * Edit to include full URL in ui for assets
+                 */
+                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
+
+                /*
+                * Edit to set path where swagger ui assets should be stored
+                */
+                'swagger_ui_assets_path' => env('L5_SWAGGER_UI_ASSETS_PATH', 'vendor/swagger-api/swagger-ui/dist/'),
+
+                /*
+                 * File name of the generated json documentation file
+                 */
+                'docs_json' => 'api-docs-administrators.json',
+
+                /*
+                 * File name of the generated YAML documentation file
+                 */
+                'docs_yaml' => 'api-docs-administrators.yaml',
+
+                /*
+                 * Set this to `json` or `yaml` to determine which documentation file to use in UI
+                 */
+                'format_to_use_for_docs' => env('L5_FORMAT_TO_USE_FOR_DOCS', 'json'),
+
+                /*
+                 * Absolute paths to directory containing the swagger annotations are stored.
+                 * Scoped to administrator files so this documentation stays group-specific.
+                 */
+                'annotations' => [
+                    base_path('app/Http/Controllers/Administrators'),
+                    base_path('app/Models/Administrators'),
+                    base_path('app/Models/Access'),
+                    base_path('app/Models/Contents'),
+                    base_path('app/Models/Documentations'),
+                    base_path('app/Models/Users'),
+                    base_path('app/Models/Misc'),
+                    base_path('app/Models/Broadcasts'),
+                ],
+            ],
+        ],
+
+        'users' => [
+            'api' => [
+                'title' => 'User API',
+            ],
+            'routes' => [
+                'api' => 'api/documentation/users',
+                'docs' => 'docs/users',
+                'oauth2_callback' => 'api/oauth2-callback/users',
+            ],
+            'paths' => [
+                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
+                'swagger_ui_assets_path' => env('L5_SWAGGER_UI_ASSETS_PATH', 'vendor/swagger-api/swagger-ui/dist/'),
+                'docs_json' => 'api-docs-users.json',
+                'docs_yaml' => 'api-docs-users.yaml',
+                'format_to_use_for_docs' => env('L5_FORMAT_TO_USE_FOR_DOCS', 'json'),
+                'annotations' => [
+                    base_path('app/Http/Controllers/Users'),
+                    base_path('app/Models/Users'),
+                    base_path('app/Models/Notifications'),
+                ],
+            ],
+        ],
+
+        'common' => [
+            'api' => [
+                'title' => 'Common API',
+            ],
+
+            'routes' => [
+                'api' => 'api/documentation/common',
+                // Distinct docs/oauth2 paths so they don't collide with the
+                // administrators documentation's routes (which use the defaults).
+                'docs' => 'docs/common',
+                'oauth2_callback' => 'api/oauth2-callback/common',
+            ],
+            'paths' => [
+                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
+                'swagger_ui_assets_path' => env('L5_SWAGGER_UI_ASSETS_PATH', 'vendor/swagger-api/swagger-ui/dist/'),
+                'docs_json' => 'api-docs-common.json',
+                'docs_yaml' => 'api-docs-common.yaml',
+                'format_to_use_for_docs' => env('L5_FORMAT_TO_USE_FOR_DOCS', 'json'),
+                'annotations' => [
+                    base_path('app/Http/Controllers/Common'),
+                    base_path('app/Models/Misc'),
+                    base_path('app/Models/Contents'),
+                    base_path('app/Models/Addresses'),
+                ],
+            ],
+        ],
+
+        // Future groups get their own documentation here: 'public'.
+    ],
+    'defaults' => [
+        'routes' => [
+            /*
+             * Route for accessing parsed swagger annotations.
+             */
+            'docs' => 'docs',
+
+            /*
+             * Route for Oauth2 authentication callback.
+             */
+            'oauth2_callback' => 'api/oauth2-callback',
+
+            /*
+             * Middleware allows to prevent unexpected access to API documentation
+             */
+            'middleware' => [
+                // Swagger UI is a browser page, so it cannot carry a Sanctum bearer
+                // token — putting it behind `auth:administrators` would lock everyone
+                // out rather than secure it. The surface is removed instead: 404 unless
+                // DOCS_ENABLED, which defaults off in production.
+                'api' => [EnsureDocumentationEnabled::class],
+                'asset' => [EnsureDocumentationEnabled::class],
+                'docs' => [EnsureDocumentationEnabled::class],
+                'oauth2_callback' => [EnsureDocumentationEnabled::class],
+            ],
+
+            /*
+             * Route Group options
+             */
+            'group_options' => [],
+        ],
+
+        'paths' => [
+            /*
+             * Absolute path to location where parsed annotations will be stored
+             */
+            'docs' => storage_path('api-docs'),
+
+            /*
+             * Absolute path to directory where to export views
+             */
+            'views' => base_path('resources/views/vendor/l5-swagger'),
+
+            /*
+             * Edit to set the api's base path
+             */
+            'base' => env('L5_SWAGGER_BASE_PATH', null),
+
+            /*
+             * Absolute path to directories that should be excluded from scanning
+             * @deprecated Please use `scanOptions.exclude`
+             * `scanOptions.exclude` overwrites this
+             */
+            'excludes' => [],
+        ],
+
+        'scanOptions' => [
+            /**
+             * Optional CustomGeneratorInterface implementation that creates an OpenApi\Generator instance.
+             * Use this to provide a custom pre-configured generator.
+             * Accepts an instance or a class name (FQCN) implementing the interface.
+             *
+             * @see CustomGeneratorInterface
+             */
+            'generator_factory' => null,
+
+            /**
+             * Configuration for default processors. Allows to pass processors configuration to swagger-php.
+             *
+             * @link https://zircote.github.io/swagger-php/reference/processors.html
+             */
+            'default_processors_configuration' => [
+            /** Example */
+            /**
+             * 'operationId.hash' => true,
+             * 'pathFilter' => [
+             * 'tags' => [
+             * '/pets/',
+             * '/store/',
+             * ],
+             * ],.
+             */
+            ],
+
+            /**
+             * analyser: defaults to \OpenApi\StaticAnalyser .
+             *
+             * @see scan
+             */
+            'analyser' => null,
+
+            /**
+             * analysis: defaults to a new \OpenApi\Analysis .
+             *
+             * @see scan
+             */
+            'analysis' => null,
+
+            /**
+             * Custom processors.
+             *
+             * Each entry can be:
+             * - A class name or instance (inserted after BuildPaths by default)
+             * - An array with 'class' and 'after' keys for precise positioning:
+             *   ['class' => MyProcessor::class, 'after' => SomeProcessor::class]
+             *
+             * @link https://github.com/zircote/swagger-php/tree/master/Examples/processors/schema-query-parameter
+             * @see scan
+             */
+            'processors' => [
+                // \App\SwaggerProcessors\SchemaQueryParameter::class,
+                // ['class' => \App\SwaggerProcessors\Custom::class, 'after' => \OpenApi\Processors\AugmentSchemas::class],
+            ],
+
+            /**
+             * pattern: string       $pattern File pattern(s) to scan (default: *.php) .
+             *
+             * @see scan
+             */
+            'pattern' => null,
+
+            /*
+             * Absolute path to directories that should be excluded from scanning
+             * @note This option overwrites `paths.excludes`
+             * @see \OpenApi\scan
+             */
+            'exclude' => [],
+
+            /*
+             * Allows to generate specs either for OpenAPI 3.0.0 or OpenAPI 3.1.0.
+             * By default the spec will be in version 3.0.0
+             */
+            'open_api_spec_version' => env('L5_SWAGGER_OPEN_API_SPEC_VERSION', Generator::OPEN_API_DEFAULT_SPEC_VERSION),
+        ],
+
+        /*
+         * API security definitions. Will be generated into documentation file.
+        */
+        'securityDefinitions' => [
+            'securitySchemes' => [
+                /*
+                 * Examples of Security schemes
+                 */
+                /*
+                'api_key_security_example' => [ // Unique name of security
+                    'type' => 'apiKey', // The type of the security scheme. Valid values are "basic", "apiKey" or "oauth2".
+                    'description' => 'A short description for security scheme',
+                    'name' => 'api_key', // The name of the header or query parameter to be used.
+                    'in' => 'header', // The location of the API key. Valid values are "query" or "header".
+                ],
+                'oauth2_security_example' => [ // Unique name of security
+                    'type' => 'oauth2', // The type of the security scheme. Valid values are "basic", "apiKey" or "oauth2".
+                    'description' => 'A short description for oauth2 security scheme.',
+                    'flow' => 'implicit', // The flow used by the OAuth2 security scheme. Valid values are "implicit", "password", "application" or "accessCode".
+                    'authorizationUrl' => 'http://example.com/auth', // The authorization URL to be used for (implicit/accessCode)
+                    //'tokenUrl' => 'http://example.com/auth' // The authorization URL to be used for (password/application/accessCode)
+                    'scopes' => [
+                        'read:projects' => 'read your projects',
+                        'write:projects' => 'modify projects in your account',
+                    ]
+                ],
+                */
+
+                /* Open API 3.0 support
+                'passport' => [ // Unique name of security
+                    'type' => 'oauth2', // The type of the security scheme. Valid values are "basic", "apiKey" or "oauth2".
+                    'description' => 'Laravel passport oauth2 security.',
+                    'in' => 'header',
+                    'scheme' => 'https',
+                    'flows' => [
+                        "password" => [
+                            "authorizationUrl" => config('app.url') . '/oauth/authorize',
+                            "tokenUrl" => config('app.url') . '/oauth/token',
+                            "refreshUrl" => config('app.url') . '/token/refresh',
+                            "scopes" => []
+                        ],
+                    ],
+                ],
+                'sanctum' => [ // Unique name of security
+                    'type' => 'apiKey', // Valid values are "basic", "apiKey" or "oauth2".
+                    'description' => 'Enter token in format (Bearer <token>)',
+                    'name' => 'Authorization', // The name of the header or query parameter to be used.
+                    'in' => 'header', // The location of the API key. Valid values are "query" or "header".
+                ],
+                */
+            ],
+            'security' => [
+                /*
+                 * Examples of Securities
+                 */
+                [
+                    /*
+                    'oauth2_security_example' => [
+                        'read',
+                        'write'
+                    ],
+
+                    'passport' => []
+                    */
+                ],
+            ],
+        ],
+
+        /*
+         * Set this to `true` in development mode so that docs would be regenerated on each request
+         * Set this to `false` to disable swagger generation on production
+         */
+        'generate_always' => env('L5_SWAGGER_GENERATE_ALWAYS', false),
+
+        /*
+         * Set this to `true` to generate a copy of documentation in yaml format
+         */
+        'generate_yaml_copy' => env('L5_SWAGGER_GENERATE_YAML_COPY', false),
+
+        /*
+         * Edit to trust the proxy's ip address - needed for AWS Load Balancer
+         * string[]
+         */
+        'proxy' => false,
+
+        /*
+         * Configs plugin allows to fetch external configs instead of passing them to SwaggerUIBundle.
+         * See more at: https://github.com/swagger-api/swagger-ui#configs-plugin
+         */
+        'additional_config_url' => null,
+
+        /*
+         * Apply a sort to the operation list of each API. It can be 'alpha' (sort by paths alphanumerically),
+         * 'method' (sort by HTTP method).
+         * Default is the order returned by the server unchanged.
+         */
+        'operations_sort' => env('L5_SWAGGER_OPERATIONS_SORT', null),
+
+        /*
+         * Pass the validatorUrl parameter to SwaggerUi init on the JS side.
+         * A null value here disables validation.
+         */
+        'validator_url' => null,
+
+        /*
+         * Swagger UI configuration parameters
+         */
+        'ui' => [
+            'display' => [
+                'dark_mode' => env('L5_SWAGGER_UI_DARK_MODE', false),
+                /*
+                 * Controls the default expansion setting for the operations and tags. It can be :
+                 * 'list' (expands only the tags),
+                 * 'full' (expands the tags and operations),
+                 * 'none' (expands nothing).
+                 */
+                'doc_expansion' => env('L5_SWAGGER_UI_DOC_EXPANSION', 'none'),
+
+                /**
+                 * If set, enables filtering. The top bar will show an edit box that
+                 * you can use to filter the tagged operations that are shown. Can be
+                 * Boolean to enable or disable, or a string, in which case filtering
+                 * will be enabled using that string as the filter expression. Filtering
+                 * is case-sensitive matching the filter expression anywhere inside
+                 * the tag.
+                 */
+                'filter' => env('L5_SWAGGER_UI_FILTERS', true), // true | false
+            ],
+
+            'authorization' => [
+                /*
+                 * If set to true, it persists authorization data, and it would not be lost on browser close/refresh
+                 */
+                'persist_authorization' => env('L5_SWAGGER_UI_PERSIST_AUTHORIZATION', false),
+
+                'oauth2' => [
+                    /*
+                     * If set to true, adds PKCE to AuthorizationCodeGrant flow
+                     */
+                    'use_pkce_with_authorization_code_grant' => false,
+                ],
+            ],
+        ],
+        /*
+         * Constants which can be used in annotations
+         */
+        'constants' => [
+            // Base URLs for the Swagger "Servers" dropdown, one per environment.
+            // All env-driven so each deployment sets its own real domain (no real
+            // hosts hardcoded). LOCAL falls back to the legacy L5_SWAGGER_CONST_HOST
+            // / APP_URL; staging/production carry obvious placeholders until set.
+            'L5_SWAGGER_CONST_HOST_LOCAL' => env('L5_SWAGGER_CONST_HOST_LOCAL', env('L5_SWAGGER_CONST_HOST', env('APP_URL', 'http://localhost').'/api/v1')),
+            'L5_SWAGGER_CONST_HOST_STAGING' => env('L5_SWAGGER_CONST_HOST_STAGING', 'https://staging.api.example.com/api/v1'),
+            'L5_SWAGGER_CONST_HOST_PRODUCTION' => env('L5_SWAGGER_CONST_HOST_PRODUCTION', 'https://api.example.com/api/v1'),
+            // Retained for backward compatibility (LOCAL falls back to it).
+            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', env('APP_URL', 'http://localhost').'/api/v1'),
+        ],
+    ],
+];

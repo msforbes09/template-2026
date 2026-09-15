@@ -1,0 +1,20 @@
+/.idea
+/.vscode
+/.claude/worktrees
+.env
+/data-*
+
+# Raw data dumps (e.g. address SQL exports) — the seeder uses the extracted
+# INSERT-only files under project/database/seeders/data/ instead.
+/dumps
+
+# Reference material (external API docs, scratch pages) — not part of the app.
+/references
+
+# Security-audit artifacts (see findings/README.md) — kept out of the repo.
+/findings/*
+!/findings/README.md
+
+# macOS
+.DS_Store
+data-opensearch/

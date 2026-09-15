@@ -1,0 +1,150 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-sun: var(--sun);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+ * Theme — the three colours asked for before UI work (see CLAUDE.md):
+ * primary   #1452F0 (electric blue)
+ * secondary #E5484D (soft alert red - reserved for destructive/alert use)
+ * tertiary  #FCD116 (sun yellow - highlight accent, `sun` token)
+ */
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #0b0f1a;
+  --card: #ffffff;
+  --card-foreground: #0b0f1a;
+  --popover: #ffffff;
+  --popover-foreground: #0b0f1a;
+  --primary: #1452f0;
+  --primary-foreground: #ffffff;
+  --secondary: #eef3fe;
+  --secondary-foreground: #12309e;
+  --muted: #f4f6fb;
+  --muted-foreground: #545e74;
+  --accent: #eef3fe;
+  --accent-foreground: #12309e;
+  --destructive: #e5484d;
+  --border: #e5e9f2;
+  --input: #e5e9f2;
+  --ring: #1452f0;
+  --chart-1: #1452f0;
+  --chart-2: #fcd116;
+  --chart-3: #e5484d;
+  --chart-4: #7396f5;
+  --chart-5: #b3c6f8;
+  --radius: 0.625rem;
+  --sun: #fcd116;
+  --sidebar: #f7f9fd;
+  --sidebar-foreground: #0b0f1a;
+  --sidebar-primary: #1452f0;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef3fe;
+  --sidebar-accent-foreground: #12309e;
+  --sidebar-border: #e5e9f2;
+  --sidebar-ring: #1452f0;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #070c1c;
+  --foreground: #e8edf8;
+  --card: #0d1530;
+  --card-foreground: #e8edf8;
+  --popover: #0d1530;
+  --popover-foreground: #e8edf8;
+  --primary: #9db9ff;
+  --primary-foreground: #071240;
+  --secondary: #141e3d;
+  --secondary-foreground: #dbe4f8;
+  --muted: #121a36;
+  --muted-foreground: #97a3c0;
+  --accent: #16214a;
+  --accent-foreground: #dbe4f8;
+  --destructive: #ff8291;
+  --border: rgb(157 185 255 / 0.14);
+  --input: rgb(157 185 255 / 0.18);
+  --ring: #9db9ff;
+  --chart-1: #9db9ff;
+  --chart-2: #fcd116;
+  --chart-3: #ff8291;
+  --chart-4: #5a7fd6;
+  --chart-5: #33477e;
+  --sun: #fcd116;
+  --sidebar: #0d1530;
+  --sidebar-foreground: #e8edf8;
+  --sidebar-primary: #9db9ff;
+  --sidebar-primary-foreground: #071240;
+  --sidebar-accent: #16214a;
+  --sidebar-accent-foreground: #dbe4f8;
+  --sidebar-border: rgb(157 185 255 / 0.14);
+  --sidebar-ring: #9db9ff;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply scroll-smooth font-sans;
+  }
+  ::selection {
+    background: var(--sun);
+    color: #101a33;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}

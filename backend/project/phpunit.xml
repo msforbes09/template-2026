@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <!-- Headroom for the fuller autoloaded surface (Scout + OpenSearch client). -->
+        <ini name="memory_limit" value="512M"/>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_NAME" value="Template"/>
+        <env name="AWS_DEFAULT_REGION" value="us-east-1"/>
+        <env name="AWS_BUCKET" value="test-bucket"/>
+        <env name="APP_KEY" value="base64:Z8sos2DBU0t5oRMJck4Vws2iANNIuFzjrB244XW56qY="/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="PII_ENCRYPTION_KEY" value="base64:Y9WcQb7Sg3tYyq8wYb4ZQ1fRkG0lBjQmqvT5W1o1c2A="/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="BROADCAST_CONNECTION" value="null"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="SCOUT_DRIVER" value="null"/>
+        <!-- Log lists read MySQL directly in tests (no live OpenSearch cluster). -->
+        <env name="OPENSEARCH_READ_ENABLED" value="false"/>
+        <env name="PERMISSION_CACHE_STORE" value="array"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="DB_URL" value=""/>
+        <env name="CONNECTION_LOG_CONNECTION" value="sqlite"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="ADMIN_2FA_ENABLED" value="false"/>
+        <env name="AUDITING_ENABLED" value="true"/>
+        <env name="DB_AUDIT_CONNECTION" value="null" force="true"/>
+        <env name="TURNSTILE_ENABLED" value="false"/>
+        <env name="CORS_ALLOWED_ORIGINS" value="http://localhost:3000,http://localhost:5173,http://localhost:8080,http://127.0.0.1:3000,http://127.0.0.1:5173,http://127.0.0.1:8080" force="true"/>
+    </php>
+</phpunit>
