@@ -21,7 +21,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'last_name', type: 'string', example: 'Lovelace'),
         new OA\Property(property: 'photo', type: 'object', nullable: true, properties: [
             new OA\Property(property: 'uuid', type: 'string', example: '9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f'),
-            new OA\Property(property: 'url', type: 'string', description: 'Signed CloudFront URL', example: 'https://cdn.example.com/uploads/9f1c....jpg?Signature=...'),
+            new OA\Property(property: 'url', type: 'string', description: 'S3 presigned URL on the private bucket', example: 'https://<account-id>.r2.cloudflarestorage.com/private-bucket/uploads/9f1c....jpg?X-Amz-Signature=...'),
             new OA\Property(property: 'original_name', type: 'string', example: 'ada.jpg'),
             new OA\Property(property: 'mime_type', type: 'string', example: 'image/jpeg'),
             new OA\Property(property: 'size', type: 'integer', example: 20481),

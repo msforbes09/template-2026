@@ -12,6 +12,7 @@ use App\Models\Addresses\Regions\Region;
 use App\Models\Misc\Files\File;
 use App\Models\Users\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -26,11 +27,13 @@ class ProfileCooldownTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Seed the address reference rows the payload references.
+     * Fake the private R2 disk and seed the address reference rows the payload references.
      */
     protected function setUp(): void
     {
         parent::setUp();
+
+        Storage::fake(File::PRIVATE_DISK);
 
         Country::create(['code' => 'PH', 'name' => 'Philippines', 'nationality' => 'Filipino']);
         Region::create(['code' => 'R1', 'name' => 'NCR']);

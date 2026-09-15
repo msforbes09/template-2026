@@ -47,25 +47,36 @@ return [
             'report' => false,
         ],
 
-        's3' => [
+        // Cloudflare R2 (S3-compatible). Private bucket: objects are only ever
+        // reachable through presigned URLs. Public bucket: "Public access" is
+        // enabled on the bucket and a custom domain is attached; objects are
+        // served from that domain by plain URL.
+        'r2' => [
             'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
-            'endpoint' => env('AWS_ENDPOINT'),
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('R2_BUCKET'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'use_path_style_endpoint' => true,
             'throw' => false,
             'report' => false,
-            'folder' => env('AWS_FOLDER'),
-            'public_folder' => env('AWS_PUBLIC_FOLDER', 'public'),
-            'cloudfront' => [
-                'url' => env('AWS_CLOUDFRONT_URL'),
-                'key_pair_id' => env('AWS_CLOUDFRONT_KEY_PAIR_ID'),
-                'private_key' => storage_path('keys/cloudfront-private.pem'),
-                'ttl' => (int) env('AWS_CLOUDFRONT_TTL', 10800),
-            ],
+            'folder' => env('R2_FOLDER', 'uploads'),
+            'private_url_ttl' => (int) env('R2_PRIVATE_URL_TTL', 10800),
+        ],
+
+        'r2-public' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('R2_PUBLIC_BUCKET'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'throw' => false,
+            'report' => false,
+            'url' => env('R2_PUBLIC_URL'),
+            'folder' => env('R2_FOLDER', 'uploads'),
         ],
 
     ],

@@ -9,7 +9,7 @@ use App\Models\Misc\Files\Resources\FileResource;
 use OpenApi\Attributes as OA;
 
 /**
- * Upload a private file and return its UUID + a cached signed CloudFront URL.
+ * Upload a private file and return its UUID + a cached S3 presigned URL on the private R2 bucket.
  */
 class UploadPrivateFileController extends Controller
 {
@@ -31,7 +31,7 @@ class UploadPrivateFileController extends Controller
             new OA\Response(response: 201, description: 'Uploaded', content: new OA\JsonContent(properties: [
                 new OA\Property(property: 'data', type: 'object', properties: [
                     new OA\Property(property: 'uuid', type: 'string', example: '9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f'),
-                    new OA\Property(property: 'url', type: 'string', description: 'Signed CloudFront URL (expires ~3h)', example: 'https://cdn.example.com/uploads/private/9f1c....jpg?Signature=...'),
+                    new OA\Property(property: 'url', type: 'string', description: 'S3 presigned URL on the private bucket (expires ~3h)', example: 'https://<account-id>.r2.cloudflarestorage.com/private-bucket/uploads/9f1c....jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=11100&X-Amz-Signature=...'),
                     new OA\Property(property: 'original_name', type: 'string', example: 'contract.pdf'),
                     new OA\Property(property: 'mime_type', type: 'string', example: 'application/pdf'),
                     new OA\Property(property: 'size', type: 'integer', example: 20481),

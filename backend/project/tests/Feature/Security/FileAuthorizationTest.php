@@ -22,13 +22,14 @@ class FileAuthorizationTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Fake s3 so uploads don't touch the network.
+     * Fake both R2 disks so uploads don't touch the network.
      */
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('s3');
-        config(['filesystems.disks.s3.folder' => 'uploads']);
+        Storage::fake(File::PRIVATE_DISK);
+        Storage::fake(File::PUBLIC_DISK);
+        config(['filesystems.disks.r2.folder' => 'uploads', 'filesystems.disks.r2-public.folder' => 'uploads']);
     }
 
     /**

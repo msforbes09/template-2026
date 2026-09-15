@@ -3,8 +3,8 @@
 namespace Tests\Feature\Files;
 
 use App\Models\Administrators\Administrator;
+use App\Models\Misc\Files\File;
 use App\Models\Users\User;
-use App\Services\Files\CloudFrontSigner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -18,24 +18,18 @@ class FileUploadEndpointTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Fake s3 + stub signer + cloudfront config.
+     * Fake both R2 disks.
      */
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('s3');
+        Storage::fake(File::PRIVATE_DISK);
+        Storage::fake(File::PUBLIC_DISK);
         config([
-            'filesystems.disks.s3.folder' => 'uploads',
-            'filesystems.disks.s3.cloudfront.url' => 'https://cdn.test', 'filesystems.disks.s3.cloudfront.key_pair_id' => 'TESTKEY',
-            'filesystems.disks.s3.cloudfront.ttl' => 10800,
+            'filesystems.disks.r2.folder' => 'uploads',
+            'filesystems.disks.r2-public.folder' => 'uploads',
+            'filesystems.disks.r2-public.url' => 'https://cdn.test',
         ]);
-        $this->app->bind(CloudFrontSigner::class, fn () => new class extends CloudFrontSigner
-        {
-            public function sign(string $url, int $ttlSeconds): string
-            {
-                return $url.'?sig=test';
-            }
-        });
     }
 
     /**
@@ -63,18 +57,18 @@ class FileUploadEndpointTest extends TestCase
         $response = $this->postJson('/api/v1/common/files/public', ['file' => UploadedFile::fake()->image('a.jpg')]);
 
         $response->assertCreated()->assertJsonStructure(['data' => ['uuid', 'url', 'mime_type', 'size']]);
-        $this->assertStringContainsString('https://cdn.test/public/uploads/', $response->json('data.url'));
+        $this->assertStringContainsString('https://cdn.test/uploads/', $response->json('data.url'));
     }
 
     /**
-     * Private upload returns a signed url.
+     * Private upload returns a presigned url.
      */
-    public function test_private_upload_is_signed(): void
+    public function test_private_upload_is_presigned(): void
     {
         $this->actingAsAdmin();
 
         $this->postJson('/api/v1/common/files/private', ['file' => UploadedFile::fake()->image('a.jpg')])
-            ->assertCreated()->assertJsonPath('data.url', fn ($url) => str_ends_with($url, '?sig=test'));
+            ->assertCreated()->assertJsonPath('data.url', fn ($url) => str_contains($url, '?expiration='));
     }
 
     /**

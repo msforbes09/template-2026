@@ -6,6 +6,7 @@ use App\Models\Access\PermissionGroups\PermissionGroup;
 use App\Models\Access\Permissions\Permission;
 use App\Models\Access\Roles\Role;
 use App\Models\Administrators\Administrator;
+use App\Models\Misc\Files\File;
 use Database\Seeders\AccessSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +26,8 @@ class AccessSeederTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake('s3');
+        Storage::fake(File::PRIVATE_DISK);
+        Storage::fake(File::PUBLIC_DISK);
         config([
             'auth.super_admin.email' => 'super@admin.test',
             'auth.super_admin.password' => 'password123',
@@ -59,7 +61,7 @@ class AccessSeederTest extends TestCase
         $this->assertNotNull($admin->photo_uuid);
         $this->assertNotNull($admin->photo);
         $this->assertSame('Administrator', $admin->photo->owner_type);
-        Storage::disk('s3')->assertExists("{$admin->photo->folder_path}/{$admin->photo->uploaded_name}");
+        Storage::disk(File::PRIVATE_DISK)->assertExists("{$admin->photo->folder_path}/{$admin->photo->uploaded_name}");
     }
 
     /**

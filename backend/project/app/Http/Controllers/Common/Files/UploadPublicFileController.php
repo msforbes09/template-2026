@@ -9,7 +9,7 @@ use App\Models\Misc\Files\Resources\FileResource;
 use OpenApi\Attributes as OA;
 
 /**
- * Upload a public file and return its permanent CloudFront URL.
+ * Upload a public file and return its permanent URL on the public R2 bucket's custom domain.
  */
 class UploadPublicFileController extends Controller
 {
@@ -31,7 +31,7 @@ class UploadPublicFileController extends Controller
             new OA\Response(response: 201, description: 'Uploaded', content: new OA\JsonContent(properties: [
                 new OA\Property(property: 'data', type: 'object', properties: [
                     new OA\Property(property: 'uuid', type: 'string', example: '9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f'),
-                    new OA\Property(property: 'url', type: 'string', example: 'https://cdn.example.com/uploads/public/9f1c2d3e-....jpg'),
+                    new OA\Property(property: 'url', type: 'string', example: 'https://cdn.example.com/uploads/9f1c2d3e-....jpg'),
                     new OA\Property(property: 'original_name', type: 'string', example: 'photo.jpg'),
                     new OA\Property(property: 'mime_type', type: 'string', example: 'image/jpeg'),
                     new OA\Property(property: 'size', type: 'integer', example: 20481),

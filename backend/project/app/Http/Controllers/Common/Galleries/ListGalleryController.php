@@ -26,7 +26,7 @@ class ListGalleryController extends Controller
                 new OA\Property(property: 'data', type: 'array', items: new OA\Items(type: 'object', properties: [
                     new OA\Property(property: 'uuid', type: 'string', example: '9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f'),
                     new OA\Property(property: 'original_name', type: 'string', nullable: true, example: 'banner.jpg'),
-                    new OA\Property(property: 'url', type: 'string', nullable: true, example: 'https://cdn.example.com/public/gallery/9f1c2d3e-….jpg'),
+                    new OA\Property(property: 'url', type: 'string', nullable: true, example: 'https://cdn.example.com/gallery/9f1c2d3e-….jpg'),
                 ])),
             ])),
             new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/UnauthenticatedError')),

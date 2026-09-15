@@ -10,37 +10,79 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
- * Tests the File model's upload + public URL behaviour.
+ * Tests the File model's disk selection, upload, and public URL behaviour.
  */
 class FileModelTest extends TestCase
 {
     use RefreshDatabase;
 
     /**
-     * Configure a faked s3 disk and cloudfront settings.
+     * Fake both R2 disks and pin the folder + public URL.
      */
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('s3');
+        Storage::fake(File::PRIVATE_DISK);
+        Storage::fake(File::PUBLIC_DISK);
         config([
-            'filesystems.disks.s3.folder' => 'uploads',
-            'filesystems.disks.s3.cloudfront.url' => 'https://cdn.test',
-            'filesystems.disks.s3.cloudfront.ttl' => 10800,
+            'filesystems.disks.r2.folder' => 'uploads',
+            'filesystems.disks.r2-public.folder' => 'uploads',
+            'filesystems.disks.r2-public.url' => 'https://cdn.test',
         ]);
     }
 
     /**
-     * Uploading a public file streams it to s3 and resolves a permanent CloudFront URL.
+     * A public upload lands on the public disk, records that disk, and resolves a plain custom-domain URL.
      */
-    public function test_public_upload_stores_and_builds_permanent_url(): void
+    public function test_public_upload_stores_on_public_disk_and_builds_permanent_url(): void
     {
         $file = (new File)->uploadFromFile(UploadedFile::fake()->image('photo.jpg'), FileEnum::VISIBILITY['PUBLIC']);
 
         $this->assertSame(FileEnum::STATUS['UPLOADED'], $file->status);
-        $this->assertNotEmpty($file->uuid);
-        Storage::disk('s3')->assertExists("public/uploads/{$file->uploaded_name}");
+        $this->assertSame(File::PUBLIC_DISK, $file->disk);
+        $this->assertSame('uploads', $file->folder_path);
+        Storage::disk(File::PUBLIC_DISK)->assertExists("uploads/{$file->uploaded_name}");
+        Storage::disk(File::PRIVATE_DISK)->assertMissing("uploads/{$file->uploaded_name}");
 
-        $this->assertSame("https://cdn.test/public/uploads/{$file->uploaded_name}", $file->url());
+        $this->assertSame("https://cdn.test/uploads/{$file->uploaded_name}", $file->url());
+    }
+
+    /**
+     * A private upload lands on the private disk only and records that disk.
+     */
+    public function test_private_upload_stores_on_private_disk(): void
+    {
+        $file = (new File)->uploadFromFile(UploadedFile::fake()->image('photo.jpg'), FileEnum::VISIBILITY['PRIVATE']);
+
+        $this->assertSame(FileEnum::STATUS['UPLOADED'], $file->status);
+        $this->assertSame(File::PRIVATE_DISK, $file->disk);
+        Storage::disk(File::PRIVATE_DISK)->assertExists("uploads/{$file->uploaded_name}");
+        Storage::disk(File::PUBLIC_DISK)->assertMissing("uploads/{$file->uploaded_name}");
+    }
+
+    /**
+     * diskFor maps visibility to the matching disk name.
+     */
+    public function test_disk_for_maps_visibility_to_disk(): void
+    {
+        $this->assertSame('r2-public', File::diskFor(FileEnum::VISIBILITY['PUBLIC']));
+        $this->assertSame('r2', File::diskFor(FileEnum::VISIBILITY['PRIVATE']));
+    }
+
+    /**
+     * A blank public base URL must fail loudly instead of silently resolving a relative URL.
+     */
+    public function test_public_url_throws_when_base_url_is_blank(): void
+    {
+        config(['filesystems.disks.r2-public.url' => null]);
+        $file = File::factory()->create([
+            'visibility' => FileEnum::VISIBILITY['PUBLIC'],
+            'disk' => File::PUBLIC_DISK,
+            'status' => FileEnum::STATUS['UPLOADED'],
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+
+        $file->url();
     }
 }

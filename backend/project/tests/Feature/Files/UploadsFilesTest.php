@@ -5,6 +5,7 @@ namespace Tests\Feature\Files;
 use App\Enums\FileEnum;
 use App\Models\Administrators\Administrator;
 use App\Models\Misc\Audits\Audit;
+use App\Models\Misc\Files\File;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -23,8 +24,9 @@ class UploadsFilesTest extends TestCase
      */
     public function test_admin_upload_associates_owner(): void
     {
-        Storage::fake('s3');
-        config(['filesystems.disks.s3.folder' => 'uploads', 'filesystems.disks.s3.cloudfront.url' => 'https://cdn.test']);
+        Storage::fake(File::PRIVATE_DISK);
+        Storage::fake(File::PUBLIC_DISK);
+        config(['filesystems.disks.r2.folder' => 'uploads', 'filesystems.disks.r2-public.folder' => 'uploads', 'filesystems.disks.r2-public.url' => 'https://cdn.test']);
         $admin = Administrator::factory()->create();
 
         $file = $admin->uploadFile(UploadedFile::fake()->image('a.jpg'), FileEnum::VISIBILITY['PUBLIC']);
@@ -38,8 +40,9 @@ class UploadsFilesTest extends TestCase
      */
     public function test_upload_writes_a_single_audit_record(): void
     {
-        Storage::fake('s3');
-        config(['filesystems.disks.s3.folder' => 'uploads', 'filesystems.disks.s3.cloudfront.url' => 'https://cdn.test']);
+        Storage::fake(File::PRIVATE_DISK);
+        Storage::fake(File::PUBLIC_DISK);
+        config(['filesystems.disks.r2.folder' => 'uploads', 'filesystems.disks.r2-public.folder' => 'uploads', 'filesystems.disks.r2-public.url' => 'https://cdn.test']);
         $admin = Administrator::factory()->create();
         BaseAudit::$auditingGloballyDisabled = false;
 

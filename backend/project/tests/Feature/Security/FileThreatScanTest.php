@@ -3,6 +3,7 @@
 namespace Tests\Feature\Security;
 
 use App\Models\Administrators\Administrator;
+use App\Models\Misc\Files\File;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -19,13 +20,14 @@ class FileThreatScanTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Fake s3 + config so uploads don't touch the network.
+     * Fake both R2 disks + config so uploads don't touch the network.
      */
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('s3');
-        config(['filesystems.disks.s3.folder' => 'uploads']);
+        Storage::fake(File::PRIVATE_DISK);
+        Storage::fake(File::PUBLIC_DISK);
+        config(['filesystems.disks.r2.folder' => 'uploads', 'filesystems.disks.r2-public.folder' => 'uploads']);
 
         $admin = Administrator::factory()->create(['with_temporary_password' => false]);
         $this->withToken($admin->createToken('t', ['*'])->plainTextToken);

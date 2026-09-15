@@ -43,7 +43,7 @@ class FileEnum
      * Byte-signature blacklist scanned in uploaded file contents. A shallow,
      * bypassable heuristic — defense-in-depth only. The real protections are
      * the real-MIME check, images-only, UUID object names, and serving from
-     * S3/CloudFront (which never executes code).
+     * R2 (which never executes code).
      *
      * @var list<string>
      */
@@ -54,7 +54,7 @@ class FileEnum
         // so including them false-rejects most legitimate uploads. The remaining
         // signatures are all ≥5 bytes, where the collision rate is negligible — and
         // the real defence against a served polyglot is the MIME-derived object name
-        // + non-executing S3/CloudFront storage, not this heuristic.
+        // + non-executing R2 storage, not this heuristic.
         '<?php',
         // HTML / script injection (belt-and-suspenders for images; matters if SVG/HTML/docs are ever accepted)
         '<script', '</script>', '<html', '<iframe', '<object', '<embed', 'onerror=', 'onload=',

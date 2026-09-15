@@ -31,7 +31,7 @@ class FileFactory extends Factory
         return [
             'uuid' => $uuid,
             'visibility' => FileEnum::VISIBILITY['PRIVATE'],
-            'disk' => 's3',
+            'disk' => File::PRIVATE_DISK,
             'folder_path' => 'uploads',
             'uploaded_name' => "{$uuid}.jpg",
             'original_name' => 'photo.jpg',
