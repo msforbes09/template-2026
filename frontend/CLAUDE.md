@@ -2,6 +2,8 @@
 
 Guidance for Claude Code (claude.ai/code) when working in this repository.
 
+This is the frontend half of a two-part template. The root `../CLAUDE.md` holds the cross-cutting rules (reading the real backend responses, the hard branch rules, session notes) — read it first, then this file.
+
 @AGENTS.md
 
 ## Critical: this is Next.js 16, not the Next.js you were trained on
@@ -117,7 +119,7 @@ Vitest + React Testing Library, mock at the `fetch` boundary. Test the seams (sc
 
 ## Branching & Pull Requests
 
-- **`develop` is the working branch.** All ongoing work targets `develop`.
+- **`develop` is the working branch.** All ongoing work targets `develop`. It is branched from `main` once the template's initial setup lands; until then feature branches go off `main` (see the root `CLAUDE.md`).
 - **Every update goes through a pull request into `develop`** — do not commit straight to `develop`. The only exception is an explicit user instruction.
 - **Release flow: `develop` → `staging` → `production`.** Promotions to `staging` are cherry-picks of the develop merge commits (`git cherry-pick -x -m 1 <merge>`) on a `release/staging-YYYY-MM-DD*` branch, PR'd into `staging`. Releases to `production` are a plain `staging → production` PR with the deploy steps in the body (see `docs/deploy/`).
 - **Never merge a PR without the user's explicit go-ahead.** Open the PR and stop; the merge is the user's call, per PR, every time.

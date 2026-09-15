@@ -25,7 +25,7 @@ export type LogBlob = Record<string, unknown> | unknown[] | null;
 
 export type ConnectionLogListItem = {
   id: string;
-  // The partner/connection slug, e.g. "emessage". Named `type` by the API,
+  // The partner/connection slug, e.g. "sms-provider". Named `type` by the API,
   // not `platform` as on gateway logs.
   type: string;
   // Correlates the outbound call with whatever triggered it — the masked

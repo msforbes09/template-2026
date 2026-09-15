@@ -33,7 +33,7 @@ class AuditUserResolutionTest extends TestCase
      * audit owner (user_type User + their id) — user actions must not land
      * unattributed.
      */
-    public function test_citizen_action_is_attributed(): void
+    public function test_user_action_is_attributed(): void
     {
         $user = User::factory()->create(['gender' => 'male']);
         $this->actingAs($user, 'users');

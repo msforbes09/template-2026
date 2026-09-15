@@ -157,7 +157,7 @@ class AuthAttemptLogTest extends TestCase
      * same hash (counting + joining back to the account still work) plus a masked
      * identifier (recognisable to an admin, not harvestable).
      */
-    public function test_a_citizen_identifier_is_hashed_and_stored_masked_only(): void
+    public function test_a_user_identifier_is_hashed_and_stored_masked_only(): void
     {
         $user = User::factory()->create(['email' => 'alex@user.test']);
 
@@ -173,7 +173,7 @@ class AuthAttemptLogTest extends TestCase
     /**
      * A user mobile identifier is stored with the phone mask (first 5 + last 3).
      */
-    public function test_a_citizen_mobile_identifier_is_stored_masked(): void
+    public function test_a_user_mobile_identifier_is_stored_masked(): void
     {
         app(AuthAttemptRecorder::class)->record(User::AUTH_GUARD, AuthEventEnum::INVALID_CREDENTIALS, '+639171234567');
 

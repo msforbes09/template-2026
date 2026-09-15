@@ -32,7 +32,7 @@ class MaintenanceModeTest extends TestCase
     /**
      * Every user endpoint is down — pre-auth and authenticated alike.
      */
-    public function test_citizen_endpoints_are_down(): void
+    public function test_user_endpoints_are_down(): void
     {
         $this->enableMaintenance();
 
