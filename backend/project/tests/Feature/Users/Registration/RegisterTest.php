@@ -56,7 +56,7 @@ class RegisterTest extends TestCase
 
         $this->assertDatabaseCount('users', 0);
         // OTP is keyed on the normalized email (the deliverable identifier).
-        $this->assertDatabaseHas('otps', ['type' => 'user_registration_email', 'identifier' => 'user@example.com']);
+        $this->assertDatabaseHas('otps', ['type' => 'user_registration', 'identifier' => 'user@example.com']);
         $this->assertTrue(Cache::has(User::registrationCacheKey('user@example.com')));
         // The company captured at the start step is cached with the pending payload.
         $this->assertSame('Acme Corp', Cache::get(User::registrationCacheKey('user@example.com'))['company_name']);
@@ -84,7 +84,7 @@ class RegisterTest extends TestCase
         // so the delivered email is the notice, not the OTP.
         $result = User::startRegistration(['email' => 'taken@example.com', 'first_name' => 'C', 'last_name' => 'D']);
 
-        $this->assertDatabaseHas('otps', ['type' => 'user_registration_exists_email', 'identifier' => 'taken@example.com']);
+        $this->assertDatabaseHas('otps', ['type' => 'user_registration_exists', 'identifier' => 'taken@example.com']);
         Mail::assertSent(UserAccountExistsMail::class);
         Mail::assertNotSent(UserRegistrationOtpMail::class);
 

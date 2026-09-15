@@ -18,7 +18,7 @@ use OpenApi\Attributes as OA;
 #[OA\SecurityScheme(securityScheme: 'bearerAuth', type: 'http', scheme: 'bearer')]
 #[OA\Tag(name: 'Registration', description: 'Website self-registration (email OTP).')]
 #[OA\Tag(name: 'Authentication', description: 'Password + OTP authentication (authenticate / two-factor / profile / logout).')]
-#[OA\Tag(name: 'Profile', description: 'The authenticated user\'s own profile (view / update / complete / photo / add + verify a contact channel / delete).')]
+#[OA\Tag(name: 'Profile', description: 'The authenticated user\'s own profile (view / update / complete / photo / delete).')]
 #[OA\Tag(name: 'Password', description: 'Change / forgot / reset the account password.')]
 #[OA\Tag(name: 'Notifications', description: "The authenticated user's in-app notification center (list / mark read).")]
 #[OA\Schema(schema: 'ErrorEnvelope', type: 'object', properties: [

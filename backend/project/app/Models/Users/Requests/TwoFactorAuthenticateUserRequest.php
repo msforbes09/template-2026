@@ -2,8 +2,6 @@
 
 namespace App\Models\Users\Requests;
 
-use App\Enums\AuthChannelEnum;
-use App\Models\Users\Requests\Concerns\ResolvesChannelInput;
 use App\Rules\Turnstile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -13,8 +11,6 @@ use Illuminate\Validation\Rule;
  */
 class TwoFactorAuthenticateUserRequest extends FormRequest
 {
-    use ResolvesChannelInput;
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -31,7 +27,6 @@ class TwoFactorAuthenticateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'channel' => ['nullable', Rule::enum(AuthChannelEnum::class)],
             'auth_token' => ['required', 'string'],
             'pin' => ['required', 'string'],
             'captcha' => [Rule::requiredIf((bool) config('services.turnstile.enabled')), new Turnstile],

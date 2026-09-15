@@ -12,11 +12,9 @@ use App\Models\Concerns\HasAddress;
 use App\Models\Concerns\UploadsFiles;
 use App\Models\Misc\Files\File;
 use App\Models\Notifications\Notification;
-use App\Models\Users\Concerns\ManagesContacts;
 use App\Models\Users\Concerns\ManagesPassword;
 use App\Models\Users\Concerns\ManagesProfile;
 use App\Models\Users\Concerns\RegistersViaWebsite;
-use App\Models\Users\Concerns\ResolvesAuthChannel;
 use App\Models\Users\Concerns\SearchableUser;
 use App\Models\Users\Concerns\TwoFactorAuthenticates;
 use Database\Factories\Users\UserFactory;
@@ -48,11 +46,9 @@ class User extends Authenticatable implements Auditable
     use HasFactory;
 
     use HasUuids;
-    use ManagesContacts;
     use ManagesPassword;
     use ManagesProfile;
     use RegistersViaWebsite;
-    use ResolvesAuthChannel;
     use RoutesNotifications;
     use SearchableUser;
     use SoftDeletes;
@@ -116,7 +112,7 @@ class User extends Authenticatable implements Auditable
         'municipality_code', 'barangay_code', 'address_line_one', 'address_line_two',
         'postal_code', 'photo_uuid', 'status', 'profile_completed_at',
         'details_changed_at', 'photo_changed_at', 'is_active',
-        'registration_method', 'authentication_method', 'authentication_channel', 'last_login_at',
+        'registration_method', 'authentication_method', 'last_login_at',
         'auth_token', 'auth_token_expires_at', 'trusted_devices',
     ];
 

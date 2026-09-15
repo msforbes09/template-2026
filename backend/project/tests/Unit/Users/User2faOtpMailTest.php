@@ -16,6 +16,6 @@ class User2faOtpMailTest extends TestCase
     public function test_it_renders_pin_and_is_configured(): void
     {
         (new User2faOtpMail('123456'))->assertSeeInHtml('123456');
-        $this->assertSame(User2faOtpMail::class, config('otp.mailables.user_2fa_email'));
+        $this->assertSame(User2faOtpMail::class, config('otp.mailables.user_2fa'));
     }
 }

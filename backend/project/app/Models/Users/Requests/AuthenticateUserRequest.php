@@ -2,7 +2,6 @@
 
 namespace App\Models\Users\Requests;
 
-use App\Enums\AuthChannelEnum;
 use App\Rules\Turnstile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -28,9 +27,7 @@ class AuthenticateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'channel' => ['nullable', Rule::enum(AuthChannelEnum::class)],
-            'email' => ['exclude_if:channel,sms', 'required', 'email'],
-            'mobile_number' => ['exclude_unless:channel,sms', 'required', 'string', 'regex:/^\+639\d{9}$/'],
+            'email' => ['required', 'email'],
             'password' => ['required', 'string'],
             'device_token' => ['nullable', 'string'],
             'captcha' => [Rule::requiredIf((bool) config('services.turnstile.enabled')), new Turnstile],

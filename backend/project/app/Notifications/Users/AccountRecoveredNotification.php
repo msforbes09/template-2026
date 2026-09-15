@@ -6,15 +6,10 @@ use App\Notifications\BaseNotification;
 
 /**
  * Security notice: this soft-deleted account was recovered via
- * re-registration on a verified channel.
+ * re-registration on its verified email.
  */
 class AccountRecoveredNotification extends BaseNotification
 {
-    /**
-     * Create the notification.
-     */
-    public function __construct(public readonly string $channel) {}
-
     /**
      * The stored `type`.
      */
@@ -30,6 +25,6 @@ class AccountRecoveredNotification extends BaseNotification
      */
     public function toDatabase(object $notifiable): array
     {
-        return ['channel' => $this->channel, 'reference' => null];
+        return ['reference' => null];
     }
 }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('uuid')->index();
             $table->string('password')->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->timestamp('mobile_number_verified_at')->nullable();   // set when an SMS registration completes
+            $table->timestamp('mobile_number_verified_at')->nullable();   // reserved: mobile is a plain contact field, never verified
 
             // Encrypted PII — the values (names, email, mobile_number, birth_date,
             // address lines, postal_code) live only in `ciphertext`. The `*_hash`
@@ -47,7 +47,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->index();
             $table->string('registration_method', 20)->nullable()->index();
             $table->string('authentication_method', 20)->nullable()->index();
-            $table->string('authentication_channel', 10)->nullable()->index(); // channel of the last token issued: email | sms
+            $table->string('authentication_channel', 10)->nullable()->index(); // reserved: unused since auth became email-only
             $table->timestamp('last_login_at')->nullable();
             $table->string('auth_token')->nullable()->index();          // hashed pending-2FA handle
             $table->timestamp('auth_token_expires_at')->nullable();     // handshake expiry (fail closed)

@@ -56,10 +56,10 @@ class OtpServiceVerifyTest extends TestCase
     {
         config(['otp.max_attempts' => 5]);
         $service = app(OtpService::class);
-        $service->generate('user_registration_email', 'alex@user.test');
+        $service->generate('user_registration', 'alex@user.test');
 
         try {
-            $service->verify('user_registration_email', 'alex@user.test', '000000', revealAttempts: false);
+            $service->verify('user_registration', 'alex@user.test', '000000', revealAttempts: false);
             $this->fail('Expected InvalidOtpException.');
         } catch (InvalidOtpException $e) {
             $this->assertNull($e->getMeta());
@@ -67,7 +67,7 @@ class OtpServiceVerifyTest extends TestCase
 
         // The missing-row case throws the identical envelope.
         try {
-            $service->verify('user_registration_email', 'nobody@user.test', '000000', revealAttempts: false);
+            $service->verify('user_registration', 'nobody@user.test', '000000', revealAttempts: false);
             $this->fail('Expected InvalidOtpException.');
         } catch (InvalidOtpException $e) {
             $this->assertNull($e->getMeta());

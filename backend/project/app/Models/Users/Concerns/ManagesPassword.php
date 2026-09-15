@@ -2,7 +2,6 @@
 
 namespace App\Models\Users\Concerns;
 
-use App\Enums\AuthChannelEnum;
 use App\Enums\AuthEventEnum;
 use App\Events\Otp\OtpIssued;
 use App\Exceptions\InvalidOtpException;
@@ -49,19 +48,19 @@ trait ManagesPassword
      * via the shared OtpMailer, and log the attempt. The response is identical for
      * both branches (anti-enumeration).
      */
-    public static function sendPasswordResetOtp(string $identifier, AuthChannelEnum $channel = AuthChannelEnum::EMAIL): OtpResult
+    public static function sendPasswordResetOtp(string $email): OtpResult
     {
-        $identifier = static::normalizeIdentifier($channel, $identifier);
-        $account = static::resettableAccount($identifier, $channel);
+        $email = static::normalizeEmail($email);
+        $account = static::resettableAccount($email);
         $purpose = $account !== null
             ? static::PASSWORD_RESET_OTP_TYPE
             : static::PASSWORD_RESET_NO_ACCOUNT_OTP_TYPE;
 
         // A reset OTP belongs to the account being reset (attributes its delivery log);
         // the "no account" notice has no owner. Same response either way (anti-enumeration).
-        $result = app(OtpService::class)->generate(static::channelOtpType($purpose, $channel), $identifier, $account);
+        $result = app(OtpService::class)->generate($purpose, $email, $account);
         OtpIssued::dispatch($result);
-        static::recordAuthEvent(AuthEventEnum::PASSWORD_RESET_REQUESTED, $identifier);
+        static::recordAuthEvent(AuthEventEnum::PASSWORD_RESET_REQUESTED, $email);
 
         return $result;
     }
@@ -70,13 +69,13 @@ trait ManagesPassword
      * Complete a password reset: verify the reset OTP, reject an unchanged
      * password, set the new one, revoke all sessions, and return a fresh token.
      */
-    public static function resetPasswordWithOtp(string $identifier, string $otp, string $newPassword, AuthChannelEnum $channel = AuthChannelEnum::EMAIL): string
+    public static function resetPasswordWithOtp(string $email, string $otp, string $newPassword): string
     {
-        $identifier = static::normalizeIdentifier($channel, $identifier);
+        $email = static::normalizeEmail($email);
 
-        app(OtpService::class)->verify(static::channelOtpType(static::PASSWORD_RESET_OTP_TYPE, $channel), $identifier, $otp, revealAttempts: false);
+        app(OtpService::class)->verify(static::PASSWORD_RESET_OTP_TYPE, $email, $otp, revealAttempts: false);
 
-        $user = static::query()->whereHashed($channel->identifierField(), $identifier)->whereNotNull('password')->first();
+        $user = static::resettableAccount($email);
 
         if (! $user) {
             throw new InvalidOtpException;
@@ -86,28 +85,20 @@ trait ManagesPassword
             throw new PasswordUnchangedException;
         }
 
-        $user->update(['password' => $newPassword, 'authentication_channel' => $channel->value]);
+        $user->update(['password' => $newPassword]);
         $user->resetTwoFactorState();
-        static::recordAuthEvent(AuthEventEnum::PASSWORD_CHANGED, $identifier, $user);
+        static::recordAuthEvent(AuthEventEnum::PASSWORD_CHANGED, $email, $user);
         $user->notify(new PasswordChangedNotification);
 
         return $user->authenticate();
     }
 
     /**
-     * Whether the identifier has a resettable (password-holding) account.
+     * The account a reset for this email would apply to — one that owns the
+     * address and has a password — or null (no such account / SSO-only).
      */
-    protected static function isResettable(string $identifier, AuthChannelEnum $channel = AuthChannelEnum::EMAIL): bool
+    protected static function resettableAccount(string $email): ?static
     {
-        return static::resettableAccount($identifier, $channel) !== null;
-    }
-
-    /**
-     * The account a reset for this identifier would apply to — one that owns the
-     * contact and has a password — or null (no such account / SSO-only).
-     */
-    protected static function resettableAccount(string $identifier, AuthChannelEnum $channel = AuthChannelEnum::EMAIL): ?static
-    {
-        return static::query()->whereHashed($channel->identifierField(), $identifier)->whereNotNull('password')->first();
+        return static::query()->whereHashed('email', $email)->whereNotNull('password')->first();
     }
 }

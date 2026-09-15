@@ -40,7 +40,7 @@ class NotificationCopyTest extends TestCase
     }
 
     /**
-     * Security pair: password change warning + recovery channel.
+     * Security pair: password change warning + account recovery.
      */
     public function test_security_copy(): void
     {
@@ -48,7 +48,7 @@ class NotificationCopyTest extends TestCase
         $this->assertSame('Your password was changed', $copy['title']);
         $this->assertStringContainsString('contact our support team', $copy['message']);
 
-        $copy = NotificationCopy::render('security.account_recovered', ['channel' => 'email', 'reference' => null]);
+        $copy = NotificationCopy::render('security.account_recovered', ['reference' => null]);
         $this->assertSame('Account recovered', $copy['title']);
         $this->assertStringContainsString('email', $copy['message']);
     }

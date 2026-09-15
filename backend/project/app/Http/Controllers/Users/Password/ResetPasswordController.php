@@ -23,11 +23,9 @@ class ResetPasswordController extends Controller
         description: 'Verifies the reset code and sets a new password (which must differ from the current one). Revokes all existing tokens and returns a fresh one.',
         tags: ['Password'],
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
-            required: ['otp', 'new_password', 'new_password_confirmation'],
+            required: ['email', 'otp', 'new_password', 'new_password_confirmation'],
             properties: [
-                new OA\Property(property: 'channel', type: 'string', enum: ['email', 'sms'], description: 'Must match the forgot-password step (default email).', example: 'email'),
-                new OA\Property(property: 'email', type: 'string', format: 'email', description: 'Required when channel is email.', example: 'user@example.com'),
-                new OA\Property(property: 'mobile_number', type: 'string', description: 'Required when channel is sms. Format +639XXXXXXXXX.', example: '+639171234567'),
+                new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@example.com'),
                 new OA\Property(property: 'otp', type: 'string', example: '123456'),
                 new OA\Property(property: 'new_password', type: 'string', format: 'password', example: 'BrandNew@456'),
                 new OA\Property(property: 'new_password_confirmation', type: 'string', format: 'password', example: 'BrandNew@456'),
@@ -48,10 +46,9 @@ class ResetPasswordController extends Controller
     {
         return response()->json([
             'token' => User::resetPasswordWithOtp(
-                $request->channelIdentifier(),
+                $request->validated('email'),
                 $request->validated('otp'),
                 $request->validated('new_password'),
-                $request->channel(),
             ),
         ]);
     }

@@ -17,7 +17,7 @@ production service already in place. Copy it, set `.env`, and start on features.
 ## What is included
 
 - Two Sanctum guards: `administrators` (roles and permissions via spatie) and `users`
-  (registration, email/SMS OTP, 2FA, profile, contacts, password lifecycle)
+  (registration, email OTP, 2FA, profile, password lifecycle)
 - Audit log, auth-attempt log, and outbound-connection log on monthly tables, with an
   optional OpenSearch read path
 - PII encryption with blind indexes, PII-access auditing, trusted proxies, throttling,

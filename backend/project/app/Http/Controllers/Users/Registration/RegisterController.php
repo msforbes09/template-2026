@@ -22,14 +22,12 @@ class RegisterController extends Controller
     #[OA\Post(
         path: '/register',
         summary: 'Begin website registration (email OTP)',
-        description: 'Validates the identifier and names and sends a one-time code by email (channel=email, default) or SMS (channel=sms). No account is created at this step. The response is identical whether or not the identifier is already registered. Resend the code via POST /common/otp/resend with the returned resend_token.',
+        description: 'Validates the email and names and sends a one-time code by email. No account is created at this step. The response is identical whether or not the email is already registered. Resend the code via POST /common/otp/resend with the returned resend_token.',
         tags: ['Registration'],
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
-            required: ['first_name', 'last_name', 'company_name'],
+            required: ['email', 'first_name', 'last_name', 'company_name'],
             properties: [
-                new OA\Property(property: 'channel', type: 'string', enum: ['email', 'sms'], description: 'Delivery channel (default email). With sms, send mobile_number instead of email.', example: 'email'),
-                new OA\Property(property: 'email', type: 'string', format: 'email', description: 'Required when channel is email.', example: 'user@example.com'),
-                new OA\Property(property: 'mobile_number', type: 'string', description: 'Required when channel is sms. Format +639XXXXXXXXX.', example: '+639171234567'),
+                new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@example.com'),
                 new OA\Property(property: 'first_name', type: 'string', example: 'Alex'),
                 new OA\Property(property: 'last_name', type: 'string', example: 'Rivera'),
                 new OA\Property(property: 'company_name', type: 'string', example: 'Acme Corp'),
@@ -52,7 +50,7 @@ class RegisterController extends Controller
     )]
     public function __invoke(RegisterUserRequest $request): JsonResponse
     {
-        $result = User::startRegistration($request->safe()->only(['channel', 'email', 'mobile_number', 'first_name', 'last_name', 'company_name']));
+        $result = User::startRegistration($request->safe()->only(['email', 'first_name', 'last_name', 'company_name']));
 
         return response()->json([
             'resend_token' => $result->resendToken,

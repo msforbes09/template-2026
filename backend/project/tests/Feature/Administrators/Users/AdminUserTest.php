@@ -109,13 +109,12 @@ class AdminUserTest extends TestCase
     public function test_shows_user_by_uuid(): void
     {
         $this->actingWith(['users-view']);
-        $user = User::factory()->create(['company_name' => 'Acme Corp', 'authentication_channel' => 'sms']);
+        $user = User::factory()->create(['company_name' => 'Acme Corp']);
 
         $this->getJson("/api/v1/administrator/users/{$user->uuid}")
             ->assertOk()
             ->assertJsonPath('data.uuid', $user->uuid)
             ->assertJsonPath('data.company_name', 'Acme Corp')
-            ->assertJsonPath('data.authentication_channel', 'sms')
             ->assertJsonMissingPath('data.id');
 
         // The internal id must not resolve the route.

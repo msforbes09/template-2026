@@ -33,9 +33,5 @@ enum AuthEventEnum: string
 
     case ACCOUNT_RECOVERED = 'account_recovered';
 
-    case CONTACT_ADD_REQUESTED = 'contact_add_requested';
-
-    case CONTACT_ADDED = 'contact_added';
-
     case ACCOUNT_DELETED = 'account_deleted';
 }

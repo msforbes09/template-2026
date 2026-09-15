@@ -23,11 +23,9 @@ class VerifyRegistrationController extends Controller
         description: 'Verifies the one-time code sent to the email and, only on success, creates the draft account with the chosen password. Returns a bearer token for the new draft session.',
         tags: ['Registration'],
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
-            required: ['otp', 'password', 'password_confirmation'],
+            required: ['email', 'otp', 'password', 'password_confirmation'],
             properties: [
-                new OA\Property(property: 'channel', type: 'string', enum: ['email', 'sms'], description: 'Must match the register step (default email).', example: 'email'),
-                new OA\Property(property: 'email', type: 'string', format: 'email', description: 'Required when channel is email.', example: 'user@example.com'),
-                new OA\Property(property: 'mobile_number', type: 'string', description: 'Required when channel is sms. Format +639XXXXXXXXX.', example: '+639171234567'),
+                new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@example.com'),
                 new OA\Property(property: 'otp', type: 'string', example: '123456'),
                 new OA\Property(property: 'password', type: 'string', format: 'password', example: 'Secret@123'),
                 new OA\Property(property: 'password_confirmation', type: 'string', format: 'password', example: 'Secret@123'),
@@ -46,10 +44,9 @@ class VerifyRegistrationController extends Controller
     {
         return response()->json([
             'token' => User::completeRegistration(
-                $request->channelIdentifier(),
+                $request->validated('email'),
                 $request->validated('otp'),
                 $request->validated('password'),
-                $request->channel(),
             ),
         ]);
     }

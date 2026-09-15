@@ -50,7 +50,6 @@ class DemoUsersSeederTest extends TestCase
         $this->assertNotNull($completed->address_line_one);
         $this->assertNotNull($completed->region_code);
         $this->assertNotNull($completed->barangay_code);
-        $this->assertNotNull($completed->mobile_number_verified_at);
         $this->assertNotNull($completed->details_changed_at);
         $this->assertNotNull($completed->last_login_at);
 
@@ -59,7 +58,6 @@ class DemoUsersSeederTest extends TestCase
         $this->assertNotNull($draft->last_login_at);        // signed in
         $this->assertNull($draft->profile_completed_at);   // but incomplete
         $this->assertNull($draft->address_line_one);
-        $this->assertNull($draft->mobile_number_verified_at);
     }
 
     /**
