@@ -21,7 +21,7 @@ const AUDIENCE_BASE_PATH: Record<"admin" | "client", string> = {
 // lib/auth/client-better-auth.ts) as a Bearer header and root the path under
 // that audience's base path; omit it for unauthenticated calls. For the auth
 // exchange itself, see modules/admin/lib/admin-auth-client.ts (admin) and
-// modules/client-auth (the citizen login form) — those endpoints are
+// modules/client-auth (the user login form) — those endpoints are
 // hit directly from the browser and don't go through this server-only client.
 //
 // Authenticated calls also forward the browser's IP (X-Forwarded-For) so the

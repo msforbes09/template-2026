@@ -12,12 +12,10 @@ function normalizeSameSite(value: string | undefined) {
   return value?.toLowerCase() as "strict" | "lax" | "none" | undefined;
 }
 
-// Called once the client has already exchanged the eGov SSO `exchange_code`
-// for our own backend's bearer token
-// — this only writes the local "client" Better Auth session, mirroring
+// Called once the client holds the backend's bearer token — this only writes the local "client" Better Auth session, mirroring
 // modules/admin/actions/session-actions.ts's writeAdminSession. `username` is
 // the mobile number or email entered in the wizard's first step, used as the
-// session store's lookup key in place of a real email (mobile-only eGovPH
+// session store's lookup key in place of a real email (mobile-only
 // accounts don't have one).
 export async function writeClientSession(input: {
   username: string;
@@ -47,7 +45,7 @@ export async function writeClientSession(input: {
   // The audience is stamped on the row so the DAL can assert it. Without
   // it the two Better Auth instances share one session shape, and a row
   // minted for one audience satisfied the other's guard — which is what
-  // made a citizen token usable as an admin Bearer.
+  // made a user token usable as an admin Bearer.
   const session = await ctx.internalAdapter.createSession(userId, false, {
     accessToken: input.accessToken,
     audience: "client",

@@ -4,7 +4,7 @@
 // record rather than each list hand-rolling its own URLSearchParams.
 //
 // The date range spans months — these endpoints read from OpenSearch and are
-// no longer month-scoped, which is why there's no `month` here. The citizen's
+// no longer month-scoped, which is why there's no `month` here. The user's
 // own list moved onto the same footing (2026-08-17 handoff) and keeps its own
 // builder for its own per-page constant — see
 // modules/gateway-logs/lib/build-log-query.ts.

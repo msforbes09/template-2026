@@ -16,7 +16,7 @@ import { safeErrorMessage } from "@/lib/safe-error-message";
 //
 // The two audiences hit genuinely different backend endpoints with different
 // guards — /administrator/broadcasting/auth (admins, permission-gated on the
-// shared `administrators` channel) vs /user/broadcasting/auth (citizens,
+// shared `administrators` channel) vs /user/broadcasting/auth (users,
 // ownership-gated on their own `user.{uuid}`). Presenting the wrong one is a
 // 403 on subscribe, so the audience is fixed by which route file called this,
 // never taken from the request.

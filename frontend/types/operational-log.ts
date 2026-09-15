@@ -1,6 +1,6 @@
 // The three non-gateway operational log types the admin console can read
 // (2026-08-15 handoff). Gateway logs keep their own file — they're the one
-// type the citizen audience also sees, and they carry a different shape.
+// type the user audience also sees, and they carry a different shape.
 //
 // Shared conventions across all of them:
 // - `id` is the composite "{YYYY_MM}:{id}" string. OPAQUE: never parse it,
@@ -29,7 +29,7 @@ export type ConnectionLogListItem = {
   // not `platform` as on gateway logs.
   type: string;
   // Correlates the outbound call with whatever triggered it — the masked
-  // mobile for eMessage, an exchange code / uniqid for eGov SSO. On the list
+  // mobile for an SMS provider. On the list
   // row since 2026-08-18; the API filters on it by exact match.
   reference: string | null;
   method: string;
@@ -56,7 +56,7 @@ export type ConnectionLogDetail = ConnectionLogListItem & {
 // ── Auth-attempt logs — sign-in successes and failures ────────────────────
 
 // Which guard the attempt was made against. The admin console and the
-// citizen site authenticate separately, so this splits the two streams.
+// user site authenticate separately, so this splits the two streams.
 export type AuthGuard = "administrators" | "users";
 
 export type AuthAttemptLogListItem = {

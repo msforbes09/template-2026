@@ -1,7 +1,7 @@
 // The date format every log list's `from`/`to` uses: plain YYYY-MM-DD, both
 // ends inclusive, ranges spanning months.
 //
-// Shared rather than per-module because the citizen's own gateway-log list now
+// Shared rather than per-module because the user's own gateway-log list now
 // takes the same range params as the admin lists (2026-08-17 handoff moved it
 // onto OpenSearch and dropped `month`), so both audiences validate identically.
 

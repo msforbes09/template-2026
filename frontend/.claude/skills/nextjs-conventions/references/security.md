@@ -95,7 +95,7 @@ export const getAdminSession = cache(async () => {
 });
 ```
 
-Without it, a citizen's token can be presented as the admin `Bearer` — including
+Without it, a user's token can be presented as the admin `Bearer` — including
 to any endpoint that accepts a token "from whichever audience is calling."
 
 Reject a row that lacks the field rather than grandfathering it.

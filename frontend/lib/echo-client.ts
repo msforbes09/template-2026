@@ -18,7 +18,7 @@ export type EchoAudience = "admin" | "client";
 // to the audience's own backend endpoint and guard (an admin token is
 // rejected on `user.{uuid}` and vice versa), and the endpoint is fixed per
 // Echo instance via the authorizer below. In practice only one is ever
-// created per page — an admin console and a citizen dashboard are different
+// created per page — an admin console and a user dashboard are different
 // routes — but keying the singleton makes that a property of the code rather
 // than an assumption about routing.
 const echoInstances: Partial<Record<EchoAudience, Echo<"reverb">>> = {};

@@ -6,7 +6,7 @@ import {
 import { getClientProfile } from "@/modules/site/lib/get-client-profile";
 
 // Server wrapper for the bell: fetches the first page and the badge count, and
-// resolves the citizen's own broadcast channel.
+// resolves the user's own broadcast channel.
 //
 // Split from the bell itself so the client bundle carries only the interactive
 // part — the fetch, the session guard and the uuid lookup all stay on the

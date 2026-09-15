@@ -4,19 +4,19 @@ import { ContentPage } from "@/modules/content/components/content-page";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "How the eGov API Developer Portal collects, uses, and protects your information under the Data Privacy Act of 2012.",
+    "How we collect, use, and protect your information.",
   alternates: { canonical: "/privacy-policy" },
   openGraph: {
     type: "website",
     url: "/privacy-policy",
     title: "Privacy Policy",
     description:
-      "How the eGov API Developer Portal collects, uses, and protects your information under the Data Privacy Act of 2012.",
+      "How we collect, use, and protect your information.",
   },
   twitter: {
     card: "summary",
     title: "Privacy Policy",
-    description: "How the eGov API Developer Portal collects, uses, and protects your information.",
+    description: "How we collect, use, and protect your information.",
   },
 };
 
@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
       identifier="privacy-policy"
       title="Privacy Policy"
       kicker="Legal"
-      lede="How the eGov API Developer Portal collects, uses, and protects your information under the Data Privacy Act of 2012."
+      lede="How we collect, use, and protect your information."
     />
   );
 }

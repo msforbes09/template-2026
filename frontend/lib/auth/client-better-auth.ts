@@ -7,8 +7,8 @@ import { env } from "@/lib/env";
 // file's comments for why the session store is real (holds the backend's
 // bearer token as a custom field) and why it's pinned on globalThis (Route
 // Handlers and Server Components compile to separate bundles, so a plain
-// module-level object isn't a reliable singleton across them). The eGov SSO
-// citizen login form (modules/client-auth) is the credential source here
+// module-level object isn't a reliable singleton across them). The
+// user login form (modules/client-auth) is the credential source here
 // instead of a Laravel email/password form.
 declare global {
   var __clientAuthDb: MemoryDB | undefined;

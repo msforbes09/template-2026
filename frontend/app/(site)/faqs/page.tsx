@@ -4,19 +4,19 @@ import { ContentPage } from "@/modules/content/components/content-page";
 export const metadata: Metadata = {
   title: "FAQs",
   description:
-    "Answers to common questions about accessing and integrating Philippine government APIs through the eGov API Developer Portal.",
+    "Answers to common questions about the service.",
   alternates: { canonical: "/faqs" },
   openGraph: {
     type: "website",
     url: "/faqs",
     title: "FAQs",
     description:
-      "Answers to common questions about accessing and integrating Philippine government APIs through the eGov API Developer Portal.",
+      "Answers to common questions about the service.",
   },
   twitter: {
     card: "summary",
     title: "FAQs",
-    description: "Answers to common questions about the eGov API Developer Portal.",
+    description: "Answers to common questions about the service.",
   },
 };
 
@@ -26,7 +26,7 @@ export default function FaqsPage() {
       identifier="faqs"
       title="FAQs"
       kicker="Support"
-      lede="Answers to common questions about accessing and integrating Philippine government APIs through the eGov API Developer Portal."
+      lede="Answers to common questions about the service."
     />
   );
 }

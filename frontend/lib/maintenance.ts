@@ -19,12 +19,12 @@ export function isMaintenanceError(err: unknown): boolean {
 }
 
 // What every surface says while maintenance is on. One sentence, in one place,
-// so the citizen portal, the public site and the admin login form cannot drift
+// so the user portal, the public site and the admin login form cannot drift
 // into describing the same outage three different ways.
 export const MAINTENANCE_TITLE = "We're down for maintenance";
 
 export const MAINTENANCE_MESSAGE =
-  "The eGov API portal is temporarily unavailable while we carry out scheduled maintenance. Nothing you have saved is affected, and everything will be here when we're back.";
+  "The service is temporarily unavailable while we carry out scheduled maintenance. Nothing you have saved is affected, and everything will be here when we're back.";
 
 // Deliberately no "try again at HH:MM": the backend does not tell us when it
 // expects to be finished, and inventing a time is worse than not giving one.

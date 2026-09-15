@@ -30,8 +30,8 @@ describe("serializeJsonLd", () => {
   });
 
   it("leaves ordinary content untouched", () => {
-    expect(serializeJsonLd({ "@type": "WebSite", name: "eGov API" })).toBe(
-      '{"@type":"WebSite","name":"eGov API"}',
+    expect(serializeJsonLd({ "@type": "WebSite", name: "Example" })).toBe(
+      '{"@type":"WebSite","name":"Example"}',
     );
   });
 });

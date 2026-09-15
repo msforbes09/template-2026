@@ -5,18 +5,18 @@ import { ClientLoginForm } from "@/modules/client-auth/components/client-login-f
 
 export const metadata: Metadata = {
   title: "Log in",
-  description: "Sign in to your eGov API Developer Portal account with your email and password.",
+  description: "Sign in to your account with your email and password.",
   alternates: { canonical: "/login" },
   openGraph: {
     type: "website",
     url: "/login",
     title: "Log in",
-    description: "Sign in to your eGov API Developer Portal account with your email and password.",
+    description: "Sign in to your account with your email and password.",
   },
   twitter: {
     card: "summary",
     title: "Log in",
-    description: "Sign in to your eGov API Developer Portal account.",
+    description: "Sign in to your account.",
   },
 };
 
@@ -25,7 +25,7 @@ export default function LoginPage() {
   return (
     <AuthCard
       title="Welcome back"
-      subtitle="Enter your details to access your developer account."
+      subtitle="Enter your details to access your account."
       footer={
         <>
           Don&apos;t have an account?{" "}

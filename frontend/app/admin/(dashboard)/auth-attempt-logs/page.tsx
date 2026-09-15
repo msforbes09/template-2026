@@ -57,7 +57,7 @@ export default function AuthAttemptLogsPage({
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Auth Attempt Logs"
-        description="Read-only record of sign-in successes and failures across the admin console and the citizen site."
+        description="Read-only record of sign-in successes and failures across the admin console and the user site."
       />
       <Suspense fallback={<AdminLogsSkeleton filters={4} />}>
         <AuthAttemptLogsForParams searchParams={searchParams} />

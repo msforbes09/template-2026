@@ -20,7 +20,7 @@ import { truncateMiddle } from "@/lib/truncate-middle";
 import type { ConnectionLogDetail, ConnectionLogListItem } from "@/types/operational-log";
 
 // Outbound calls WE make to partners — the mirror image of a gateway log,
-// which records calls citizens make to us. The url here is a full partner URL
+// which records calls users make to us. The url here is a full partner URL
 // including host, not a path.
 
 function ConnectionLogDetailBody({ log }: { log: ConnectionLogDetail }) {

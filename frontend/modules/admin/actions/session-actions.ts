@@ -44,7 +44,7 @@ export async function writeAdminSession(input: {
   // The audience is stamped on the row so the DAL can assert it. Without
   // it the two Better Auth instances share one session shape, and a row
   // minted for one audience satisfied the other's guard — which is what
-  // made a citizen token usable as an admin Bearer.
+  // made a user token usable as an admin Bearer.
   const session = await ctx.internalAdapter.createSession(userId, false, {
     accessToken: input.accessToken,
     audience: "admin",

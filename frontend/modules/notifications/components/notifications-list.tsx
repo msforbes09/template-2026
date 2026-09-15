@@ -38,7 +38,7 @@ export async function NotificationsList({
       perPage: LIST_PAGE_SIZE,
       page,
     }),
-    // Names the citizen's private channel for the live refresh below;
+    // Names the user's private channel for the live refresh below;
     // cache()-memoized, so the header's bell already paid for this read.
     getClientProfile(),
   ]);

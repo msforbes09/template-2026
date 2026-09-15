@@ -29,7 +29,7 @@ const AUDIENCE_BASE_PATH = {
 
 export type VerifiedIdentity = {
   // Every identity the backend recognises for this account, lowercased. The
-  // citizen audience keys its local user row on "the mobile number or email
+  // user audience keys its local user row on "the mobile number or email
   // entered in the wizard's first step", so either may legitimately be the
   // claimed username.
   identifiers: string[];

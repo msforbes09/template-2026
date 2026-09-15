@@ -24,7 +24,7 @@ import type { ChangePasswordValues } from "@/modules/admin/schemas/change-passwo
 // flow hit it every time.
 //
 // We END THE SESSION rather than adopting the returned token (which is what
-// the citizen side does — see changeClientPassword). Re-authenticating is the
+// the user side does — see changeClientPassword). Re-authenticating is the
 // point here: it proves the admin knows the password they just set rather than
 // riding the session that set it, and the backend resets their two-factor
 // state in the same call, so the next sign-in is the right place to pick that

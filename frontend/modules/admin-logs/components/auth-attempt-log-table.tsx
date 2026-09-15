@@ -48,7 +48,7 @@ function AuthAttemptLogDetailBody({ log }: { log: AuthAttemptLogDetail }) {
         <DetailField label="Attempted At">{formatLogTimestamp(log.attempted_at)}</DetailField>
         <DetailField label="IP Address">{log.ip_address ?? "—"}</DetailField>
         {/* Only ever present for the administrators guard, and masked even
-            then — a citizen attempt shows nothing here by design. */}
+            then — a user attempt shows nothing here by design. */}
         <DetailField label="Identifier (masked)">{log.identifier ?? "—"}</DetailField>
         <DetailField label="Account">
           <ModelRefBadge type={log.user_type} id={log.user_id} fallback="Not resolved" />

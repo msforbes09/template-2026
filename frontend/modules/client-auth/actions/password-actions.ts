@@ -26,7 +26,7 @@ function toActionResult(err: unknown, where: string): ActionResult<never> {
 // (which is `{ data: Administrator }`), the User API's real response here
 // is `{ token }` (confirmed against the live API doc), so the local Better
 // Auth session must be rewritten with that new token immediately or the
-// citizen's very next request 401s against their now-revoked old one.
+// user's very next request 401s against their now-revoked old one.
 export async function changeClientPassword(
   email: string,
   values: ChangePasswordValues,

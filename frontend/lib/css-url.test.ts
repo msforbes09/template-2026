@@ -11,7 +11,7 @@ describe("cssUrl", () => {
     // must be identical to the value that went in. Any re-encoding here would
     // invalidate the signature and break the image.
     const signed =
-      "https://cdn.example.com/egov/staging/82e00438.jpg?Expires=1787805709&Signature=eHL09ARz~ot3-cma_0z0S7&Key-Pair-Id=K2BWWX3YMJH0EO";
+      "https://cdn.example.com/media/82e00438.jpg?Expires=1787805709&Signature=eHL09ARz~ot3-cma_0z0S7&Key-Pair-Id=K2BWWX3YMJH0EO";
     expect(cssUrl(signed)).toBe(`url("${signed}")`);
   });
 

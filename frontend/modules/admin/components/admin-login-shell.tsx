@@ -16,19 +16,17 @@ export function AdminLoginShell() {
         </Link>
         <div className="relative max-w-md space-y-4">
           <span className="inline-flex size-11 items-center justify-center rounded-lg bg-white/10">
-            <ShieldCheck aria-hidden className="size-5 text-[#fcd116]" />
+            <ShieldCheck aria-hidden className="size-5 text-sun" />
           </span>
           <h1 className="text-3xl font-semibold tracking-tight text-balance text-white">
-            Administer the eGov API platform
+            Administer the platform
           </h1>
           <p className="text-sm leading-relaxed text-blue-100/90">
-            Review access requests, manage credentials and oversee every
-            connected service from one console.
+            Manage accounts, content and announcements from one console.
           </p>
         </div>
         <p className="relative text-xs text-blue-200/80">
-          Restricted to authorized administrators of the Republic of the
-          Philippines.
+          Restricted to authorized administrators.
         </p>
       </div>
 

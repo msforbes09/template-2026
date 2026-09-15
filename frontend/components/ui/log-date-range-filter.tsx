@@ -11,7 +11,7 @@ import { useUpdateSearchParams } from "@/hooks/use-update-search-params";
 import { isValidLogDate } from "@/lib/log-date";
 
 // The from/to range every log list shares — the admin lists and, since the
-// 2026-08-17 handoff moved it off month-scoping, the citizen's own usage list
+// 2026-08-17 handoff moved it off month-scoping, the user's own usage list
 // too. Lives in components/ui rather than a feature module because a second
 // audience now needs it. Both ends live in the URL —
 // they have to survive a refresh and be shareable, same rule as every other

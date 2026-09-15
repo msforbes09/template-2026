@@ -34,7 +34,7 @@ import {
 // flow where a single stray click destroys an account.
 //
 // Only rendered for accounts that HAVE a password (see the profile page): an
-// eGovPH SSO account has none, so it could never satisfy the confirmation and
+// mobile-only account has none, so it could never satisfy the confirmation and
 // would meet a 422 it can do nothing about. A deletion path for those is a
 // planned backend follow-up.
 

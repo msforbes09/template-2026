@@ -9,7 +9,7 @@ import type { ActionResult } from "@/lib/action-result";
 import type { AppNotification, MarkAllReadResult } from "@/types/notification";
 
 // Both routes are deliberately exempt from the account freeze on the backend:
-// a SUSPENDED citizen must still be able to read and dismiss the notice that
+// a SUSPENDED user must still be able to read and dismiss the notice that
 // tells them they are suspended. So neither of these gates on account status
 // beyond requiring a session.
 

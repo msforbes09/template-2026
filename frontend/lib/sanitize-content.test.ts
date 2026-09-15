@@ -48,9 +48,9 @@ describe("sanitizeContentHtml", () => {
 
   it("keeps ordinary links and images", () => {
     const out = sanitizeContentHtml(
-      '<a href="https://dict.gov.ph" title="DICT">DICT</a><img src="https://x.test/a.png" alt="a">',
+      '<a href="https://example.com" title="Example">Example</a><img src="https://x.test/a.png" alt="a">',
     );
-    expect(out).toContain('href="https://dict.gov.ph"');
+    expect(out).toContain('href="https://example.com"');
     expect(out).toContain('src="https://x.test/a.png"');
     expect(out).toContain('alt="a"');
   });

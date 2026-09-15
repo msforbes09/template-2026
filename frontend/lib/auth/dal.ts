@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth/better-auth";
 import { clientAuth } from "@/lib/auth/client-better-auth";
 
 const ADMIN_LOGIN_PATH = "/admin/login";
-// Email/password is the only citizen sign-in method — eGovPH SSO was removed.
+// Email/password is the only user sign-in method.
 const CLIENT_LOGIN_PATH = "/login";
 
 // Asserts the row was minted for THIS audience.
@@ -14,7 +14,7 @@ const CLIENT_LOGIN_PATH = "/login";
 // Both Better Auth instances store the same session shape, and the guards below
 // only ever checked "a row exists and has not expired". A session created for
 // one audience therefore satisfied the other's guard, which is what let a
-// citizen token be presented as an admin Bearer by lib/api-client.ts. The
+// user token be presented as an admin Bearer by lib/api-client.ts. The
 // writers stamp `audience`; this is the half that reads it.
 //
 // A row without the field is REJECTED rather than grandfathered: the session

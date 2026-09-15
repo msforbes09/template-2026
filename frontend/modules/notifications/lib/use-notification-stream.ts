@@ -8,7 +8,7 @@ import type { NotificationCreatedEvent } from "@/types/notification";
 // and never matches what the backend broadcasts.
 const EVENT = ".notification.created";
 
-// New notifications arriving on the citizen's own private channel.
+// New notifications arriving on the user's own private channel.
 //
 // This is the SAME channel the gateway-log feed uses (`user.{uuid}`), which is
 // why there is no second socket and no second auth endpoint — getEcho keys one

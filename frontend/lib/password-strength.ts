@@ -65,8 +65,6 @@ const COMMON = new Set([
   "abc",
   "abcd",
   "test",
-  "egov",
-  "egovph",
 ]);
 
 // Substitutions people make when told to "add a number or symbol". Undoing

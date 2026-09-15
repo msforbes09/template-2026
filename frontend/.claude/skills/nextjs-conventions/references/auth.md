@@ -119,7 +119,7 @@ export async function writeSession(
 ```
 
 Step 2 is not optional: a 200 proves the token is *real*, not that it belongs to
-the name being claimed. Without it a valid citizen token can be replayed to mint a
+the name being claimed. Without it a valid user token can be replayed to mint a
 session under someone else's identity — or under the other audience.
 
 **Deny on every failure**, including an unreachable backend. An outage must not
@@ -143,7 +143,7 @@ overwriting the other's session. It does **not** stop a session minted for one
 audience satisfying the other's guard — the instances share a secret and a session
 shape, so to `findSession()` the rows are indistinguishable.
 
-That gap is a privilege escalation, not a tidiness issue: a citizen token carried
+That gap is a privilege escalation, not a tidiness issue: a user token carried
 on an admin-audience session is then attached by `apiFetch` as the admin `Bearer`.
 
 So: stamp `audience` when writing (above), and assert it when reading (in

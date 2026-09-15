@@ -47,7 +47,7 @@ export function FileUploader({
   hint?: string;
   // How an uploaded image is previewed (non-capture mode): the default
   // avatar thumbnail, or a full-width "banner" (wide cover images — the
-  // eGov event cover photo — where a circle crop misrepresents the file).
+  // gallery image — where a circle crop misrepresents the file).
   preview?: "avatar" | "banner";
   "aria-invalid"?: boolean;
   "aria-describedby"?: string;

@@ -6,7 +6,7 @@ import {
 } from "@/lib/maintenance";
 
 // The full-page takeover shown while `maintenance_mode` is on, for both the
-// citizen portal and the public site (they share the `(site)` shell).
+// user portal and the public site (they share the `(site)` shell).
 //
 // A takeover rather than a banner, per the handoff: while maintenance is on,
 // every user/* endpoint is down — login and registration included — plus the

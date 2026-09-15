@@ -19,9 +19,9 @@ describe("truncateMiddle", () => {
   });
 
   it("keeps a URL's origin whole and snaps the tail to a path segment when it fits", () => {
-    const out = truncateMiddle("https://api.example.gov.ph/v1/administrator/gateway-logs/2026-08", 50);
+    const out = truncateMiddle("https://api.example.com/v1/administrator/connection-logs/2026-08", 50);
     expect(out.length).toBeLessThanOrEqual(50);
-    expect(out).toBe("https://api.example.gov.ph…/gateway-logs/2026-08");
+    expect(out).toBe("https://api.example.com…/connection-logs/2026-08");
   });
 
   it("falls back to a plain head…tail split for non-URL strings", () => {

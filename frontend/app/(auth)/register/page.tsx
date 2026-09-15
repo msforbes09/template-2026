@@ -5,18 +5,18 @@ import { ClientRegisterForm } from "@/modules/client-auth/components/client-regi
 
 export const metadata: Metadata = {
   title: "Register",
-  description: "Create a free eGov API Developer Portal account to access Philippine government APIs.",
+  description: "Create a free account.",
   alternates: { canonical: "/register" },
   openGraph: {
     type: "website",
     url: "/register",
     title: "Register",
-    description: "Create a free eGov API Developer Portal account to access Philippine government APIs.",
+    description: "Create a free account.",
   },
   twitter: {
     card: "summary",
     title: "Register",
-    description: "Create a free eGov API Developer Portal account.",
+    description: "Create a free account.",
   },
 };
 

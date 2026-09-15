@@ -46,7 +46,7 @@ export async function setFeatureFlag(
       "admin",
     );
 
-    // THE LOAD-BEARING LINE. Every citizen-facing surface reads the flag map
+    // THE LOAD-BEARING LINE. Every user-facing surface reads the flag map
     // through getFeatureFlags, which is cached with cacheLife("minutes") — so
     // without this, a flip an administrator just made would take up to a
     // minute to appear and they would sit there pressing it again. Dropping

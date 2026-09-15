@@ -13,7 +13,7 @@ describe("redactKeys", () => {
     // The shape internalAdapter.findSession() returns.
     const session = {
       session: { id: "s1", token: "cookie-value", accessToken: "upstream-bearer" },
-      user: { id: "u1", email: "citizen@example.com" },
+      user: { id: "u1", email: "user@example.com" },
     };
     const out = redactKeys(session) as typeof session;
     expect(out.session.token).toBe(REDACTED);

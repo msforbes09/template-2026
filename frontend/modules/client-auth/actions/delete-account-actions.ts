@@ -35,7 +35,7 @@ function toActionResult(err: unknown, where: string): ActionResult<never> {
 // DELETE /user/profile — self-service account deletion.
 //
 // A soft delete: the backend keeps a minimal record for audit and revokes every
-// token the account holds, so the citizen is logged out everywhere the moment
+// token the account holds, so the user is logged out everywhere the moment
 // this returns. The local Better Auth session is therefore dropped here rather
 // than left for the caller — if it survived, the next request would carry a
 // token the backend has already killed and 401, which reads as a bug rather

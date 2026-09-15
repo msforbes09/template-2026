@@ -35,7 +35,7 @@ export default function BroadcastsPage({
     <div className="space-y-6">
       <PageHeader
         title="Broadcasts"
-        description="Announcements pushed into citizens' notification bells. Composing saves a draft; delivery starts only when you say so."
+        description="Announcements pushed into users' notification bells. Composing saves a draft; delivery starts only when you say so."
         action={
           <Can permission={PERMISSIONS.notificationsBroadcast}>
             <Button

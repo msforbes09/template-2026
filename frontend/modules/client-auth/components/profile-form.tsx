@@ -108,9 +108,8 @@ export function ProfileForm({
       company_name: profile.company_name ?? "",
       birth_date: profile.birth_date ?? "",
       gender: profile.gender === "male" || profile.gender === "female" ? profile.gender : "",
-      // Country picker is removed from the UI (citizens registering here are
-      // always Philippine-based) — always submit PH regardless of what's on
-      // the existing profile.
+      // Country picker is removed from the UI — always submit the default
+      // country regardless of what's on the existing profile.
       citizenship_code: DEFAULT_CITIZENSHIP.code,
       region_code: profile.address?.region?.code ?? "",
       province_code: profile.address?.province?.code ?? "",

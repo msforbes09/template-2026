@@ -3,7 +3,7 @@ import { requireClientSession } from "@/lib/auth/dal";
 import { logError } from "@/lib/log-error";
 import type { NotificationPage } from "@/types/notification";
 
-// The citizen's own notifications — GET user/notifications.
+// The user's own notifications — GET user/notifications.
 //
 // Never cached, and never tagged: this is per-account, changes on every
 // broadcast, and its meta carries the bell badge. A stale badge is worse than

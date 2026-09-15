@@ -16,7 +16,7 @@ export default function AdminFeatureFlagsPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">System controls</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Runtime switches for the citizen-facing portal. A change takes effect
+          Runtime switches for the user-facing portal. A change takes effect
           immediately — there is no deploy and no restart. Developer
           administrators only.
         </p>

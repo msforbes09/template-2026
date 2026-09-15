@@ -61,7 +61,7 @@ export async function logError(error: unknown, ctx: ErrorContext) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        text: `eGov API error: ${slackSafe(where)}`,
+        text: `${env.NEXT_PUBLIC_APP_NAME} error: ${slackSafe(where)}`,
         blocks: [
           {
             type: "section",
