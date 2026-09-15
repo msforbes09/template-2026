@@ -29,15 +29,13 @@ const AUDIENCE_BASE_PATH = {
 
 export type VerifiedIdentity = {
   // Every identity the backend recognises for this account, lowercased. The
-  // user audience keys its local user row on "the mobile number or email
-  // entered in the wizard's first step", so either may legitimately be the
-  // claimed username.
+  // user audience keys its local user row on the email entered in the
+  // wizard's first step.
   identifiers: string[];
 };
 
 type ProfileShape = {
   email?: string | null;
-  mobile_number?: string | null;
 };
 
 // Returns the verified identity, or null when the token is not accepted, the
@@ -67,7 +65,7 @@ export async function verifyAccessToken(
     const data = (body as { data?: ProfileShape } | null)?.data;
     if (!data || typeof data !== "object") return null;
 
-    const identifiers = [data.email, data.mobile_number]
+    const identifiers = [data.email]
       .filter((value): value is string => typeof value === "string" && value.length > 0)
       .map((value) => value.trim().toLowerCase());
 

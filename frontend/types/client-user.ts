@@ -28,9 +28,7 @@ export type ClientUserProfile = {
   // private broadcast channel key: `private-user.{uuid}`.
   uuid: string;
   email: string | null;
-  // Addable/verifiable via /add-contact + /verify-contact when null — a
-  // user always has exactly one of email/mobile_number set (whichever
-  // they registered with) and can add the other as a secondary contact.
+  // A plain contact field edited on the profile form — never verified.
   mobile_number: string | null;
   first_name: string | null;
   middle_name: string | null;

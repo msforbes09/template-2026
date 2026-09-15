@@ -16,7 +16,6 @@ import { FormRootError } from "@/components/ui/form-root-error";
 import { FormSubmitButton } from "@/components/ui/form-submit-button";
 import { OtpField } from "@/components/ui/otp-field";
 import { TurnstileField } from "@/components/ui/turnstile-field";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   loginSchema,
   twoFactorSchema,
@@ -29,7 +28,7 @@ import {
   type ClientAuthResult,
   type ClientTwoFactorResult,
 } from "@/modules/client-auth/lib/client-auth-client";
-import { maskEmail, maskMobileNumber } from "@/lib/mask-identifier";
+import { maskEmail } from "@/lib/mask-identifier";
 import { resendOtp } from "@/lib/otp-client";
 import { setClientDeviceToken, getClientDeviceToken } from "@/modules/client-auth/lib/session-cookie";
 import { writeClientSession } from "@/modules/client-auth/actions/session-actions";
@@ -41,9 +40,7 @@ type Step =
   | {
       name: "two_factor";
       authToken: string;
-      channel: "email" | "sms";
       email: string;
-      mobileNumber: string;
       resendToken: string;
       retryAfter: number;
       message: string;
@@ -55,9 +52,8 @@ export function ClientLoginForm() {
 
   const credentialsForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { channel: "email", email: "", mobile_number: "", password: "" },
+    defaultValues: { email: "", password: "" },
   });
-  const channel = credentialsForm.watch("channel");
   const otpForm = useForm<TwoFactorValues>({ resolver: zodResolver(twoFactorSchema) });
 
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -78,13 +74,10 @@ export function ClientLoginForm() {
     otpForm.reset();
   });
 
-  async function handleAuthResult(
-    result: ClientAuthResult,
-    identifier: { channel: "email" | "sms"; email: string; mobileNumber: string },
-  ) {
+  async function handleAuthResult(result: ClientAuthResult, email: string) {
     if (result.kind === "authenticated") {
       const written = await writeClientSession({
-        username: identifier.channel === "email" ? identifier.email : identifier.mobileNumber,
+        username: email,
         accessToken: result.token,
       });
       if (!written.ok) {
@@ -107,23 +100,18 @@ export function ClientLoginForm() {
       setStep({
         name: "two_factor",
         authToken: result.authToken,
-        channel: identifier.channel,
-        email: identifier.email,
-        mobileNumber: identifier.mobileNumber,
+        email,
         resendToken: result.resendToken,
         retryAfter: result.retryAfter,
-        // Built here, not taken from the API: the backend says "your email"
-        // whatever the channel. Masked and specific, matching the wording the
-        // registration step uses so the two screens read the same.
-        message:
-          identifier.channel === "email"
-            ? `We sent a 6-digit code to ${maskEmail(identifier.email)}.`
-            : `We sent a 6-digit code to ${maskMobileNumber(identifier.mobileNumber)}.`,
+        // Built here, not taken from the API: masked and specific, matching
+        // the wording the registration step uses so the two screens read the
+        // same.
+        message: `We sent a 6-digit code to ${maskEmail(email)}.`,
       });
       otpForm.reset();
       return;
     }
-    applyResultErrors(credentialsForm, result, ["email", "mobile_number", "password"]);
+    applyResultErrors(credentialsForm, result, ["email", "password"]);
   }
 
   async function submitCredentials(values: LoginValues) {
@@ -134,34 +122,25 @@ export function ClientLoginForm() {
     const captcha = captchaToken;
     turnstileRef.current?.reset();
     setCaptchaToken(null);
-    const email = values.channel === "email" ? values.email : undefined;
-    const mobileNumber = values.channel === "sms" ? `+63${values.mobile_number}` : undefined;
     const result = await authenticateClient({
-      channel: values.channel,
-      email,
-      mobile_number: mobileNumber,
+      email: values.email,
       password: values.password,
       captcha,
       deviceToken: getClientDeviceToken(),
     });
-    await handleAuthResult(result, {
-      channel: values.channel,
-      email: email ?? "",
-      mobileNumber: mobileNumber ?? "",
-    });
+    await handleAuthResult(result, values.email);
   }
 
   async function submitOtp(values: TwoFactorValues, captcha: string) {
     if (step.name !== "two_factor") return;
     const result: ClientTwoFactorResult = await verifyTwoFactorClient({
       authToken: step.authToken,
-      channel: step.channel,
       pin: values.pin,
       captcha,
     });
     if (result.kind === "authenticated") {
       const written = await writeClientSession({
-        username: step.channel === "email" ? step.email : step.mobileNumber,
+        username: step.email,
         accessToken: result.token,
       });
       if (!written.ok) {
@@ -217,23 +196,6 @@ export function ClientLoginForm() {
         className="space-y-5"
         noValidate
       >
-        <Tabs
-          value={channel}
-          onValueChange={(value) => {
-            credentialsForm.clearErrors();
-            credentialsForm.setValue("channel", value as "email" | "sms");
-          }}
-        >
-          <TabsList className="w-full">
-            <TabsTrigger value="email" className="flex-1">
-              Email
-            </TabsTrigger>
-            <TabsTrigger value="sms" className="flex-1">
-              Mobile number
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-        {channel === "email" ? (
           <AppFormField label="Email" isRequired error={credentialsForm.formState.errors.email?.message}>
             <Input
               type="email"
@@ -243,31 +205,6 @@ export function ClientLoginForm() {
               {...credentialsForm.register("email")}
             />
           </AppFormField>
-        ) : (
-          <AppFormField
-            label="Mobile number"
-            isRequired
-            error={credentialsForm.formState.errors.mobile_number?.message}
-          >
-            <div className="relative">
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center gap-1.5 text-sm text-muted-foreground"
-              >
-                <span className="text-base leading-none">🇵🇭</span>+63
-              </span>
-              <Input
-                type="tel"
-                inputMode="numeric"
-                autoComplete="tel-national"
-                placeholder="9171234567"
-                maxLength={10}
-                className="h-11 pl-16"
-                {...credentialsForm.register("mobile_number")}
-              />
-            </div>
-          </AppFormField>
-        )}
         <div>
           <AppFormField
             label="Password"

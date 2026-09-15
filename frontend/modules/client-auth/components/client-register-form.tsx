@@ -16,7 +16,6 @@ import { FormRootError } from "@/components/ui/form-root-error";
 import { FormSubmitButton } from "@/components/ui/form-submit-button";
 import { OtpField } from "@/components/ui/otp-field";
 import { TurnstileField } from "@/components/ui/turnstile-field";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Stepper } from "@/components/ui/stepper";
 import { REGISTRATION_STEPS } from "@/modules/client-auth/lib/registration-steps";
 import { registerSchema, type RegisterValues } from "@/modules/client-auth/schemas/register-schema";
@@ -29,7 +28,7 @@ import {
   verifyRegistrationClient,
   type VerifyRegistrationResult,
 } from "@/modules/client-auth/lib/client-auth-client";
-import { maskEmail, maskMobileNumber } from "@/lib/mask-identifier";
+import { maskEmail } from "@/lib/mask-identifier";
 import { resendOtp } from "@/lib/otp-client";
 import { writeClientSession } from "@/modules/client-auth/actions/session-actions";
 
@@ -39,9 +38,7 @@ type Step =
   | { name: "register" }
   | {
       name: "verify";
-      channel: "email" | "sms";
       email: string;
-      mobileNumber: string;
       resendToken: string;
       retryAfter: number;
       message: string;
@@ -53,15 +50,12 @@ export function ClientRegisterForm() {
   const registerForm = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      channel: "email",
       email: "",
-      mobile_number: "",
       company_name: "",
       first_name: "",
       last_name: "",
     },
   });
-  const channel = registerForm.watch("channel");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
   // Everything here is discarded when the route is navigated away from.
@@ -87,12 +81,8 @@ export function ClientRegisterForm() {
     const captcha = captchaToken;
     turnstileRef.current?.reset();
     setCaptchaToken(null);
-    const email = values.channel === "email" ? values.email : undefined;
-    const mobileNumber = values.channel === "sms" ? `+63${values.mobile_number}` : undefined;
     const result = await registerClient({
-      channel: values.channel,
-      email,
-      mobile_number: mobileNumber,
+      email: values.email,
       company_name: values.company_name,
       first_name: values.first_name,
       last_name: values.last_name,
@@ -101,18 +91,15 @@ export function ClientRegisterForm() {
     if (result.kind === "sent") {
       setStep({
         name: "verify",
-        channel: values.channel,
-        email: email ?? "",
-        mobileNumber: mobileNumber ?? "",
+        email: values.email,
         resendToken: result.resendToken,
         retryAfter: result.retryAfter,
-        message: `We sent a 6-digit code to ${email ? maskEmail(email) : maskMobileNumber(mobileNumber ?? "")}.`,
+        message: `We sent a 6-digit code to ${maskEmail(values.email)}.`,
       });
       return;
     }
     applyResultErrors(registerForm, result, [
       "email",
-      "mobile_number",
       "company_name",
       "first_name",
       "last_name",
@@ -124,9 +111,7 @@ export function ClientRegisterForm() {
       <Stepper steps={REGISTRATION_STEPS} current={step.name === "verify" ? "verify" : "account"} />
       {step.name === "verify" ? (
         <VerifyStep
-          channel={step.channel}
           email={step.email}
-          mobileNumber={step.mobileNumber}
           message={step.message}
           retryAfter={step.retryAfter}
           resendToken={step.resendToken}
@@ -146,23 +131,6 @@ export function ClientRegisterForm() {
             className="space-y-5"
             noValidate
           >
-            <Tabs
-              value={channel}
-              onValueChange={(value) => {
-                registerForm.clearErrors();
-                registerForm.setValue("channel", value as "email" | "sms");
-              }}
-            >
-              <TabsList className="w-full">
-                <TabsTrigger value="email" className="flex-1">
-                  Email
-                </TabsTrigger>
-                <TabsTrigger value="sms" className="flex-1">
-                  Mobile number
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            {channel === "email" ? (
               <AppFormField
                 label="Email"
                 isRequired
@@ -176,31 +144,6 @@ export function ClientRegisterForm() {
                   {...registerForm.register("email")}
                 />
               </AppFormField>
-            ) : (
-              <AppFormField
-                label="Mobile number"
-                isRequired
-                error={registerForm.formState.errors.mobile_number?.message}
-              >
-                <div className="relative">
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center gap-1.5 text-sm text-muted-foreground"
-                  >
-                    <span className="text-base leading-none">🇵🇭</span>+63
-                  </span>
-                  <Input
-                    type="tel"
-                    inputMode="numeric"
-                    autoComplete="tel-national"
-                    placeholder="9171234567"
-                    maxLength={10}
-                    className="h-11 pl-16"
-                    {...registerForm.register("mobile_number")}
-                  />
-                </div>
-              </AppFormField>
-            )}
             <AppFormField
               label="Company name"
               isRequired
@@ -254,17 +197,13 @@ export function ClientRegisterForm() {
 }
 
 function VerifyStep({
-  channel,
   email,
-  mobileNumber,
   message,
   retryAfter,
   resendToken: initialResendToken,
   onBack,
 }: {
-  channel: "email" | "sms";
   email: string;
-  mobileNumber: string;
   message: string;
   retryAfter: number;
   resendToken: string;
@@ -297,14 +236,12 @@ function VerifyStep({
 
   async function handleSubmit(values: VerifyRegistrationValues) {
     const result: VerifyRegistrationResult = await verifyRegistrationClient({
-      channel,
-      email: channel === "email" ? email : undefined,
-      mobile_number: channel === "sms" ? mobileNumber : undefined,
+      email,
       ...values,
     });
     if (result.kind === "authenticated") {
       const written = await writeClientSession({
-        username: channel === "email" ? email : mobileNumber,
+        username: email,
         accessToken: result.token,
       });
       if (!written.ok) {
@@ -316,12 +253,7 @@ function VerifyStep({
       // everything here survives into a later visit to /register — the wizard
       // step and, until now, the name, company and email typed into step one.
       onBack();
-      // The ?registered=1 marker survives the entire draft -> for_assessment
-      // journey unchanged (CompleteProfileWizard/SubmitForAssessmentStep
-      // never navigate away from /dashboard, just router.refresh() in
-      // place) — it's what lets DashboardGuard show the one-time missing-
-      // contact nudge on the first real (non-wizard) dashboard render.
-      router.push("/dashboard?registered=1");
+      router.push("/dashboard");
       router.refresh();
       return;
     }

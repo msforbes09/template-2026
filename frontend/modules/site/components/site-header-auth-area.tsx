@@ -34,8 +34,7 @@ export async function SiteHeaderAuthArea({
   }
 
   // The change-password action needs an email to rewrite the session cookie
-  // with the token it mints, and an account that registered by mobile has
-  // none — the same condition the profile page gates its own form on.
+  // with the token it mints; fail closed if the profile somehow lacks one.
   const canChangePassword = Boolean(profile.email);
 
   if (variant === "stacked") {

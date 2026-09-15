@@ -80,9 +80,7 @@ async function parseBody(
 const NETWORK_ERROR_MESSAGE = "Couldn't reach the server. Check your connection and try again.";
 
 export async function registerClient(input: {
-  channel: "email" | "sms";
-  email?: string;
-  mobile_number?: string;
+  email: string;
   company_name: string;
   first_name: string;
   last_name: string;
@@ -94,9 +92,7 @@ export async function registerClient(input: {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
-        channel: input.channel,
-        email: input.channel === "email" ? input.email : undefined,
-        mobile_number: input.channel === "sms" ? input.mobile_number : undefined,
+        email: input.email,
         company_name: input.company_name,
         first_name: input.first_name,
         last_name: input.last_name,
@@ -133,9 +129,7 @@ export async function registerClient(input: {
 }
 
 export async function verifyRegistrationClient(input: {
-  channel: "email" | "sms";
-  email?: string;
-  mobile_number?: string;
+  email: string;
   otp: string;
   password: string;
   password_confirmation: string;
@@ -146,9 +140,7 @@ export async function verifyRegistrationClient(input: {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
-        channel: input.channel,
-        email: input.channel === "email" ? input.email : undefined,
-        mobile_number: input.channel === "sms" ? input.mobile_number : undefined,
+        email: input.email,
         otp: input.otp,
         password: input.password,
         password_confirmation: input.password_confirmation,
@@ -190,9 +182,7 @@ export async function verifyRegistrationClient(input: {
 }
 
 export async function authenticateClient(input: {
-  channel: "email" | "sms";
-  email?: string;
-  mobile_number?: string;
+  email: string;
   password: string;
   captcha: string;
   deviceToken?: string;
@@ -203,9 +193,7 @@ export async function authenticateClient(input: {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
-        channel: input.channel,
-        email: input.channel === "email" ? input.email : undefined,
-        mobile_number: input.channel === "sms" ? input.mobile_number : undefined,
+        email: input.email,
         password: input.password,
         device_token: input.deviceToken,
         captcha: input.captcha,
@@ -221,12 +209,9 @@ export async function authenticateClient(input: {
   }
   if (res.status === 428) {
     const meta = body.meta ?? {};
-    // `body.message` is deliberately DROPPED. The backend's
-    // TwoFactorRequiredException hardcodes "A verification code has been sent
-    // to your email." for every channel, so passing it through told an SMS
-    // user to check an inbox they may not even have. The caller knows the
-    // channel and the identifier it just submitted, so it writes the sentence
-    // itself — same as the registration step already does.
+    // `body.message` is deliberately DROPPED: the caller knows the email it
+    // just submitted and writes a masked, specific sentence itself — same as
+    // the registration step already does.
     return {
       kind: "two_factor_required",
       authToken: String(meta.auth_token ?? ""),
@@ -252,7 +237,6 @@ export async function authenticateClient(input: {
 
 export async function verifyTwoFactorClient(input: {
   authToken: string;
-  channel: "email" | "sms";
   pin: string;
   captcha: string;
 }): Promise<ClientTwoFactorResult> {
@@ -263,7 +247,6 @@ export async function verifyTwoFactorClient(input: {
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
         auth_token: input.authToken,
-        channel: input.channel,
         pin: input.pin,
         captcha: input.captcha,
       }),
@@ -288,9 +271,7 @@ export async function verifyTwoFactorClient(input: {
 }
 
 export async function forgotPasswordClient(input: {
-  channel: "email" | "sms";
-  email?: string;
-  mobile_number?: string;
+  email: string;
   captcha: string;
 }): Promise<ForgotPasswordResult> {
   let res: Response;
@@ -299,9 +280,7 @@ export async function forgotPasswordClient(input: {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
-        channel: input.channel,
-        email: input.channel === "email" ? input.email : undefined,
-        mobile_number: input.channel === "sms" ? input.mobile_number : undefined,
+        email: input.email,
         captcha: input.captcha,
       }),
     });
@@ -335,9 +314,7 @@ export async function forgotPasswordClient(input: {
 }
 
 export async function resetPasswordClient(input: {
-  channel: "email" | "sms";
-  email?: string;
-  mobile_number?: string;
+  email: string;
   otp: string;
   new_password: string;
   new_password_confirmation: string;
@@ -349,9 +326,7 @@ export async function resetPasswordClient(input: {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
-        channel: input.channel,
-        email: input.channel === "email" ? input.email : undefined,
-        mobile_number: input.channel === "sms" ? input.mobile_number : undefined,
+        email: input.email,
         otp: input.otp,
         new_password: input.new_password,
         new_password_confirmation: input.new_password_confirmation,

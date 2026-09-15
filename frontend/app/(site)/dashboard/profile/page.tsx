@@ -7,7 +7,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { requireClientSession } from "@/lib/auth/dal";
 import { formatDate } from "@/lib/format-date";
 import { getClientProfile } from "@/modules/site/lib/get-client-profile";
-import { AddContactDialog } from "@/modules/client-auth/components/add-contact-dialog";
 import { ProfileEditLink } from "@/modules/client-auth/components/profile-edit-link";
 import { DeleteAccountCard } from "@/modules/client-auth/components/delete-account-card";
 import type { ClientUserAddress } from "@/types/client-user";
@@ -50,11 +49,6 @@ async function ProfileGuard() {
   }
 
   const name = profile.display_name;
-  // Deleting an account requires re-entering its password. Changing a
-  // password needs an email to rewrite the session cookie with the token it
-  // mints; an account registered by mobile has none. Same condition the
-  // header uses to decide whether to offer "Change password".
-  const hasPassword = Boolean(profile.email);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -85,17 +79,11 @@ async function ProfileGuard() {
           <dl className="grid grid-cols-1 gap-x-4 gap-y-3 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-muted-foreground">Email</dt>
-              <dd className="mt-1 flex flex-wrap items-center gap-2 text-foreground">
-                <span>{profile.email ?? "Not set"}</span>
-                {!profile.email && <AddContactDialog channel="email" />}
-              </dd>
+              <dd className="mt-1 text-foreground">{profile.email ?? "—"}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Mobile number</dt>
-              <dd className="mt-1 flex flex-wrap items-center gap-2 text-foreground">
-                <span>{profile.mobile_number ?? "Not set"}</span>
-                {!profile.mobile_number && <AddContactDialog channel="sms" />}
-              </dd>
+              <dd className="mt-1 text-foreground">{profile.mobile_number ?? "—"}</dd>
             </div>
           </dl>
         </CardContent>
@@ -160,7 +148,7 @@ async function ProfileGuard() {
 
       {/* Last on the page on purpose — a destructive action shouldn't sit above
           the things people actually came here to read. */}
-      {hasPassword && <DeleteAccountCard />}
+      <DeleteAccountCard />
     </div>
   );
 }

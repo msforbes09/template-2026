@@ -32,11 +32,6 @@ import {
 // the account password typed into it. The password is not a formality — it is
 // the re-authentication the backend requires, so there is no version of this
 // flow where a single stray click destroys an account.
-//
-// Only rendered for accounts that HAVE a password (see the profile page): an
-// mobile-only account has none, so it could never satisfy the confirmation and
-// would meet a 422 it can do nothing about. A deletion path for those is a
-// planned backend follow-up.
 
 const FIELDS = ["password"] as const;
 
@@ -109,7 +104,7 @@ export function DeleteAccountCard() {
                 is what makes "deleted" honest. */}
             <div className="space-y-2 text-sm text-muted-foreground">
               <p>
-                You can register again later with the same email or mobile number,
+                You can register again later with the same email,
                 but it creates a <strong className="font-medium">new</strong>{" "}
                 account — nothing from this one carries over.
               </p>

@@ -136,13 +136,6 @@ export function ViewUserModal({ user: initialUser }: { user: AdminUser }) {
             <Field label="Birth date">{user.birth_date ?? "—"}</Field>
             <Field label="Gender">{user.gender ?? "—"}</Field>
             <Field label="Citizenship">{user.citizenship?.name ?? "—"}</Field>
-            <Field label="Authentication">
-              {user.authentication_channel === "sms"
-                ? "SMS"
-                : user.authentication_channel === "email"
-                  ? "Email"
-                  : "—"}
-            </Field>
             <Field label="Address" wide>
               {formatFullAddress(user)}
             </Field>

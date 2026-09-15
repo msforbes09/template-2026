@@ -47,7 +47,7 @@ npm run build        # production build; prebuild runs lint + tests
 
 ## Modules
 
-- **client-auth** — registration (email or SMS OTP), login with 2FA and trusted device, forgot/reset/change password, profile (`draft` → `completed` with edit cooldowns), contacts, PSGC address combobox, delete account.
+- **client-auth** — registration (email OTP), login with email-OTP 2FA and trusted device, forgot/reset/change password, profile (`draft` → `completed` with edit cooldowns; `mobile_number` is a plain contact field), PSGC address combobox, delete account.
 - **site** — the public shell (header, footer, account menu) and the user dashboard cards.
 - **landing** — one placeholder hero; replace it per project.
 - **content** — the CMS blocks behind `/faqs`, `/privacy-policy`, `/terms-of-service` and the admin Contents CRUD.

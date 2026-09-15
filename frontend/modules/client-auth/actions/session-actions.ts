@@ -14,9 +14,8 @@ function normalizeSameSite(value: string | undefined) {
 
 // Called once the client holds the backend's bearer token — this only writes the local "client" Better Auth session, mirroring
 // modules/admin/actions/session-actions.ts's writeAdminSession. `username` is
-// the mobile number or email entered in the wizard's first step, used as the
-// session store's lookup key in place of a real email (mobile-only
-// accounts don't have one).
+// the email entered in the wizard's first step, used as the session store's
+// lookup key.
 export async function writeClientSession(input: {
   username: string;
   accessToken: string;

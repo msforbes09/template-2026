@@ -25,7 +25,7 @@ export default function RegisterPage() {
   return (
     <AuthCard
       title="Create your account"
-      subtitle="Register with your email or mobile number to get started."
+      subtitle="Register with your email to get started."
       footer={
         <>
           Already have an account?{" "}
