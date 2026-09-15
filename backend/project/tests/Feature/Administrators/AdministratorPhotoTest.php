@@ -11,7 +11,7 @@ use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
- * Tests that an administrator's photo_uuid resolves to a signed CloudFront URL.
+ * Tests that an administrator's photo_uuid resolves to a presigned URL on the private R2 disk.
  */
 class AdministratorPhotoTest extends TestCase
 {
