@@ -31,6 +31,5 @@ class R2DisksConfigTest extends TestCase
     {
         $this->assertSame(10800, config('filesystems.disks.r2.private_url_ttl'));
         $this->assertArrayHasKey('url', config('filesystems.disks.r2-public'));
-        $this->assertArrayNotHasKey('s3', config('filesystems.disks'));
     }
 }

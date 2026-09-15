@@ -62,7 +62,6 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->forceDebugOffInProduction();
         $this->forceDocsOffInProduction();
-        $this->removeUnusedFrameworkDefaultDisk();
         // Read from config, not env(): once `config:cache` runs (production boot via
         // entry-point.sh's `artisan optimize`) env() returns null, which would make
         // this guard throw on every boot even with the key set.
@@ -219,21 +218,6 @@ class AppServiceProvider extends ServiceProvider
         config(['app.debug' => false]);
 
         Log::critical('APP_DEBUG was enabled in production and has been forced off. Fix the environment file — a debug error page discloses configuration and secrets.');
-    }
-
-    /**
-     * `config/filesystems.php`'s `disks` array is one of the few keys Laravel's
-     * `LoadConfiguration` bootstrapper merges rather than replaces (see
-     * `mergeableOptions()`), so the framework's own default `s3` disk (an
-     * AWS-shaped stub this app no longer uses — file storage moved to
-     * Cloudflare R2's `r2`/`r2-public` disks) survives even though this app's
-     * config file never defines it. Drop it so nothing accidentally resolves it.
-     */
-    private function removeUnusedFrameworkDefaultDisk(): void
-    {
-        $disks = config('filesystems.disks');
-        unset($disks['s3']);
-        config(['filesystems.disks' => $disks]);
     }
 
     /**
