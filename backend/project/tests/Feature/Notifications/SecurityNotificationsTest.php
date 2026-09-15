@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Notifications;
 
-use App\Enums\AuthChannelEnum;
 use App\Models\Users\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -29,17 +28,16 @@ class SecurityNotificationsTest extends TestCase
     }
 
     /**
-     * Account recovery → `security.account_recovered` carrying the channel.
+     * Account recovery → `security.account_recovered`.
      */
     public function test_account_recovery_notifies(): void
     {
         $user = User::factory()->create(['email_verified_at' => now()]);
         $user->delete();
 
-        $user->recoverAccount('N3w-secret-password!', AuthChannelEnum::EMAIL);
+        $user->recoverAccount('N3w-secret-password!');
 
         $row = $user->notifications()->where('type', 'security.account_recovered')->first();
         $this->assertNotNull($row);
-        $this->assertSame('email', $row->data['channel']);
     }
 }

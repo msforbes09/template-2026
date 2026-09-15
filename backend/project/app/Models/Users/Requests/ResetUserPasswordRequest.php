@@ -2,8 +2,6 @@
 
 namespace App\Models\Users\Requests;
 
-use App\Enums\AuthChannelEnum;
-use App\Models\Users\Requests\Concerns\ResolvesChannelInput;
 use App\Rules\Turnstile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -14,8 +12,6 @@ use Illuminate\Validation\Rules\Password;
  */
 class ResetUserPasswordRequest extends FormRequest
 {
-    use ResolvesChannelInput;
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -32,9 +28,7 @@ class ResetUserPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'channel' => ['nullable', Rule::enum(AuthChannelEnum::class)],
-            'email' => ['exclude_if:channel,sms', 'required', 'string', 'email'],
-            'mobile_number' => ['exclude_unless:channel,sms', 'required', 'string', 'regex:/^\+639\d{9}$/'],
+            'email' => ['required', 'string', 'email'],
             'otp' => ['required', 'string'],
             'new_password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
             'captcha' => [Rule::requiredIf((bool) config('services.turnstile.enabled')), new Turnstile],

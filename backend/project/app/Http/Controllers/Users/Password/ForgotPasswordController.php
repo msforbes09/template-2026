@@ -20,13 +20,12 @@ class ForgotPasswordController extends Controller
     #[OA\Post(
         path: '/forgot-password',
         summary: 'Request a password reset code',
-        description: 'Sends a reset code (by email or SMS per channel) if the identifier has a password-based account, or a "no account" notice otherwise. The response is identical either way (no account-existence disclosure). Resend the code via POST /common/otp/resend.',
+        description: 'Emails a reset code if the address has a password-based account, or a "no account" notice otherwise. The response is identical either way (no account-existence disclosure). Resend the code via POST /common/otp/resend.',
         tags: ['Password'],
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
+            required: ['email'],
             properties: [
-                new OA\Property(property: 'channel', type: 'string', enum: ['email', 'sms'], description: 'Reset channel (default email). With sms, send mobile_number instead of email.', example: 'email'),
-                new OA\Property(property: 'email', type: 'string', format: 'email', description: 'Required when channel is email.', example: 'user@example.com'),
-                new OA\Property(property: 'mobile_number', type: 'string', description: 'Required when channel is sms. Format +639XXXXXXXXX.', example: '+639171234567'),
+                new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@example.com'),
                 new OA\Property(property: 'captcha', type: 'string', example: 'cf-turnstile-response-token'),
             ],
         )),
@@ -43,7 +42,7 @@ class ForgotPasswordController extends Controller
     )]
     public function __invoke(ForgotPasswordRequest $request): JsonResponse
     {
-        $result = User::sendPasswordResetOtp($request->channelIdentifier(), $request->channel());
+        $result = User::sendPasswordResetOtp($request->validated('email'));
 
         return response()->json([
             'resend_token' => $result->resendToken,

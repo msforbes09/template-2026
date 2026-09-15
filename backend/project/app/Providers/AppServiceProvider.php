@@ -24,8 +24,6 @@ use App\Models\Notifications\Notification;
 use App\Models\Users\User;
 use App\Notifications\Channels\DatabaseChannel;
 use App\Services\Security\PiiKeyGuard;
-use App\Services\Sms\LogSmsSender;
-use App\Services\Sms\SmsSender;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
@@ -46,9 +44,6 @@ class AppServiceProvider extends ServiceProvider
     {
         // The notifications table auto-increments; drop the framework's stamped uuid.
         $this->app->bind(BaseDatabaseChannel::class, DatabaseChannel::class);
-
-        // Outbound SMS: the template ships a log-only sender; bind a real provider here.
-        $this->app->bind(SmsSender::class, LogSmsSender::class);
 
         // Resolve the raw OpenSearch client from the default connection, so the
         // future read phase (raw aggregation/list DSL) can inject OpenSearch\Client.
@@ -119,11 +114,11 @@ class AppServiceProvider extends ServiceProvider
         // them out. Email-keying caps OTP requests per inbox; Turnstile + OtpService's
         // own cooldown/lockout cover bulk cross-email abuse.
         RateLimiter::for('register', fn (Request $request) => Limit::perMinute(5)
-            ->by('register:'.$this->channelKey($request)));
+            ->by('register:'.$this->emailKey($request)));
 
         // User login by email (crowds share a NAT'd IP; Turnstile carries bulk abuse).
         RateLimiter::for('user-authenticate', fn (Request $request) => Limit::perMinute(5)
-            ->by('user-authenticate:'.$this->channelKey($request)));
+            ->by('user-authenticate:'.$this->emailKey($request)));
 
         // User 2FA completion, keyed per handshake handle. The OTP's own lockout is the
         // primary protection; this is a light backstop that avoids the shared-IP problem.
@@ -145,21 +140,18 @@ class AppServiceProvider extends ServiceProvider
         // Forgot / reset password, email-keyed (crowds share a NAT'd IP); the OTP
         // cooldown/lockout is the second layer, Turnstile the third.
         RateLimiter::for('user-forgot-password', fn (Request $request) => Limit::perMinute(5)
-            ->by('user-forgot-password:'.$this->channelKey($request)));
+            ->by('user-forgot-password:'.$this->emailKey($request)));
         RateLimiter::for('user-reset-password', fn (Request $request) => Limit::perMinute(5)
-            ->by('user-reset-password:'.$this->channelKey($request)));
+            ->by('user-reset-password:'.$this->emailKey($request)));
 
         // Registration OTP verification — the anti-enumeration flow. Keyed on the
-        // channel identifier (email OR mobile, so SMS callers don't share one
-        // bucket), falling back to IP for a malformed body; caps how fast the
+        // email, falling back to IP for a malformed body; caps how fast the
         // now-uniform failure envelope can be probed at scale.
         RateLimiter::for('verify-registration', fn (Request $request) => Limit::perMinute(10)
-            ->by('verify-registration:'.hash('sha256', Str::lower(trim(
-                (string) ($request->input('email') ?? $request->input('mobile_number') ?? $request->ip())
-            )))));
+            ->by('verify-registration:'.$this->emailKey($request)));
 
         // Shared OTP resend — keyed on the resend_token (per OTP session), so an
-        // attacker with many tokens still can't flood email/SMS from one IP unchecked.
+        // attacker with many tokens still can't flood email from one IP unchecked.
         RateLimiter::for('otp-resend', fn (Request $request) => Limit::perMinute(5)
             ->by('otp-resend:'.hash('sha256', (string) $request->input('resend_token', $request->ip()))));
 
@@ -175,26 +167,19 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(20)->by('upload-file:'.$key);
         });
-
-        // Authenticated add / verify a contact channel, capped per account.
-        RateLimiter::for('user-add-contact', fn (Request $request) => Limit::perMinute(5)
-            ->by('user-add-contact:'.(string) ($request->user('users')?->getKey() ?? $request->ip())));
-        RateLimiter::for('user-verify-contact', fn (Request $request) => Limit::perMinute(10)
-            ->by('user-verify-contact:'.(string) ($request->user('users')?->getKey() ?? $request->ip())));
     }
 
     /**
-     * A per-account rate-limiter key for the channel-aware auth endpoints: the
-     * submitted email, else the mobile number (SMS channel), else the caller IP —
-     * so SMS-channel callers each get their own bucket instead of all sharing the
-     * empty-email bucket (F11).
+     * A per-account rate-limiter key for the email-keyed auth endpoints: the
+     * normalised submitted email, else the caller IP for a malformed body — so
+     * callers with no email never all share one empty bucket.
      */
-    private function channelKey(Request $request): string
+    private function emailKey(Request $request): string
     {
-        $identifier = (string) ($request->input('email') ?: $request->input('mobile_number') ?: '');
+        $email = (string) ($request->input('email') ?: '');
 
-        return $identifier !== ''
-            ? hash('sha256', Str::lower(trim($identifier)))
+        return $email !== ''
+            ? hash('sha256', Str::lower(trim($email)))
             : 'ip:'.$request->ip();
     }
 

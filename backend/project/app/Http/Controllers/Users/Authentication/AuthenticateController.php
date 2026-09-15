@@ -20,14 +20,12 @@ class AuthenticateController extends Controller
     #[OA\Post(
         path: '/authenticate',
         summary: 'Authenticate a user (email + password)',
-        description: 'Verifies credentials (email or mobile number + password). With 2FA disabled or a trusted device, returns a bearer token; otherwise sends an OTP (by email or SMS per channel) and responds 428 with a handshake handle.',
+        description: 'Verifies credentials (email + password). With 2FA disabled or a trusted device, returns a bearer token; otherwise emails an OTP and responds 428 with a handshake handle.',
         tags: ['Authentication'],
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
-            required: ['password'],
+            required: ['email', 'password'],
             properties: [
-                new OA\Property(property: 'channel', type: 'string', enum: ['email', 'sms'], description: 'Login channel (default email). With sms, send mobile_number instead of email.', example: 'email'),
-                new OA\Property(property: 'email', type: 'string', format: 'email', description: 'Required when channel is email.', example: 'user@example.com'),
-                new OA\Property(property: 'mobile_number', type: 'string', description: 'Required when channel is sms. Format +639XXXXXXXXX.', example: '+639171234567'),
+                new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@example.com'),
                 new OA\Property(property: 'password', type: 'string', format: 'password', example: 'Secret@123'),
                 new OA\Property(property: 'device_token', type: 'string', nullable: true, description: 'Trusted-device token to skip 2FA within the trust window', example: 'kD9xPfa2Qz7bVn4mLtR8sYcE1wHgUj60'),
                 new OA\Property(property: 'captcha', type: 'string', description: 'Cloudflare Turnstile token (required when enabled)', example: '0.abc-turnstile'),

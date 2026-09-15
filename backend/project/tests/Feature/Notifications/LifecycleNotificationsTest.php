@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Notifications;
 
-use App\Enums\AuthChannelEnum;
 use App\Enums\UserStatusEnum;
 use App\Mail\Users\UserRegistrationOtpMail;
 use App\Models\Users\User;
@@ -26,7 +25,7 @@ class LifecycleNotificationsTest extends TestCase
     {
         $user = User::factory()->create(['last_login_at' => null]);
 
-        $user->recordLogin(AuthChannelEnum::EMAIL);
+        $user->recordLogin();
 
         $this->assertNotNull($user->notifications()->where('type', 'welcome')->first());
         $this->assertNotNull($user->fresh()->last_login_at);
@@ -83,7 +82,7 @@ class LifecycleNotificationsTest extends TestCase
         config(['notifications.welcome_back_days' => 30]);
         $user = User::factory()->create(['last_login_at' => now()->subDays(45)]);
 
-        $user->recordLogin(AuthChannelEnum::EMAIL);
+        $user->recordLogin();
 
         $row = $user->notifications()->where('type', 'welcome.back')->first();
         $this->assertNotNull($row);
@@ -98,7 +97,7 @@ class LifecycleNotificationsTest extends TestCase
         config(['notifications.welcome_back_days' => 30]);
         $user = User::factory()->create(['last_login_at' => now()->subDays(3)]);
 
-        $user->recordLogin(AuthChannelEnum::EMAIL);
+        $user->recordLogin();
 
         $this->assertSame(0, $user->notifications()->count());
     }

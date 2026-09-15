@@ -78,22 +78,6 @@
         "max_memory_restart": "1G"
     },
     {
-        "name": "worker-sms",
-        "interpreter": "php",
-        "script": "artisan",
-        "args": [
-            "queue:work",
-            "--queue=sms",
-            "--tries=3",
-            "--timeout=0"
-        ],
-        "instances": 1,
-        "exec_mode": "fork",
-        "autostart": true,
-        "watch": false,
-        "max_memory_restart": "1G"
-    },
-    {
         "name": "worker-search",
         "interpreter": "php",
         "script": "artisan",

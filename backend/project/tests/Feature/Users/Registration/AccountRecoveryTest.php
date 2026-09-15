@@ -131,31 +131,6 @@ class AccountRecoveryTest extends TestCase
     }
 
     /**
-     * Recovery requires the presented channel to be the one verified on the
-     * account: a recycled mobile number cannot recover an email-verified account
-     * whose mobile was never verified. (F2)
-     */
-    public function test_recovery_requires_the_presented_channel_to_be_verified(): void
-    {
-        $mobile = '+639171234567';
-        $user = $this->deletedAccount('owner@example.com', [
-            'mobile_number' => $mobile,
-            'mobile_number_verified_at' => null, // set but never verified
-        ]);
-
-        // SMS-channel recovery with the recycled mobile must NOT restore the row —
-        // it issues a fresh registration OTP instead.
-        Mail::fake();
-        $result = User::startRegistration([
-            'channel' => 'sms', 'mobile_number' => $mobile,
-            'first_name' => 'New', 'last_name' => 'Owner', 'company_name' => 'Acme',
-        ]);
-
-        $this->assertSame('user_registration_sms', $result->type);
-        $this->assertNotNull($user->fresh()->deleted_at); // still trashed, not recovered
-    }
-
-    /**
      * A trashed non-website account is NOT recovered — the website flow issues a
      * normal registration OTP and creates a fresh website account.
      */

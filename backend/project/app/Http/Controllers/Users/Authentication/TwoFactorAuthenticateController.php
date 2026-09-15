@@ -25,7 +25,6 @@ class TwoFactorAuthenticateController extends Controller
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
             required: ['auth_token', 'pin'],
             properties: [
-                new OA\Property(property: 'channel', type: 'string', enum: ['email', 'sms'], description: 'Must match the authenticate step (default email).', example: 'email'),
                 new OA\Property(property: 'auth_token', type: 'string', example: 'Zx7pQa2Kd9bVn4mLtR8sYcE1wHgUj60F'),
                 new OA\Property(property: 'pin', type: 'string', example: '123456'),
                 new OA\Property(property: 'captcha', type: 'string', description: 'Cloudflare Turnstile token (required when enabled)', example: '0.abc-turnstile'),
@@ -56,7 +55,6 @@ class TwoFactorAuthenticateController extends Controller
             User::completeTwoFactor(
                 $request->validated('auth_token'),
                 $request->validated('pin'),
-                $request->channel(),
             ),
         );
     }

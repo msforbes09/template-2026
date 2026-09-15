@@ -82,7 +82,7 @@ class AuthenticateTest extends TestCase
             $this->assertArrayHasKey('resend_token', $e->getMeta());
         }
 
-        $this->assertDatabaseHas('otps', ['type' => 'user_2fa_email', 'identifier' => 'user@example.com']);
+        $this->assertDatabaseHas('otps', ['type' => 'user_2fa', 'identifier' => 'user@example.com']);
         $this->assertNotNull(User::first()->auth_token);
         $this->assertNotNull(User::first()->auth_token_expires_at);
         Mail::assertSent(User2faOtpMail::class);

@@ -2,7 +2,6 @@
 
 namespace App\Models\Users\Concerns;
 
-use App\Enums\AuthChannelEnum;
 use App\Enums\AuthEventEnum;
 use App\Events\Otp\OtpIssued;
 use App\Exceptions\InactiveAccountException;
@@ -37,38 +36,36 @@ trait TwoFactorAuthenticates
      */
     public static function attemptTwoFactor(array $credentials, ?string $deviceToken = null): string
     {
-        $channel = AuthChannelEnum::from($credentials['channel'] ?? AuthChannelEnum::EMAIL->value);
-        $user = static::verifyPasswordCredentials($credentials, $channel);
+        $user = static::verifyPasswordCredentials($credentials);
 
         if (! static::twoFactorEnabled() || $user->hasTrustedDevice($deviceToken)) {
-            $user->recordLogin($channel);
+            $user->recordLogin();
 
             return $user->authenticate();
         }
 
-        $user->startTwoFactor($channel);
+        $user->startTwoFactor();
     }
 
     /**
-     * Verify identifier + password against the blind index. Rejects unknown
-     * identifiers, SSO-only (null-password) accounts, and wrong passwords
-     * identically. The channel selects email vs mobile-number lookup.
+     * Verify email + password against the blind index. Rejects unknown emails,
+     * SSO-only (null-password) accounts, and wrong passwords identically.
      *
      * @param  array<string, mixed>  $credentials
      */
-    protected static function verifyPasswordCredentials(array $credentials, AuthChannelEnum $channel = AuthChannelEnum::EMAIL): static
+    protected static function verifyPasswordCredentials(array $credentials): static
     {
-        $identifier = static::channelIdentifier($channel, $credentials);
-        $user = static::whereHashed($channel->identifierField(), $identifier)->first();
+        $email = static::normalizeEmail($credentials['email'] ?? null);
+        $user = static::whereHashed('email', $email)->first();
 
         if (! $user || $user->password === null || ! Hash::check($credentials['password'] ?? '', $user->password)) {
-            static::recordAuthEvent(AuthEventEnum::INVALID_CREDENTIALS, $identifier, $user);
+            static::recordAuthEvent(AuthEventEnum::INVALID_CREDENTIALS, $email, $user);
 
             throw new InvalidCredentialsException;
         }
 
         if (! $user->is_active) {
-            static::recordAuthEvent(AuthEventEnum::ACCOUNT_INACTIVE, $identifier, $user);
+            static::recordAuthEvent(AuthEventEnum::ACCOUNT_INACTIVE, $email, $user);
 
             throw new InactiveAccountException;
         }
@@ -79,7 +76,7 @@ trait TwoFactorAuthenticates
     /**
      * Issue an OTP, store the expiring pending-2FA handle, and halt with a 428.
      */
-    protected function startTwoFactor(AuthChannelEnum $channel = AuthChannelEnum::EMAIL): never
+    protected function startTwoFactor(): never
     {
         $authToken = Str::random(64);
 
@@ -88,9 +85,8 @@ trait TwoFactorAuthenticates
             'auth_token_expires_at' => now()->addSeconds((int) config('auth.users.two_factor.auth_token_ttl', 2100)),
         ]);
 
-        $identifier = $this->{$channel->identifierField()};
         // The OTP belongs to this user (attributes its delivery log to them).
-        $otp = app(OtpService::class)->generate(static::channelOtpType(static::TWO_FACTOR_OTP_TYPE, $channel), $identifier, $this);
+        $otp = app(OtpService::class)->generate(static::TWO_FACTOR_OTP_TYPE, $this->email, $this);
         OtpIssued::dispatch($otp);
 
         throw new TwoFactorRequiredException($authToken, $otp->resendToken, $otp->retryAfter);
@@ -101,7 +97,7 @@ trait TwoFactorAuthenticates
      *
      * @return array{token: string, device_token: string}
      */
-    public static function completeTwoFactor(string $authToken, string $pin, AuthChannelEnum $channel = AuthChannelEnum::EMAIL): array
+    public static function completeTwoFactor(string $authToken, string $pin): array
     {
         $user = static::query()->where('auth_token', hash('sha256', $authToken))->first();
 
@@ -116,16 +112,14 @@ trait TwoFactorAuthenticates
             throw new InactiveAccountException;
         }
 
-        $identifier = $user->{$channel->identifierField()};
-
         try {
-            app(OtpService::class)->verify(static::channelOtpType(static::TWO_FACTOR_OTP_TYPE, $channel), $identifier, $pin);
+            app(OtpService::class)->verify(static::TWO_FACTOR_OTP_TYPE, $user->email, $pin);
         } catch (OtpLockedException $e) {
-            static::recordAuthEvent(AuthEventEnum::OTP_LOCKED, $identifier, $user);
+            static::recordAuthEvent(AuthEventEnum::OTP_LOCKED, $user->email, $user);
 
             throw $e;
         } catch (InvalidOtpException $e) {
-            static::recordAuthEvent(AuthEventEnum::INVALID_OTP, $identifier, $user);
+            static::recordAuthEvent(AuthEventEnum::INVALID_OTP, $user->email, $user);
 
             throw $e;
         }
@@ -134,7 +128,7 @@ trait TwoFactorAuthenticates
         $user->addTrustedDevice($deviceToken);
 
         $user->update(['auth_token' => null, 'auth_token_expires_at' => null]);
-        $user->recordLogin($channel);
+        $user->recordLogin();
 
         return ['token' => $user->authenticate(), 'device_token' => $deviceToken];
     }
@@ -201,11 +195,11 @@ trait TwoFactorAuthenticates
      * config('notifications.welcome_back_days'). Called only from the real
      * login paths — never from internal token re-issues (password change).
      */
-    public function recordLogin(AuthChannelEnum $channel): void
+    public function recordLogin(): void
     {
         $previous = $this->last_login_at;
 
-        $this->update(['last_login_at' => now(), 'authentication_channel' => $channel->value]);
+        $this->update(['last_login_at' => now()]);
 
         if ($previous === null) {
             $this->notify(new WelcomeNotification);

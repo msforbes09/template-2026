@@ -5,8 +5,6 @@ use App\Http\Controllers\Users\Authentication\LogoutController;
 use App\Http\Controllers\Users\Authentication\ProfileController;
 use App\Http\Controllers\Users\Authentication\TwoFactorAuthenticateController;
 use App\Http\Controllers\Users\Broadcasting\BroadcastAuthController;
-use App\Http\Controllers\Users\Contacts\AddContactController;
-use App\Http\Controllers\Users\Contacts\VerifyContactController;
 use App\Http\Controllers\Users\Notifications\ListNotificationsController;
 use App\Http\Controllers\Users\Notifications\MarkAllNotificationsReadController;
 use App\Http\Controllers\Users\Notifications\MarkNotificationReadController;
@@ -25,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 // included) is behind the maintenance gate: while the `maintenance_mode` runtime
 // flag is on, every route here answers 503 service_unavailable.
 Route::prefix('user')->middleware('maintenance')->group(function () {
-    // Public website registration (email or SMS OTP, verify-before-create).
+    // Public website registration (email OTP, verify-before-create).
     // The OTP is resent via the shared POST api/v1/common/otp/resend endpoint.
     Route::post('register', RegisterController::class)->middleware('throttle:register');
     Route::post('verify-registration', VerifyRegistrationController::class)->middleware('throttle:verify-registration');
@@ -50,10 +48,6 @@ Route::prefix('user')->middleware('maintenance')->group(function () {
         Route::delete('profile', DeleteProfileController::class)->middleware('throttle:user-delete-account');
         Route::post('profile/complete', CompleteProfileController::class)->middleware('throttle:complete-profile');
         Route::post('change-password', ChangePasswordController::class)->middleware('throttle:user-change-password');
-
-        // Add + verify the account's missing contact channel (email or mobile).
-        Route::post('profile/add-contact', AddContactController::class)->middleware('throttle:user-add-contact');
-        Route::post('profile/verify-contact', VerifyContactController::class)->middleware('throttle:user-verify-contact');
 
         Route::post('logout', LogoutController::class);
 

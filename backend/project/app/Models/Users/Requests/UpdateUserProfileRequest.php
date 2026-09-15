@@ -37,6 +37,8 @@ class UpdateUserProfileRequest extends FormRequest
             'middle_name' => ['nullable', 'string', 'max:255'],
             'suffix_name' => ['nullable', 'string', 'max:255'],
             'company_name' => ['required', 'string', 'max:255'],
+            // A plain contact field — not an auth identifier, never verified.
+            'mobile_number' => ['nullable', 'string', 'max:20'],
             'birth_date' => ['nullable', 'date', 'before:today'],
             'gender' => ['nullable', Rule::enum(GenderEnum::class)],
             'citizenship_code' => ['required', 'string', 'exists:countries,code'],

@@ -50,7 +50,6 @@ class DemoUsersSeeder extends Seeder
         $base = [
             'registration_method' => 'website',
             'authentication_method' => 'website',
-            'authentication_channel' => 'email',
             'email_verified_at' => now(),
             'last_login_at' => now()->subHours(rand(1, 240)),
         ];
@@ -124,9 +123,8 @@ class DemoUsersSeeder extends Seeder
             'address_line_two' => 'Unit 4B',
             ...$codes,
             'profile_completed_at' => now()->subDays(rand(2, 40)),
-            // A completed profile has both channels verified and its edit-cooldown
-            // clocks stamped (the details were set at completion).
-            'mobile_number_verified_at' => now()->subDays(rand(2, 40)),
+            // A completed profile has its edit-cooldown clocks stamped (the
+            // details were set at completion).
             'details_changed_at' => now()->subDays(rand(2, 40)),
         ];
     }

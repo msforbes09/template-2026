@@ -2,7 +2,6 @@
 
 namespace App\Models\Users\Concerns;
 
-use App\Enums\AuthChannelEnum;
 use App\Enums\AuthEventEnum;
 use App\Enums\UserStatusEnum;
 use App\Events\Otp\OtpIssued;
@@ -57,31 +56,28 @@ trait RegistersViaWebsite
      * alike. A registered email cannot be completed (`verify` looks up the
      * new-email type only, and `completeRegistration` re-checks uniqueness).
      *
-     * @param  array{channel?: string, email?: string, mobile_number?: string, first_name: string, last_name: string, company_name: string}  $data
+     * @param  array{email: string, first_name: string, last_name: string, company_name: string}  $data
      */
     public static function startRegistration(array $data): OtpResult
     {
-        $channel = AuthChannelEnum::from($data['channel'] ?? AuthChannelEnum::EMAIL->value);
-        $field = $channel->identifierField();
-        $identifier = static::channelIdentifier($channel, $data);
-        $exists = static::whereHashed($field, $identifier)->exists();
-        $recoverable = ! $exists && static::trashedWebsiteAccount($field, $identifier, $channel) !== null;
+        $email = static::normalizeEmail($data['email'] ?? null);
+        $exists = static::whereHashed('email', $email)->exists();
+        $recoverable = ! $exists && static::trashedWebsiteAccount($email) !== null;
 
         $result = app(OtpService::class)->generate(
-            static::channelOtpType(match (true) {
+            match (true) {
                 $exists => static::REGISTRATION_EXISTS_OTP_TYPE,
                 $recoverable => static::ACCOUNT_RECOVERY_OTP_TYPE,
                 default => static::REGISTRATION_OTP_TYPE,
-            }, $channel),
-            $identifier,
+            },
+            $email,
         );
 
         if (! $exists && ! $recoverable) {
             Cache::put(
-                static::registrationCacheKey($identifier),
+                static::registrationCacheKey($email),
                 [
-                    'channel' => $channel->value,
-                    $field => $identifier,
+                    'email' => $email,
                     'first_name' => $data['first_name'],
                     'last_name' => $data['last_name'],
                     'company_name' => $data['company_name'],
@@ -91,7 +87,7 @@ trait RegistersViaWebsite
         }
 
         OtpIssued::dispatch($result);
-        static::recordAuthEvent(AuthEventEnum::REGISTRATION_STARTED, $identifier);
+        static::recordAuthEvent(AuthEventEnum::REGISTRATION_STARTED, $email);
 
         return $result;
     }
@@ -103,33 +99,32 @@ trait RegistersViaWebsite
      * cached payload, or an email that is already registered (indistinguishable,
      * by design).
      */
-    public static function completeRegistration(string $identifier, string $otp, string $password, AuthChannelEnum $channel = AuthChannelEnum::EMAIL): string
+    public static function completeRegistration(string $email, string $otp, string $password): string
     {
-        $field = $channel->identifierField();
-        $identifier = static::normalizeIdentifier($channel, $identifier);
+        $email = static::normalizeEmail($email);
 
-        // Recovery branch: the identifier belongs to a soft-deleted website
-        // account — verify the recovery-typed OTP and restore that row instead
-        // of creating a fresh one.
-        $trashed = static::trashedWebsiteAccount($field, $identifier, $channel);
+        // Recovery branch: the email belongs to a soft-deleted website account —
+        // verify the recovery-typed OTP and restore that row instead of creating
+        // a fresh one.
+        $trashed = static::trashedWebsiteAccount($email);
 
         if ($trashed !== null) {
-            app(OtpService::class)->verify(static::channelOtpType(static::ACCOUNT_RECOVERY_OTP_TYPE, $channel), $identifier, $otp, revealAttempts: false);
+            app(OtpService::class)->verify(static::ACCOUNT_RECOVERY_OTP_TYPE, $email, $otp, revealAttempts: false);
 
-            return $trashed->recoverAccount($password, $channel);
+            return $trashed->recoverAccount($password);
         }
 
-        app(OtpService::class)->verify(static::channelOtpType(static::REGISTRATION_OTP_TYPE, $channel), $identifier, $otp, revealAttempts: false);
+        app(OtpService::class)->verify(static::REGISTRATION_OTP_TYPE, $email, $otp, revealAttempts: false);
 
-        $payload = Cache::pull(static::registrationCacheKey($identifier));
+        $payload = Cache::pull(static::registrationCacheKey($email));
 
-        // Payload gone (expired) or the identifier is already registered.
-        if (! $payload || static::whereHashed($field, $identifier)->exists()) {
+        // Payload gone (expired) or the email is already registered.
+        if (! $payload || static::whereHashed('email', $email)->exists()) {
             throw new InvalidOtpException;
         }
 
         $attributes = [
-            $field => $identifier,
+            'email' => $email,
             'first_name' => $payload['first_name'],
             'last_name' => $payload['last_name'],
             'company_name' => $payload['company_name'],
@@ -138,15 +133,14 @@ trait RegistersViaWebsite
             'status' => UserStatusEnum::DRAFT->value,
             'registration_method' => 'website',
             'authentication_method' => 'website',
-            'authentication_channel' => $channel->value,
             'country_code' => 'PH', // address country: domestic PSGC addresses
+            // The email used to register is verified at creation.
+            'email_verified_at' => now(),
         ];
-        // The channel used to register is the one verified at creation.
-        $attributes[$channel->verifiedAtColumn()] = now();
 
         $user = static::create($attributes);
 
-        static::recordAuthEvent(AuthEventEnum::REGISTRATION_COMPLETED, $identifier, $user);
+        static::recordAuthEvent(AuthEventEnum::REGISTRATION_COMPLETED, $email, $user);
         // Registration IS the first login (last_login_at is stamped above and a
         // bearer token returned), so the login-path welcome can never fire for
         // this lane — greet the new user here instead.
@@ -156,38 +150,36 @@ trait RegistersViaWebsite
     }
 
     /**
-     * The soft-deleted website account recoverable via this identifier + channel,
-     * if any. Recovery is deliberately narrow: the row must have VERIFIED this
-     * exact channel (so a recycled mobile can't recover an email-verified account
-     * whose mobile was never confirmed), and only within the recovery window
-     * (past it the identifier may have been reassigned, so it is treated as
-     * available for a fresh account). Live rows take precedence.
+     * The soft-deleted website account recoverable via this email, if any.
+     * Recovery is deliberately narrow: the row must have VERIFIED the email, and
+     * only within the recovery window (past it the address may have been
+     * reassigned, so it is treated as available for a fresh account). Live rows
+     * take precedence.
      */
-    protected static function trashedWebsiteAccount(string $field, string $identifier, AuthChannelEnum $channel): ?static
+    protected static function trashedWebsiteAccount(string $email): ?static
     {
         return static::onlyTrashed()
-            ->whereHashed($field, $identifier)
+            ->whereHashed('email', $email)
             ->where('registration_method', 'website')
-            ->whereNotNull($channel->verifiedAtColumn())
+            ->whereNotNull('email_verified_at')
             ->where('deleted_at', '>=', now()->subDays((int) config('users.recovery_window_days', 30)))
             ->first();
     }
 
     /**
      * Restore this trashed account for its returning owner: un-delete the row,
-     * set the newly chosen password and mark the verified channel — keeping the
-     * status and history exactly as they were.
+     * set the newly chosen password and re-stamp the verified email — keeping
+     * the status and history exactly as they were.
      * Returns a fresh bearer token.
      */
-    public function recoverAccount(string $password, AuthChannelEnum $channel): string
+    public function recoverAccount(string $password): string
     {
         $this->restore();
 
         $this->update([
             'password' => $password,
             'last_login_at' => now(),
-            'authentication_channel' => $channel->value,
-            $channel->verifiedAtColumn() => now(),
+            'email_verified_at' => now(),
         ]);
 
         // Clear any stale 2FA handshake state carried over from before deletion,
@@ -195,8 +187,8 @@ trait RegistersViaWebsite
         // recovered account (mirrors a password change/reset).
         $this->resetTwoFactorState();
 
-        static::recordAuthEvent(AuthEventEnum::ACCOUNT_RECOVERED, $this->{$channel->identifierField()} ?? '', $this);
-        $this->notify(new AccountRecoveredNotification($channel->value));
+        static::recordAuthEvent(AuthEventEnum::ACCOUNT_RECOVERED, $this->email ?? '', $this);
+        $this->notify(new AccountRecoveredNotification);
 
         return $this->authenticate();
     }

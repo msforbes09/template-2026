@@ -91,12 +91,12 @@ class VerifyRegistrationTest extends TestCase
         $this->startAndCapturePin('user@example.com'); // an in-progress registration exists
 
         $existing = $this->postJson('/api/v1/user/verify-registration', [
-            'channel' => 'email', 'email' => 'user@example.com',
+            'email' => 'user@example.com',
             'otp' => '000000', 'password' => 'Secret@123', 'password_confirmation' => 'Secret@123',
         ])->assertStatus(400)->assertJsonPath('error', 'invalid_otp');
 
         $missing = $this->postJson('/api/v1/user/verify-registration', [
-            'channel' => 'email', 'email' => 'nobody@example.com',
+            'email' => 'nobody@example.com',
             'otp' => '000000', 'password' => 'Secret@123', 'password_confirmation' => 'Secret@123',
         ])->assertStatus(400)->assertJsonPath('error', 'invalid_otp');
 
@@ -114,7 +114,7 @@ class VerifyRegistrationTest extends TestCase
         $statuses = [];
         for ($i = 0; $i < 12; $i++) {
             $statuses[] = $this->postJson('/api/v1/user/verify-registration', [
-                'channel' => 'email', 'email' => 'flood@example.com',
+                'email' => 'flood@example.com',
                 'otp' => '000000', 'password' => 'Secret@123', 'password_confirmation' => 'Secret@123',
             ])->getStatusCode();
         }

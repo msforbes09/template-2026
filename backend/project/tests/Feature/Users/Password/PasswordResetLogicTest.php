@@ -44,7 +44,7 @@ class PasswordResetLogicTest extends TestCase
         $result = User::sendPasswordResetOtp('user@example.com');
 
         $this->assertNotEmpty($result->resendToken);
-        $this->assertDatabaseHas('otps', ['type' => 'user_password_reset_email', 'identifier' => 'user@example.com']);
+        $this->assertDatabaseHas('otps', ['type' => 'user_password_reset', 'identifier' => 'user@example.com']);
         // The reset OTP belongs to the account being reset (attributes its delivery log).
         $this->assertTrue($result->otpable?->is(User::whereHashed('email', 'user@example.com')->firstOrFail()));
         Mail::assertSent(PasswordResetOtpMail::class);
@@ -60,7 +60,7 @@ class PasswordResetLogicTest extends TestCase
 
         User::sendPasswordResetOtp('nobody@example.com');
 
-        $this->assertDatabaseHas('otps', ['type' => 'user_password_reset_no_account_email', 'identifier' => 'nobody@example.com']);
+        $this->assertDatabaseHas('otps', ['type' => 'user_password_reset_no_account', 'identifier' => 'nobody@example.com']);
         Mail::assertSent(PasswordResetNoAccountMail::class);
         Mail::assertNotSent(PasswordResetOtpMail::class);
     }

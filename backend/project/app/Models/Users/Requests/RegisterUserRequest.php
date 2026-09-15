@@ -2,7 +2,6 @@
 
 namespace App\Models\Users\Requests;
 
-use App\Enums\AuthChannelEnum;
 use App\Rules\NoDisposableEmailRule;
 use App\Rules\NoPlusAddressing;
 use App\Rules\Turnstile;
@@ -30,12 +29,8 @@ class RegisterUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Registration channel: email (default) or sms. It selects which
-            // identifier is required and which is dropped.
-            'channel' => ['nullable', Rule::enum(AuthChannelEnum::class)],
             // Uniqueness is checked silently in the model (anti-enumeration), not here.
-            'email' => ['exclude_if:channel,sms', 'required', 'string', 'email', 'max:255', new NoPlusAddressing, new NoDisposableEmailRule],
-            'mobile_number' => ['exclude_unless:channel,sms', 'required', 'string', 'regex:/^\+639\d{9}$/'],
+            'email' => ['required', 'string', 'email', 'max:255', new NoPlusAddressing, new NoDisposableEmailRule],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'company_name' => ['required', 'string', 'max:255'],

@@ -112,6 +112,6 @@ class TwoFactorAuthenticateTest extends TestCase
         } catch (TwoFactorRequiredException) {
         }
 
-        $this->assertDatabaseHas('otps', ['type' => 'user_2fa_email', 'otpable_type' => 'User', 'otpable_id' => $user->getKey()]);
+        $this->assertDatabaseHas('otps', ['type' => 'user_2fa', 'otpable_type' => 'User', 'otpable_id' => $user->getKey()]);
     }
 }

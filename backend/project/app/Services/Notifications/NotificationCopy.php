@@ -34,7 +34,7 @@ class NotificationCopy
             'profile.completed' => ['Your profile is complete', 'You now have full access to your account.'],
             'welcome.back' => ['Welcome back!', isset($data['days_away']) ? "It's been {$data['days_away']} days since your last visit." : 'Good to see you again.'],
             'security.password_changed' => ['Your password was changed', "If this wasn't you, contact our support team immediately."],
-            'security.account_recovered' => ['Account recovered', 'Your account was restored via '.($data['channel'] ?? 'identity').' verification.'],
+            'security.account_recovered' => ['Account recovered', 'Your account was restored via email verification.'],
             'announcement' => [$data['title'] ?? 'Announcement', $data['body'] ?? null],
             default => ['You have a new notification', null],
         };

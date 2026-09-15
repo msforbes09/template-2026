@@ -30,6 +30,7 @@ class UpdateProfileController extends Controller
                 new OA\Property(property: 'middle_name', type: 'string', nullable: true, example: 'Lee'),
                 new OA\Property(property: 'suffix_name', type: 'string', nullable: true, example: 'Jr.'),
                 new OA\Property(property: 'company_name', type: 'string', example: 'Acme Corp'),
+                new OA\Property(property: 'mobile_number', type: 'string', nullable: true, description: 'Contact number (max 20 characters). Not verified.', example: '+639171234567'),
                 new OA\Property(property: 'birth_date', type: 'string', format: 'date', nullable: true, example: '1990-01-01'),
                 new OA\Property(property: 'gender', type: 'string', enum: ['male', 'female'], nullable: true, example: 'male'),
                 new OA\Property(property: 'citizenship_code', type: 'string', example: 'PH'),
