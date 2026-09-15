@@ -83,6 +83,28 @@ class UpdateProfileTest extends TestCase
     }
 
     /**
+     * The mobile number is a plain, optional contact field on the profile: it is
+     * set (and cleared) through the update, with no verification step.
+     */
+    public function test_mobile_number_is_updated_and_can_be_cleared(): void
+    {
+        $this->seedAddresses();
+        $user = $this->draftUser();
+        Sanctum::actingAs($user, ['*'], 'users');
+
+        $this->putJson('/api/v1/user/profile', $this->payload(['mobile_number' => ' +639171234567 ']))
+            ->assertOk()
+            ->assertJsonPath('data.mobile_number', '+639171234567');
+        $this->assertSame('+639171234567', $user->fresh()->mobile_number);
+
+        $this->putJson('/api/v1/user/profile', $this->payload(['mobile_number' => null]))->assertOk();
+        $this->assertNull($user->fresh()->mobile_number);
+
+        $this->putJson('/api/v1/user/profile', $this->payload(['mobile_number' => str_repeat('1', 21)]))
+            ->assertStatus(422)->assertJsonValidationErrors(['mobile_number']);
+    }
+
+    /**
      * The photo moved to its own endpoint (PATCH /profile/photo) — a photo_uuid
      * in the profile payload is ignored like the privilege fields, never
      * validated and never applied.
