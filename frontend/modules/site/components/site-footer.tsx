@@ -15,7 +15,7 @@ export function SiteFooter() {
         <div className="flex flex-col gap-2">
           <Logo />
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} {env.NEXT_PUBLIC_APP_NAME}. All rights reserved.
+            © {env.NEXT_PUBLIC_APP_NAME}. All rights reserved.
           </p>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">

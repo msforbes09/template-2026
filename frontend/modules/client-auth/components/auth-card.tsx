@@ -65,7 +65,7 @@ export function AuthCard({
         </div>
 
         <p className="text-center text-xs text-muted-foreground/70 lg:text-left">
-          © {new Date().getFullYear()} {env.NEXT_PUBLIC_APP_NAME}
+          © {env.NEXT_PUBLIC_APP_NAME}. All rights reserved.
         </p>
       </div>
 
