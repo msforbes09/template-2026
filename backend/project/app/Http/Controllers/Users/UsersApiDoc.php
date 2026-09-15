@@ -52,7 +52,7 @@ use OpenApi\Attributes as OA;
 ])]
 #[OA\Schema(schema: 'File', type: 'object', properties: [
     new OA\Property(property: 'uuid', type: 'string', example: '9e2be7f8-9853-43a2-8b8b-a216a3585951'),
-    new OA\Property(property: 'url', type: 'string', nullable: true, example: 'https://cdn.example.com/signed/…'),
+    new OA\Property(property: 'url', type: 'string', nullable: true, description: 'Presigned URL on the private bucket', example: 'https://<account-id>.r2.cloudflarestorage.com/private-bucket/uploads/9f1c....jpg?X-Amz-Signature=...'),
     new OA\Property(property: 'original_name', type: 'string', nullable: true, example: 'photo.png'),
     new OA\Property(property: 'mime_type', type: 'string', nullable: true, example: 'image/png'),
     new OA\Property(property: 'size', type: 'integer', nullable: true, example: 20481),

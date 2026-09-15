@@ -68,4 +68,21 @@ class FileModelTest extends TestCase
         $this->assertSame('r2-public', File::diskFor(FileEnum::VISIBILITY['PUBLIC']));
         $this->assertSame('r2', File::diskFor(FileEnum::VISIBILITY['PRIVATE']));
     }
+
+    /**
+     * A blank public base URL must fail loudly instead of silently resolving a relative URL.
+     */
+    public function test_public_url_throws_when_base_url_is_blank(): void
+    {
+        config(['filesystems.disks.r2-public.url' => null]);
+        $file = File::factory()->create([
+            'visibility' => FileEnum::VISIBILITY['PUBLIC'],
+            'disk' => File::PUBLIC_DISK,
+            'status' => FileEnum::STATUS['UPLOADED'],
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+
+        $file->url();
+    }
 }

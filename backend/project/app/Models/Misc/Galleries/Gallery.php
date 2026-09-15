@@ -55,7 +55,7 @@ class Gallery extends Model implements Auditable
     }
 
     /**
-     * Remove the S3 object when the record is deleted.
+     * Remove the stored object when the record is deleted.
      */
     protected static function booted(): void
     {
@@ -101,6 +101,6 @@ class Gallery extends Model implements Auditable
             return null;
         }
 
-        return rtrim((string) config('filesystems.disks.'.self::DISK.'.url'), '/')."/{$this->folder_path}/{$this->uploaded_name}";
+        return File::publicBaseUrl()."/{$this->folder_path}/{$this->uploaded_name}";
     }
 }

@@ -28,7 +28,7 @@ use OpenApi\Attributes as OA;
 #[OA\Tag(name: 'Feature Flags', description: 'Runtime feature flags — list + toggle (developer applications, review surfaces, maintenance mode). The whole surface is reserved for developer admins via the developer-access login-time ability.')]
 #[OA\Schema(schema: 'File', type: 'object', properties: [
     new OA\Property(property: 'uuid', type: 'string', example: '9e2be7f8-9853-43a2-8b8b-a216a3585951'),
-    new OA\Property(property: 'url', type: 'string', nullable: true, example: 'https://cdn.example.com/signed/…'),
+    new OA\Property(property: 'url', type: 'string', nullable: true, description: 'Presigned URL on the private bucket', example: 'https://<account-id>.r2.cloudflarestorage.com/private-bucket/uploads/9f1c....jpg?X-Amz-Signature=...'),
     new OA\Property(property: 'original_name', type: 'string', nullable: true, example: 'photo.png'),
     new OA\Property(property: 'mime_type', type: 'string', nullable: true, example: 'image/png'),
     new OA\Property(property: 'size', type: 'integer', nullable: true, example: 20481),
@@ -36,7 +36,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'Gallery', type: 'object', properties: [
     new OA\Property(property: 'uuid', type: 'string', example: '9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f'),
     new OA\Property(property: 'original_name', type: 'string', nullable: true, example: 'banner.jpg'),
-    new OA\Property(property: 'url', type: 'string', nullable: true, example: 'https://cdn.example.com/public/gallery/9f1c2d3e-….jpg'),
+    new OA\Property(property: 'url', type: 'string', nullable: true, example: 'https://cdn.example.com/gallery/9f1c2d3e-….jpg'),
 ])]
 #[OA\Schema(
     schema: 'ErrorEnvelope',

@@ -70,4 +70,18 @@ class PrivateFileUrlTest extends TestCase
 
         $this->assertNull($file->url());
     }
+
+    /**
+     * A configured TTL below the floor is clamped to a minimum of 60 seconds.
+     */
+    public function test_ttl_is_clamped_to_a_minimum(): void
+    {
+        $this->freezeTime();
+        config(['filesystems.disks.r2.private_url_ttl' => 0]);
+        $file = File::factory()->create(['visibility' => FileEnum::VISIBILITY['PRIVATE']]);
+
+        $url = $file->url();
+
+        $this->assertStringEndsWith('?expiration='.now()->addSeconds(60 + 300)->timestamp, $url);
+    }
 }

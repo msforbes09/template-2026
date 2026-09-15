@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OwenIt\Auditing\Auditable as AuditableTrait;
 use OwenIt\Auditing\Contracts\Auditable;
+use RuntimeException;
 
 /**
  * An uploaded file stored on Cloudflare R2: private files on the private
@@ -135,21 +136,38 @@ class File extends Model implements Auditable
     }
 
     /**
+     * The public bucket's base URL, right-trimmed of a trailing slash. Throws
+     * when it is not configured rather than silently building a relative URL.
+     */
+    public static function publicBaseUrl(): string
+    {
+        $url = (string) config('filesystems.disks.'.self::PUBLIC_DISK.'.url');
+
+        if ($url === '') {
+            throw new RuntimeException('Public file URL base is not configured; set R2_PUBLIC_URL.');
+        }
+
+        return rtrim($url, '/');
+    }
+
+    /**
      * The permanent, unsigned URL on the public bucket's custom domain.
      */
     public function permanentUrl(): string
     {
-        return rtrim((string) config('filesystems.disks.'.self::PUBLIC_DISK.'.url'), '/').'/'.$this->path();
+        return self::publicBaseUrl().'/'.$this->path();
     }
 
     /**
      * A cached S3 presigned URL on the private bucket: signed for ttl + 5 minutes
      * and cached for ttl, so a URL handed out at the end of the cache window is
-     * still valid for the client that receives it.
+     * still valid for the client that receives it. The TTL is clamped to a
+     * minimum of 60 seconds so a blank/zero/negative config never disables the
+     * cache or signs an already-expired URL.
      */
     public function signedUrl(): string
     {
-        $ttl = (int) config('filesystems.disks.'.self::PRIVATE_DISK.'.private_url_ttl', 10800);
+        $ttl = max(60, (int) config('filesystems.disks.'.self::PRIVATE_DISK.'.private_url_ttl', 10800));
 
         return Cache::remember(static::CACHE_PREFIX.$this->uuid, $ttl, function () use ($ttl) {
             return Storage::disk($this->disk)->temporaryUrl($this->path(), now()->addSeconds($ttl + 300));

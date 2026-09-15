@@ -18,7 +18,11 @@ configured → permanent URL fallback) or hand out dead URLs (private bucket).
 1. **Two buckets, two disks.** `r2` (private bucket, never public) and
    `r2-public` (public bucket behind an R2 custom domain). Both use the
    Flysystem `s3` driver against the R2 S3 endpoint with `region: auto` and
-   path-style addressing. The default Laravel `s3` disk is removed.
+   path-style addressing. The default Laravel `s3` disk is removed. The app's
+   own config no longer defines it, but Laravel's `LoadConfiguration`
+   array-merges the framework's bundled `s3` disk back into
+   `filesystems.disks`; that unused, credential-less entry is accepted rather
+   than stripped at boot.
 2. **Private files use S3 presigned URLs** via `Storage::disk('r2')->temporaryUrl()`,
    signed for `ttl + 300s` and cached for `ttl` (same cache key and TTL
    semantics as today). `CloudFrontSigner` and all CloudFront config are

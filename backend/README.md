@@ -24,7 +24,7 @@ production service already in place. Copy it, set `.env`, and start on features.
   CORS allowlist, Turnstile, disposable-email checks
 - In-app notification center, admin broadcasts, Reverb channel auth
 - Runtime feature flags with maintenance mode
-- File uploads (S3 + optional CloudFront signing), a small CMS (contents,
+- File uploads (Cloudflare R2: private bucket via presigned URLs, public bucket via custom domain), a small CMS (contents,
   documentations, galleries), PSGC address reference data
 - OpenAPI via PHP attributes, PHPUnit suite on SQLite, Pint, GitHub Actions CI
 
