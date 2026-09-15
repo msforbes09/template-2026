@@ -4,6 +4,14 @@ import { z } from "zod";
 // use is local development where no .env exists.
 const DEV_AUTH_SECRET = "dev-only-insecure-secret-change-me-0000";
 
+// .env.example lists every variable as `KEY=` so nothing is hidden; dotenv
+// hands a blank line over as "" rather than leaving it undefined, and "" would
+// fail every url()/min() rule. Blank means unset.
+function read(name: string): string | undefined {
+  const value = process.env[name];
+  return value === undefined || value.trim() === "" ? undefined : value;
+}
+
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   // Backend base URL for server-side calls (apiFetch, server actions).
@@ -94,22 +102,22 @@ const clientEnvSchema = z.object({
 });
 
 const server = serverEnvSchema.parse({
-  NODE_ENV: process.env.NODE_ENV,
-  API_URL: process.env.API_URL,
-  SLACK_ERROR_WEBHOOK_URL: process.env.SLACK_ERROR_WEBHOOK_URL,
-  BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+  NODE_ENV: read("NODE_ENV"),
+  API_URL: read("API_URL"),
+  SLACK_ERROR_WEBHOOK_URL: read("SLACK_ERROR_WEBHOOK_URL"),
+  BETTER_AUTH_SECRET: read("BETTER_AUTH_SECRET"),
 });
 
 const client = clientEnvSchema.parse({
-  NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
-  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-  NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-  NEXT_PUBLIC_REVERB_APP_KEY: process.env.NEXT_PUBLIC_REVERB_APP_KEY,
-  NEXT_PUBLIC_REVERB_HOST: process.env.NEXT_PUBLIC_REVERB_HOST,
-  NEXT_PUBLIC_REVERB_PORT: process.env.NEXT_PUBLIC_REVERB_PORT,
-  NEXT_PUBLIC_REVERB_FORCE_TLS: process.env.NEXT_PUBLIC_REVERB_FORCE_TLS,
-  NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB: process.env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB,
+  NEXT_PUBLIC_APP_NAME: read("NEXT_PUBLIC_APP_NAME"),
+  NEXT_PUBLIC_SITE_URL: read("NEXT_PUBLIC_SITE_URL"),
+  NEXT_PUBLIC_API_URL: read("NEXT_PUBLIC_API_URL"),
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: read("NEXT_PUBLIC_TURNSTILE_SITE_KEY"),
+  NEXT_PUBLIC_REVERB_APP_KEY: read("NEXT_PUBLIC_REVERB_APP_KEY"),
+  NEXT_PUBLIC_REVERB_HOST: read("NEXT_PUBLIC_REVERB_HOST"),
+  NEXT_PUBLIC_REVERB_PORT: read("NEXT_PUBLIC_REVERB_PORT"),
+  NEXT_PUBLIC_REVERB_FORCE_TLS: read("NEXT_PUBLIC_REVERB_FORCE_TLS"),
+  NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB: read("NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB"),
 });
 
 export const env = { ...server, ...client };

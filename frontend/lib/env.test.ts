@@ -94,3 +94,24 @@ describe("Reverb defaults", () => {
     expect(env.NEXT_PUBLIC_REVERB_FORCE_TLS).toBe(false);
   });
 });
+
+// .env.example ships optional and secret variables as `KEY=` so every key is
+// visible; dotenv hands those over as "", which must read as unset.
+describe("blank values", () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("treats an empty optional URL as unset", async () => {
+    vi.stubEnv("SLACK_ERROR_WEBHOOK_URL", "");
+    const { env } = await loadEnv();
+    expect(env.SLACK_ERROR_WEBHOOK_URL).toBeUndefined();
+  });
+
+  it("treats an empty auth secret as unset outside production", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("BETTER_AUTH_SECRET", "");
+    const { env } = await loadEnv();
+    expect(env.BETTER_AUTH_SECRET).toBe("dev-only-insecure-secret-change-me-0000");
+  });
+});
