@@ -3,7 +3,6 @@
 namespace App\Models\Misc\Files;
 
 use App\Enums\FileEnum;
-use App\Services\Files\CloudFrontSigner;
 use Database\Factories\Misc\Files\FileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -144,20 +143,16 @@ class File extends Model implements Auditable
     }
 
     /**
-     * A cached CloudFront signed URL (signed ttl+5m, cached ttl). Without a
-     * configured key pair (CloudFront signing is optional), the permanent URL
-     * is returned as-is.
+     * A cached S3 presigned URL on the private bucket: signed for ttl + 5 minutes
+     * and cached for ttl, so a URL handed out at the end of the cache window is
+     * still valid for the client that receives it.
      */
     public function signedUrl(): string
     {
-        if (blank(config('filesystems.disks.s3.cloudfront.key_pair_id'))) {
-            return $this->permanentUrl();
-        }
-
-        $ttl = (int) config('filesystems.disks.s3.cloudfront.ttl', 10800);
+        $ttl = (int) config('filesystems.disks.'.self::PRIVATE_DISK.'.private_url_ttl', 10800);
 
         return Cache::remember(static::CACHE_PREFIX.$this->uuid, $ttl, function () use ($ttl) {
-            return app(CloudFrontSigner::class)->sign($this->permanentUrl(), $ttl + 300);
+            return Storage::disk($this->disk)->temporaryUrl($this->path(), now()->addSeconds($ttl + 300));
         });
     }
 }

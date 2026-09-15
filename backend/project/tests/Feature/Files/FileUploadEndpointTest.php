@@ -5,7 +5,6 @@ namespace Tests\Feature\Files;
 use App\Models\Administrators\Administrator;
 use App\Models\Misc\Files\File;
 use App\Models\Users\User;
-use App\Services\Files\CloudFrontSigner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -19,8 +18,7 @@ class FileUploadEndpointTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Fake both R2 disks + stub signer + cloudfront config (the two `cloudfront`
-     * keys keep `signedUrl()` on the signer path until Task 3 removes them).
+     * Fake both R2 disks.
      */
     protected function setUp(): void
     {
@@ -31,16 +29,7 @@ class FileUploadEndpointTest extends TestCase
             'filesystems.disks.r2.folder' => 'uploads',
             'filesystems.disks.r2-public.folder' => 'uploads',
             'filesystems.disks.r2-public.url' => 'https://cdn.test',
-            'filesystems.disks.s3.cloudfront.key_pair_id' => 'TESTKEY',
-            'filesystems.disks.s3.cloudfront.ttl' => 10800,
         ]);
-        $this->app->bind(CloudFrontSigner::class, fn () => new class extends CloudFrontSigner
-        {
-            public function sign(string $url, int $ttlSeconds): string
-            {
-                return $url.'?sig=test';
-            }
-        });
     }
 
     /**
@@ -72,14 +61,14 @@ class FileUploadEndpointTest extends TestCase
     }
 
     /**
-     * Private upload returns a signed url.
+     * Private upload returns a presigned url.
      */
-    public function test_private_upload_is_signed(): void
+    public function test_private_upload_is_presigned(): void
     {
         $this->actingAsAdmin();
 
         $this->postJson('/api/v1/common/files/private', ['file' => UploadedFile::fake()->image('a.jpg')])
-            ->assertCreated()->assertJsonPath('data.url', fn ($url) => str_ends_with($url, '?sig=test'));
+            ->assertCreated()->assertJsonPath('data.url', fn ($url) => str_contains($url, '?expiration='));
     }
 
     /**

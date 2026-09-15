@@ -5,8 +5,8 @@ namespace Tests\Feature\Administrators;
 use App\Enums\FileEnum;
 use App\Models\Administrators\Administrator;
 use App\Models\Misc\Files\File;
-use App\Services\Files\CloudFrontSigner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -18,19 +18,12 @@ class AdministratorPhotoTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Stub the CloudFront signer + cloudfront config.
+     * Fake the private R2 disk so profile photos resolve to presigned URLs.
      */
     protected function setUp(): void
     {
         parent::setUp();
-        config(['filesystems.disks.s3.cloudfront.url' => 'https://cdn.test', 'filesystems.disks.s3.cloudfront.key_pair_id' => 'TESTKEY', 'filesystems.disks.s3.cloudfront.ttl' => 10800]);
-        $this->app->bind(CloudFrontSigner::class, fn () => new class extends CloudFrontSigner
-        {
-            public function sign(string $url, int $ttlSeconds): string
-            {
-                return $url.'?sig=test';
-            }
-        });
+        Storage::fake(File::PRIVATE_DISK);
     }
 
     /**
@@ -45,7 +38,7 @@ class AdministratorPhotoTest extends TestCase
         $this->getJson('/api/v1/administrator/profile')
             ->assertOk()
             ->assertJsonPath('data.photo.uuid', $file->uuid)
-            ->assertJsonPath('data.photo.url', fn ($url) => str_ends_with((string) $url, '?sig=test'));
+            ->assertJsonPath('data.photo.url', fn ($url) => str_contains((string) $url, '?expiration='));
     }
 
     /**
