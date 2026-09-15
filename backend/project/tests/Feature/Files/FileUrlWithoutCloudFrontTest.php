@@ -20,7 +20,7 @@ class FileUrlWithoutCloudFrontTest extends TestCase
      */
     public function test_private_file_url_falls_back_to_permanent_url_without_key_pair(): void
     {
-        config(['filesystems.disks.s3.cloudfront.url' => 'https://cdn.example.com']);
+        config(['filesystems.disks.r2-public.url' => 'https://cdn.example.com']);
         config(['filesystems.disks.s3.cloudfront.key_pair_id' => null]);
 
         $file = File::factory()->create([

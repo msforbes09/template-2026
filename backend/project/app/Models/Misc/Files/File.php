@@ -17,7 +17,9 @@ use OwenIt\Auditing\Auditable as AuditableTrait;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * An uploaded file stored on S3 and served via CloudFront.
+ * An uploaded file stored on Cloudflare R2: private files on the private
+ * bucket (served by presigned URL), public files on the public bucket
+ * (served from its custom domain).
  */
 class File extends Model implements Auditable
 {
@@ -32,6 +34,16 @@ class File extends Model implements Auditable
      * Cache key prefix for resolved URLs.
      */
     public const CACHE_PREFIX = 'file:';
+
+    /**
+     * Disk holding private files (private R2 bucket).
+     */
+    public const PRIVATE_DISK = 'r2';
+
+    /**
+     * Disk holding public files (public R2 bucket with a custom domain).
+     */
+    public const PUBLIC_DISK = 'r2-public';
 
     /**
      * The attributes that are mass assignable.
@@ -62,19 +74,27 @@ class File extends Model implements Auditable
     }
 
     /**
-     * Stream an uploaded file to S3 and record it.
+     * The disk a file of the given visibility is stored on.
+     */
+    public static function diskFor(string $visibility): string
+    {
+        return $visibility === FileEnum::VISIBILITY['PUBLIC'] ? self::PUBLIC_DISK : self::PRIVATE_DISK;
+    }
+
+    /**
+     * Stream an uploaded file to the disk matching its visibility and record it.
      */
     public function uploadFromFile(UploadedFile $file, string $visibility, ?Model $owner = null): static
     {
         $this->uuid = (string) Str::uuid();
         $this->visibility = $visibility;
-        $this->disk = 's3';
+        $this->disk = static::diskFor($visibility);
         $this->original_name = $file->getClientOriginalName();
         $this->extension = $file->getClientOriginalExtension();
         $this->mime_type = $file->getClientMimeType();
         $this->size = $file->getSize();
         $this->uploaded_name = "{$this->uuid}.{$this->extension}";
-        $this->folder_path = $this->resolveFolderPath($visibility);
+        $this->folder_path = trim((string) config("filesystems.disks.{$this->disk}.folder"), '/');
         $this->status = FileEnum::STATUS['DRAFT'];
 
         if ($owner) {
@@ -82,7 +102,7 @@ class File extends Model implements Auditable
         }
 
         try {
-            Storage::disk('s3')->putFileAs($this->folder_path, $file, $this->uploaded_name);
+            Storage::disk($this->disk)->putFileAs($this->folder_path, $file, $this->uploaded_name);
             $this->status = FileEnum::STATUS['UPLOADED'];
         } catch (\Throwable $e) {
             $this->status = FileEnum::STATUS['FAILED'];
@@ -96,7 +116,15 @@ class File extends Model implements Auditable
     }
 
     /**
-     * The CloudFront URL — permanent for public files, signed for private.
+     * The object key on its disk.
+     */
+    public function path(): string
+    {
+        return "{$this->folder_path}/{$this->uploaded_name}";
+    }
+
+    /**
+     * The URL — permanent for public files, presigned for private.
      */
     public function url(): ?string
     {
@@ -108,11 +136,11 @@ class File extends Model implements Auditable
     }
 
     /**
-     * The permanent, unsigned CloudFront URL.
+     * The permanent, unsigned URL on the public bucket's custom domain.
      */
     public function permanentUrl(): string
     {
-        return rtrim((string) config('filesystems.disks.s3.cloudfront.url'), '/')."/{$this->folder_path}/{$this->uploaded_name}";
+        return rtrim((string) config('filesystems.disks.'.self::PUBLIC_DISK.'.url'), '/').'/'.$this->path();
     }
 
     /**
@@ -131,23 +159,5 @@ class File extends Model implements Auditable
         return Cache::remember(static::CACHE_PREFIX.$this->uuid, $ttl, function () use ($ttl) {
             return app(CloudFrontSigner::class)->sign($this->permanentUrl(), $ttl + 300);
         });
-    }
-
-    /**
-     * Build the object's folder path. Private files sit at the env folder;
-     * public files are rooted under the public folder (for the unsigned
-     * CloudFront behaviour).
-     */
-    protected function resolveFolderPath(string $visibility): string
-    {
-        $folder = trim((string) config('filesystems.disks.s3.folder'), '/');
-
-        if ($visibility === FileEnum::VISIBILITY['PUBLIC']) {
-            $public = trim((string) config('filesystems.disks.s3.public_folder', 'public'), '/');
-
-            return trim("{$public}/{$folder}", '/');
-        }
-
-        return $folder;
     }
 }

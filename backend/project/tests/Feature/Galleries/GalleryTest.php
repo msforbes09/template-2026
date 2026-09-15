@@ -3,6 +3,7 @@
 namespace Tests\Feature\Galleries;
 
 use App\Models\Administrators\Administrator;
+use App\Models\Misc\Files\File;
 use App\Models\Misc\Galleries\Gallery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -37,8 +38,8 @@ class GalleryTest extends TestCase
      */
     public function test_upload_stores_under_public_gallery_and_builds_url(): void
     {
-        Storage::fake('s3');
-        config(['filesystems.disks.s3.cloudfront.url' => 'https://cdn.example.com']);
+        Storage::fake(File::PUBLIC_DISK);
+        config(['filesystems.disks.r2-public.url' => 'https://cdn.example.com']);
 
         $gallery = Gallery::upload(UploadedFile::fake()->image('pic.jpg'));
 
@@ -54,7 +55,7 @@ class GalleryTest extends TestCase
      */
     public function test_delete_removes_s3_object_and_record(): void
     {
-        Storage::fake('s3');
+        Storage::fake(File::PUBLIC_DISK);
         $gallery = Gallery::upload(UploadedFile::fake()->image('pic.jpg'));
         $object = "{$gallery->folder_path}/{$gallery->uploaded_name}";
         Storage::disk('s3')->assertExists($object);
@@ -83,7 +84,7 @@ class GalleryTest extends TestCase
      */
     public function test_create_uploads_image(): void
     {
-        Storage::fake('s3');
+        Storage::fake(File::PUBLIC_DISK);
         $this->actingWith(['gallery-view', 'gallery-manage']);
 
         $this->postJson('/api/v1/administrator/galleries', ['file' => UploadedFile::fake()->image('pic.jpg')])
@@ -98,7 +99,7 @@ class GalleryTest extends TestCase
      */
     public function test_create_rejects_non_image(): void
     {
-        Storage::fake('s3');
+        Storage::fake(File::PUBLIC_DISK);
         $this->actingWith(['gallery-view', 'gallery-manage']);
 
         $this->postJson('/api/v1/administrator/galleries', ['file' => UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf')])
@@ -111,7 +112,7 @@ class GalleryTest extends TestCase
      */
     public function test_delete_endpoint_removes_gallery(): void
     {
-        Storage::fake('s3');
+        Storage::fake(File::PUBLIC_DISK);
         $gallery = Gallery::upload(UploadedFile::fake()->image('pic.jpg'));
         $this->actingWith(['gallery-view', 'gallery-manage']);
 
@@ -125,7 +126,7 @@ class GalleryTest extends TestCase
      */
     public function test_create_requires_manage_permission(): void
     {
-        Storage::fake('s3');
+        Storage::fake(File::PUBLIC_DISK);
         $this->actingWith(['gallery-view']);
 
         $this->postJson('/api/v1/administrator/galleries', ['file' => UploadedFile::fake()->image('pic.jpg')])

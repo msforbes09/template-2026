@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('uuid')->index();
             $table->nullableMorphs('owner');
             $table->string('visibility')->index();
-            $table->string('disk')->default('s3');
+            $table->string('disk')->default('r2');
             $table->string('folder_path')->nullable();
             $table->string('uploaded_name')->nullable();
             $table->string('original_name')->nullable();
