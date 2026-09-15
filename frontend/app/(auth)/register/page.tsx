@@ -1,0 +1,41 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { AuthCard } from "@/modules/client-auth/components/auth-card";
+import { ClientRegisterForm } from "@/modules/client-auth/components/client-register-form";
+
+export const metadata: Metadata = {
+  title: "Register",
+  description: "Create a free eGov API Developer Portal account to access Philippine government APIs.",
+  alternates: { canonical: "/register" },
+  openGraph: {
+    type: "website",
+    url: "/register",
+    title: "Register",
+    description: "Create a free eGov API Developer Portal account to access Philippine government APIs.",
+  },
+  twitter: {
+    card: "summary",
+    title: "Register",
+    description: "Create a free eGov API Developer Portal account.",
+  },
+};
+
+export default function RegisterPage() {
+
+  return (
+    <AuthCard
+      title="Create your account"
+      subtitle="Register with your email or mobile number to get started."
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link href="/login" className="font-medium text-primary hover:underline">
+            Log in
+          </Link>
+        </>
+      }
+    >
+      <ClientRegisterForm />
+    </AuthCard>
+  );
+}

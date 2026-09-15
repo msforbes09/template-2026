@@ -1,0 +1,32 @@
+node_modules
+.next
+out
+build
+coverage
+
+.git
+.gitignore
+
+.env
+.env.*
+!.env.example
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+*.tsbuildinfo
+next-env.d.ts
+
+.DS_Store
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Service-account keys — the builder stage does `COPY . .`, so without this a
+# key sitting in the working tree lands in that layer. Mounted at runtime
+# instead (see docker-compose.yml).
+*-sa.json
+*service-account*.json
+secrets/

@@ -1,0 +1,92 @@
+# Copy .env.example to .env and fill in real values before running this in
+# production — see Dockerfile for why the NEXT_PUBLIC_* vars must be build
+# args rather than plain runtime environment variables.
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Server-side, but needed at build time too: the public pages are
+        # prerendered by `next build`, and their reads go through this. See the
+        # Dockerfile for why it is a builder-stage-only ARG.
+        API_URL: ${API_URL:-https://egov-api-ws.oueg.info/api/v1}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://egov-api-ws.oueg.info/api/v1}
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-1x00000000000000000000AA}
+        NEXT_PUBLIC_EGOV_SSO_PARTNER_CODE: ${NEXT_PUBLIC_EGOV_SSO_PARTNER_CODE:-TEST_AGENCY}
+        NEXT_PUBLIC_REVERB_APP_KEY: ${NEXT_PUBLIC_REVERB_APP_KEY:-2uqlqvzghsgamqp93hzp}
+        NEXT_PUBLIC_REVERB_HOST: ${NEXT_PUBLIC_REVERB_HOST:-egov-api-ws.oueg.info}
+        NEXT_PUBLIC_REVERB_PORT: ${NEXT_PUBLIC_REVERB_PORT:-443}
+        NEXT_PUBLIC_REVERB_FORCE_TLS: ${NEXT_PUBLIC_REVERB_FORCE_TLS:-true}
+        NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB: ${NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB:-5}
+    image: egov-api-ui:latest
+    restart: unless-stopped
+    # Bound to localhost only — the staging host already runs its own
+    # nginx terminating the public domain/TLS, so this container should
+    # be reachable from that nginx (also on the host) but not directly
+    # from the internet. See nginx.conf for the reference config to
+    # merge into that host-level nginx's server block for this app.
+    ports:
+      - "127.0.0.1:${PORT:-3000}:${PORT:-3000}"
+    environment:
+      NODE_ENV: production
+      # Also controls the port the standalone server.js listens on inside
+      # the container (see the Next.js standalone output docs) — keep this
+      # in sync with the port mapping above, both driven by the same var.
+      PORT: ${PORT:-3000}
+      HOSTNAME: 0.0.0.0
+      API_URL: ${API_URL:-https://egov-api-ws.oueg.info/api/v1}
+      # Signs the Better Auth session cookie — required, no insecure default
+      # accepted here (lib/env.ts falls back to a dev-only value if unset,
+      # which must never reach production). Generate one with:
+      #   openssl rand -base64 32
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env (openssl rand -base64 32)}
+      SLACK_ERROR_WEBHOOK_URL: ${SLACK_ERROR_WEBHOOK_URL:-}
+      # NOTE: the review and developer-application switches are NOT set here
+      # any more. They became runtime feature flags on 2026-09-02, served from
+      # GET common/feature-flags and toggled by a developer administrator, so
+      # this container needs no variable — and no restart — to follow them.
+      # The same-named vars still exist on the BACKEND as its defaults.
+      # ── Chat assistant (modules/assistant) ───────────────────────────────
+      # Off unless explicitly enabled: with this false the widget never mounts
+      # and /api/chat returns 503, so a deployment that hasn't set up Vertex
+      # simply doesn't have the feature. These are plain runtime vars, not
+      # build args — none is NEXT_PUBLIC_, and the kill switch is read per
+      # request so flipping it needs a restart, not a rebuild.
+      ASSISTANT_ENABLED: ${ASSISTANT_ENABLED:-false}
+      GOOGLE_VERTEX_PROJECT: ${GOOGLE_VERTEX_PROJECT:-}
+      GOOGLE_VERTEX_LOCATION: ${GOOGLE_VERTEX_LOCATION:-us-central1}
+      GOOGLE_VERTEX_MODEL: ${GOOGLE_VERTEX_MODEL:-gemini-2.5-flash}
+      # Path INSIDE the container, matching the mount below. Must be absolute:
+      # the standalone server runs from a different working directory than
+      # `next dev`, so a relative path resolves somewhere else in production.
+      GOOGLE_VERTEX_KEY_FILE: /run/secrets/vertex-sa.json
+    volumes:
+      # The service-account key, mounted read-only rather than baked into the
+      # image (.dockerignore excludes it from the build context for the same
+      # reason).
+      #
+      # Host path resolution, in order: GOOGLE_VERTEX_KEY_FILE_HOST, then
+      # GOOGLE_VERTEX_KEY_FILE (what you already set for local development),
+      # then ./secrets/vertex-sa.json. Falling back to the local path matters —
+      # defaulting straight to ./secrets/ meant an .env that worked with
+      # `npm run dev` silently mounted a non-existent path under Docker.
+      #
+      # If the host path doesn't exist Docker creates a DIRECTORY at the
+      # target; the app checks for a real file and reports that case by name
+      # instead of failing inside the auth library. Leave ASSISTANT_ENABLED
+      # false, or drop this volume, on deployments not using the assistant.
+      - ${GOOGLE_VERTEX_KEY_FILE_HOST:-${GOOGLE_VERTEX_KEY_FILE:-./secrets/vertex-sa.json}}:/run/secrets/vertex-sa.json:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${PORT:-3000}/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - app-local-network
+
+networks:
+  app-local-network:
+    driver: bridge

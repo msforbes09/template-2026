@@ -1,0 +1,57 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+#Design
+/design-study
+# Google service-account keys for the Vertex assistant (GOOGLE_VERTEX_KEY_FILE).
+# A private key that grants Vertex access on the project — it is mounted into
+# the container at deploy time and must never be committed or baked into an
+# image. See .dockerignore for the matching exclusion.
+*-sa.json
+*service-account*.json
+/secrets/
+
+# Claude Code: the conventions skill under .claude/skills/ IS shared project
+# documentation (both CLAUDE.md files defer to it), so it is tracked. Only the
+# per-machine settings file is not — it holds one developer's tool permission
+# allowlist and absolute local paths.
+.claude/settings.local.json
