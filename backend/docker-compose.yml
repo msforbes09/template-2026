@@ -1,0 +1,72 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: ./ops/docker/fpm/Dockerfile
+      target: develop
+    container_name: ${COMPOSE_PROJECT_NAME}-app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: develop
+    working_dir: /var/www/html
+    volumes:
+      - ./project:/var/www/html
+      - ./logs:/var/log/php-fpm
+    networks:
+      - app-local-network
+    cap_add:
+      - SYS_PTRACE
+    # Uncomment when running OpenSearch locally (see below).
+    # depends_on:
+    #   - opensearch
+
+  # Local OpenSearch for log analytics — OPTIONAL and off by default. To enable:
+  # uncomment this service and the `depends_on` above, then set
+  # SCOUT_DRIVER=opensearch and OPENSEARCH_READ_ENABLED=true in project/.env.
+  # Single-node, security plugin disabled (plain HTTP on 9200) — access in real
+  # environments is infra-gated (VPC), so the app never signs requests.
+  # opensearch:
+  #   image: opensearchproject/opensearch:3
+  #   container_name: ${COMPOSE_PROJECT_NAME}-os
+  #   restart: unless-stopped
+  #   environment:
+  #     - discovery.type=single-node
+  #     - bootstrap.memory_lock=true
+  #     - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+  #     - "DISABLE_INSTALL_DEMO_CONFIG=true"
+  #     - "DISABLE_SECURITY_PLUGIN=true"
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #   volumes:
+  #     - ./data-opensearch:/usr/share/opensearch/data:delegated
+  #   ports:
+  #     - "${COMPOSE_OS_PORT}:9200"
+  #   networks:
+  #     - app-local-network
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./ops/docker/nginx/Dockerfile
+      target: develop
+    container_name: ${COMPOSE_PROJECT_NAME}-nginx
+    environment:
+      SERVICE_NAME: nginx
+      SERVICE_TAGS: develop
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      - app
+    ports:
+      - "${COMPOSE_WEBSERVER_PORT}:80"
+    networks:
+      - app-local-network
+
+networks:
+  app-local-network:
+    driver: bridge
