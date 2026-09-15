@@ -10,8 +10,8 @@ use Illuminate\Contracts\Validation\ValidationRule;
 /**
  * Rejects a file UUID the acting principal (administrator or user) does not own.
  *
- * A file UUID is a direct object reference and the resource hands back a signed
- * CloudFront URL for whatever file it points at. Validating only that the UUID
+ * A file UUID is a direct object reference and the resource hands back a
+ * presigned URL for whatever file it points at. Validating only that the UUID
  * exists let anyone link a private file uploaded by someone else — another admin's
  * upload, another user's photo — as their own and read it back. Ownership is
  * therefore checked here, with public files exempt (they are served by permanent,

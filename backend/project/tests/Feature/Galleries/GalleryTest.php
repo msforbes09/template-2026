@@ -53,7 +53,7 @@ class GalleryTest extends TestCase
     /**
      * Deleting a gallery removes its R2 object and its record.
      */
-    public function test_delete_removes_s3_object_and_record(): void
+    public function test_delete_removes_object_and_record(): void
     {
         Storage::fake(File::PUBLIC_DISK);
         $gallery = Gallery::upload(UploadedFile::fake()->image('pic.jpg'));

@@ -18,7 +18,7 @@ use OpenApi\Attributes as OA;
 #[OA\SecurityScheme(securityScheme: 'bearerAuth', type: 'http', scheme: 'bearer')]
 #[OA\Tag(name: 'Feature Flags', description: 'The public runtime feature-flag map — the UIs\' reference for the maintenance page, the developer-application CTA, and the review surfaces. Stays up during maintenance mode.')]
 #[OA\Tag(name: 'OTP', description: 'One-time PIN utilities.')]
-#[OA\Tag(name: 'Files', description: 'File uploads (S3 + CloudFront).')]
+#[OA\Tag(name: 'Files', description: 'File uploads (Cloudflare R2: private bucket via presigned URL, public bucket via custom domain).')]
 #[OA\Tag(name: 'Contents', description: 'Public content blocks by identifier.')]
 #[OA\Tag(name: 'Addresses', description: 'Address reference data — countries + PSGC regions/provinces/municipalities/barangays.')]
 #[OA\Schema(
