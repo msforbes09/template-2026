@@ -18,7 +18,7 @@ template, and start on features.
 ## What is included
 
 - Two audiences on Better Auth, each with its own cookie: **user** (register
-  with email or SMS OTP, 2FA, trusted device, profile with edit cooldowns,
+  with email OTP, 2FA, trusted device, profile with edit cooldowns,
   contacts, delete account, notifications) and **administrator** (2FA,
   temporary-password gate, administrators, roles and permissions, user
   directory, content blocks, gallery, broadcasts, audit / auth-attempt /

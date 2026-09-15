@@ -16,7 +16,6 @@ import { FormRootError } from "@/components/ui/form-root-error";
 import { FormSubmitButton } from "@/components/ui/form-submit-button";
 import { OtpField } from "@/components/ui/otp-field";
 import { TurnstileField } from "@/components/ui/turnstile-field";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   forgotPasswordSchema,
   type ForgotPasswordValues,
@@ -39,9 +38,7 @@ type Step =
   | { name: "request" }
   | {
       name: "reset";
-      channel: "email" | "sms";
       email: string;
-      mobileNumber: string;
       resendToken: string;
       retryAfter: number;
       message: string;
@@ -52,9 +49,8 @@ export function ForgotPasswordForm() {
 
   const requestForm = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: { channel: "email", email: "", mobile_number: "" },
+    defaultValues: { email: "" },
   });
-  const channel = requestForm.watch("channel");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
   // Everything here is discarded when the route is navigated away from.
@@ -80,35 +76,24 @@ export function ForgotPasswordForm() {
     const captcha = captchaToken;
     turnstileRef.current?.reset();
     setCaptchaToken(null);
-    const email = values.channel === "email" ? values.email : undefined;
-    const mobileNumber = values.channel === "sms" ? `+63${values.mobile_number}` : undefined;
-    const result = await forgotPasswordClient({
-      channel: values.channel,
-      email,
-      mobile_number: mobileNumber,
-      captcha,
-    });
+    const result = await forgotPasswordClient({ email: values.email, captcha });
     if (result.kind === "sent") {
       setStep({
         name: "reset",
-        channel: values.channel,
-        email: email ?? "",
-        mobileNumber: mobileNumber ?? "",
+        email: values.email,
         resendToken: result.resendToken,
         retryAfter: result.retryAfter,
-        message: `If ${email ?? mobileNumber} has an account, we sent a 6-digit code to it.`,
+        message: `If ${values.email} has an account, we sent a 6-digit code to it.`,
       });
       return;
     }
-    applyResultErrors(requestForm, result, ["email", "mobile_number"]);
+    applyResultErrors(requestForm, result, ["email"]);
   }
 
   if (step.name === "reset") {
     return (
       <ResetStep
-        channel={step.channel}
         email={step.email}
-        mobileNumber={step.mobileNumber}
         message={step.message}
         retryAfter={step.retryAfter}
         resendToken={step.resendToken}
@@ -131,23 +116,6 @@ export function ForgotPasswordForm() {
         className="space-y-5"
         noValidate
       >
-        <Tabs
-          value={channel}
-          onValueChange={(value) => {
-            requestForm.clearErrors();
-            requestForm.setValue("channel", value as "email" | "sms");
-          }}
-        >
-          <TabsList className="w-full">
-            <TabsTrigger value="email" className="flex-1">
-              Email
-            </TabsTrigger>
-            <TabsTrigger value="sms" className="flex-1">
-              Mobile number
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-        {channel === "email" ? (
           <AppFormField label="Email" isRequired error={requestForm.formState.errors.email?.message}>
             <Input
               type="email"
@@ -157,31 +125,6 @@ export function ForgotPasswordForm() {
               {...requestForm.register("email")}
             />
           </AppFormField>
-        ) : (
-          <AppFormField
-            label="Mobile number"
-            isRequired
-            error={requestForm.formState.errors.mobile_number?.message}
-          >
-            <div className="relative">
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center gap-1.5 text-sm text-muted-foreground"
-              >
-                <span className="text-base leading-none">🇵🇭</span>+63
-              </span>
-              <Input
-                type="tel"
-                inputMode="numeric"
-                autoComplete="tel-national"
-                placeholder="9171234567"
-                maxLength={10}
-                className="h-11 pl-16"
-                {...requestForm.register("mobile_number")}
-              />
-            </div>
-          </AppFormField>
-        )}
         <TurnstileField
           ref={turnstileRef}
           onVerify={setCaptchaToken}
@@ -197,17 +140,13 @@ export function ForgotPasswordForm() {
 }
 
 function ResetStep({
-  channel,
   email,
-  mobileNumber,
   message,
   retryAfter,
   resendToken: initialResendToken,
   onBack,
 }: {
-  channel: "email" | "sms";
   email: string;
-  mobileNumber: string;
   message: string;
   retryAfter: number;
   resendToken: string;
@@ -247,15 +186,13 @@ function ResetStep({
     turnstileRef.current?.reset();
     setCaptchaToken(null);
     const result: ResetPasswordResult = await resetPasswordClient({
-      channel,
-      email: channel === "email" ? email : undefined,
-      mobile_number: channel === "sms" ? mobileNumber : undefined,
+      email,
       ...values,
       captcha,
     });
     if (result.kind === "authenticated") {
       const written = await writeClientSession({
-        username: channel === "email" ? email : mobileNumber,
+        username: email,
         accessToken: result.token,
       });
       if (!written.ok) {

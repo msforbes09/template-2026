@@ -15,8 +15,6 @@ export type AdminUser = {
   suffix_name: string | null;
   company_name: string | null;
   display_name: string;
-  // Which contact channel the account registered/authenticates with.
-  authentication_channel?: "email" | "sms" | null;
   mobile_number: string | null;
   birth_date: string | null;
   gender: string | null;

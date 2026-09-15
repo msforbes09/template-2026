@@ -30,11 +30,7 @@ export function buildUserColumns({ status = "" }: { status?: string } = {}): Col
             </Avatar>
             <div>
               <p className="font-medium text-foreground">{user.display_name}</p>
-              {/* One contact line: the email, or the (masked) mobile for an
-                  SMS-channel account with no email. */}
-              <p className="text-xs text-muted-foreground">
-                {user.email ?? user.mobile_number ?? "—"}
-              </p>
+              <p className="text-xs text-muted-foreground">{user.email ?? "—"}</p>
             </div>
           </div>
         );

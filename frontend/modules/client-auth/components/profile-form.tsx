@@ -72,6 +72,7 @@ const PROFILE_FIELDS = [
   "middle_name",
   "suffix_name",
   "company_name",
+  "mobile_number",
   "birth_date",
   "gender",
   "citizenship_code",
@@ -106,6 +107,7 @@ export function ProfileForm({
       middle_name: profile.middle_name ?? "",
       suffix_name: profile.suffix_name ?? "",
       company_name: profile.company_name ?? "",
+      mobile_number: profile.mobile_number ?? "",
       birth_date: profile.birth_date ?? "",
       gender: profile.gender === "male" || profile.gender === "female" ? profile.gender : "",
       // Country picker is removed from the UI — always submit the default
@@ -200,6 +202,7 @@ export function ProfileForm({
         last_name: values.last_name,
         suffix_name: values.suffix_name,
         company_name: values.company_name,
+        mobile_number: values.mobile_number,
         birth_date: values.birth_date,
         gender: values.gender,
         citizenship: DEFAULT_CITIZENSHIP,
@@ -302,6 +305,16 @@ export function ProfileForm({
           error={form.formState.errors.company_name?.message}
         >
           <Input className="h-11" {...form.register("company_name")} />
+        </AppFormField>
+
+        <AppFormField label="Mobile number" error={form.formState.errors.mobile_number?.message}>
+          <Input
+            type="tel"
+            autoComplete="tel"
+            placeholder="+639171234567"
+            className="h-11"
+            {...form.register("mobile_number")}
+          />
         </AppFormField>
 
         <div className="grid gap-5 sm:grid-cols-2">
