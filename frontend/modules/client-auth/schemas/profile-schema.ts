@@ -12,6 +12,12 @@ export const profileSchema = z.object({
   middle_name: nullableString,
   suffix_name: nullableString,
   company_name: z.string().min(1, "Company name is required"),
+  // A plain contact field (PUT /profile: nullable, max 20) — never verified.
+  mobile_number: z
+    .string()
+    .trim()
+    .max(20, "Mobile number must be 20 characters or fewer")
+    .transform((value) => (value === "" ? null : value)),
   birth_date: z.string().min(1, "Birth date is required"),
   gender: z
     .enum(["male", "female", ""])
