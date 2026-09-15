@@ -3,6 +3,7 @@
 namespace App\Models\Misc\Galleries;
 
 use App\Enums\FileEnum;
+use App\Models\Misc\Files\File;
 use Database\Factories\Misc\Galleries\GalleryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,8 +14,8 @@ use OwenIt\Auditing\Auditable as AuditableTrait;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * A public gallery image stored on S3 and served via CloudFront. Public-only —
- * url() is the permanent (unsigned) CloudFront URL for the stored object.
+ * A public gallery image stored on the public R2 bucket. Public-only —
+ * url() is the permanent (unsigned) URL on the public R2 bucket's custom domain.
  */
 class Gallery extends Model implements Auditable
 {
@@ -26,12 +27,12 @@ class Gallery extends Model implements Auditable
     /**
      * The storage disk galleries live on.
      */
-    public const DISK = 's3';
+    public const DISK = File::PUBLIC_DISK;
 
     /**
      * The public folder galleries are stored under.
      */
-    public const FOLDER = 'public/gallery';
+    public const FOLDER = 'gallery';
 
     /**
      * The attributes that are mass assignable.
@@ -92,7 +93,7 @@ class Gallery extends Model implements Auditable
     }
 
     /**
-     * The permanent, unsigned CloudFront URL — null until the upload succeeded.
+     * The permanent, unsigned public-bucket URL — null until the upload succeeded.
      */
     public function url(): ?string
     {
@@ -100,6 +101,6 @@ class Gallery extends Model implements Auditable
             return null;
         }
 
-        return rtrim((string) config('filesystems.disks.s3.cloudfront.url'), '/')."/{$this->folder_path}/{$this->uploaded_name}";
+        return rtrim((string) config('filesystems.disks.'.self::DISK.'.url'), '/')."/{$this->folder_path}/{$this->uploaded_name}";
     }
 }

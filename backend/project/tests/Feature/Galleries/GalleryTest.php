@@ -33,8 +33,8 @@ class GalleryTest extends TestCase
     }
 
     /**
-     * Uploading stores the object under public/gallery and records its path;
-     * url() builds the public CloudFront URL from the path.
+     * Uploading stores the object under the gallery folder and records its path;
+     * url() builds the public R2 URL from the path.
      */
     public function test_upload_stores_under_public_gallery_and_builds_url(): void
     {
@@ -43,26 +43,26 @@ class GalleryTest extends TestCase
 
         $gallery = Gallery::upload(UploadedFile::fake()->image('pic.jpg'));
 
-        $this->assertSame('public/gallery', $gallery->folder_path);
+        $this->assertSame('gallery', $gallery->folder_path);
         $this->assertStringEndsWith('.jpg', $gallery->uploaded_name);
         $this->assertSame('pic.jpg', $gallery->original_name);
-        Storage::disk('s3')->assertExists("{$gallery->folder_path}/{$gallery->uploaded_name}");
+        Storage::disk(File::PUBLIC_DISK)->assertExists("{$gallery->folder_path}/{$gallery->uploaded_name}");
         $this->assertSame("https://cdn.example.com/{$gallery->folder_path}/{$gallery->uploaded_name}", $gallery->url());
     }
 
     /**
-     * Deleting a gallery removes its S3 object and its record.
+     * Deleting a gallery removes its R2 object and its record.
      */
     public function test_delete_removes_s3_object_and_record(): void
     {
         Storage::fake(File::PUBLIC_DISK);
         $gallery = Gallery::upload(UploadedFile::fake()->image('pic.jpg'));
         $object = "{$gallery->folder_path}/{$gallery->uploaded_name}";
-        Storage::disk('s3')->assertExists($object);
+        Storage::disk(File::PUBLIC_DISK)->assertExists($object);
 
         $gallery->delete();
 
-        Storage::disk('s3')->assertMissing($object);
+        Storage::disk(File::PUBLIC_DISK)->assertMissing($object);
         $this->assertDatabaseMissing('galleries', ['id' => $gallery->id]);
     }
 
