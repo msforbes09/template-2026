@@ -1,13 +1,11 @@
 import { Suspense } from "react";
 import { SiteHeader } from "@/modules/site/components/site-header";
 import { ConditionalSiteFooter } from "@/modules/site/components/conditional-site-footer";
-import { AssistantMount } from "@/modules/assistant/components/assistant-mount";
 import { MaintenanceGate } from "@/modules/feature-flags/components/maintenance-gate";
 
 // Wrapped in MaintenanceGate: while `maintenance_mode` is on this shell is
 // replaced wholesale rather than decorated with a banner. Every user/* endpoint
-// is down during maintenance — login and registration included — along with the
-// public project and event catalogue, so leaving the header up would offer a
+// is down during maintenance — login and registration included —, so leaving the header up would offer a
 // row of links that all fail.
 export default function SiteLayout({
   children,
@@ -19,7 +17,7 @@ export default function SiteLayout({
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       {/* flex column so a page can opt into filling the window with
-          `flex-1 min-h-0` (the assistant does). The layout wrapper only sets
+          `flex-1 min-h-0`. The layout wrapper only sets
           min-h-dvh, so a percentage height on a child never resolves —
           flexbox does.
           `[&>*]:w-full` is not cosmetic: as flex items, page roots that use
@@ -37,15 +35,6 @@ export default function SiteLayout({
           dynamic-param routes (see use-pathname.md). */}
       <Suspense fallback={null}>
         <ConditionalSiteFooter />
-      </Suspense>
-      {/* Renders nothing unless the assistant is enabled AND Vertex is
-          configured, so no chat JS ships on a deployment that hasn't set it up.
-          Suspense-wrapped because the gate is read at request time rather than
-          baked into the prerender — see AssistantMount for why that matters.
-          fallback={null}: a launcher skeleton would just be a button that
-          can't be pressed yet. */}
-      <Suspense fallback={null}>
-        <AssistantMount />
       </Suspense>
     </div>
     </MaintenanceGate>

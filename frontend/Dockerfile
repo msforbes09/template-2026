@@ -55,20 +55,9 @@ ENV API_URL=$API_URL \
     NEXT_PUBLIC_REVERB_FORCE_TLS=$NEXT_PUBLIC_REVERB_FORCE_TLS \
     NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB=$NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB
 
-# Deliberately NOT build args: ASSISTANT_ENABLED, GOOGLE_VERTEX_PROJECT,
-# GOOGLE_VERTEX_LOCATION, GOOGLE_VERTEX_MODEL, GOOGLE_VERTEX_KEY_FILE.
-#
 # Only NEXT_PUBLIC_* need baking, because only those are inlined into the
-# client bundle. The assistant's vars are server-side and read per request, so
-# passing them here would bake one deployment's configuration into the image
-# and, worse, make the kill switch a property of the build: the same image
-# could no longer be enabled on staging and disabled in production. That is
-# also why AssistantMount awaits connection() — without it the flag would be
-# evaluated during this `npm run build` and frozen into the prerendered pages.
-#
-# They arrive as container environment instead (see docker-compose.yml), and
-# the service-account key is mounted at runtime rather than copied in
-# (.dockerignore excludes it from the build context above).
+# client bundle. Server-side vars arrive as container environment instead
+# (see docker-compose.yml).
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # BETTER_AUTH_SECRET is supplied here as a THROWAWAY value, generated inside

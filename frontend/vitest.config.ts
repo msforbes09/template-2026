@@ -1,8 +1,8 @@
 import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 
-// Unit tests for the pure seams — spec summarising, dependency detection,
-// request building, rate limiting, tool-output parsing. See
+// Unit tests for the pure seams — schemas, formatters, result mapping, rate
+// limiting. See
 // .claude/skills/nextjs-conventions/references/testing.md: test the seams this
 // codebase defines, not the framework.
 //
@@ -24,7 +24,7 @@ export default defineConfig({
       "@": resolve(__dirname),
       // `server-only` is not a real installed package here — Next aliases it
       // during its own build. Outside that build it doesn't resolve at all, so
-      // any module importing it (rate-limit.ts, tools.ts) would fail to load.
+      // any module importing it (lib/rate-limit.ts) would fail to load.
       "server-only": resolve(__dirname, "test/stubs/server-only.ts"),
     },
   },

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { checkRateLimit } from "@/modules/assistant/lib/rate-limit";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Fake timers throughout: the limiter reads Date.now() and the whole point is
 // what happens at a window boundary, which real time can't test in 200ms.

@@ -57,38 +57,6 @@ const serverEnvSchema = z.object({
       }
     }),
 
-  // NO REVIEW OR DEVELOPER-APPLICATION FLAGS HERE ANY MORE.
-  //
-  // API_CATALOG_REVIEWS_ENABLED, PROJECT_REVIEWS_ENABLED and
-  // DEVELOPER_APPLICATIONS_ENABLED used to live here as the frontend halves of
-  // three switches. They were replaced (2026-09-02 handoff) by runtime feature
-  // flags served from GET common/feature-flags and toggled by a developer
-  // administrator — see modules/feature-flags/lib/get-feature-flags.ts.
-  //
-  // The same-named env vars still exist on the BACKEND, where they are now the
-  // defaults a stored override wins against. Re-adding them here would
-  // reintroduce exactly what the flags removed: a second copy of the truth,
-  // set in a different place, that silently disagrees with the first.
-
-  // Chat assistant (modules/assistant). Every one of these is optional or
-  // defaulted on purpose: this file is imported by Client Components too, and
-  // a non-NEXT_PUBLIC_ var resolves to undefined in the browser bundle — a
-  // required server var here would make the client-side parse throw.
-  //
-  // Kill switch. Off by default so the widget and its route stay dormant until
-  // a project and key file are actually configured.
-  ASSISTANT_ENABLED: z
-    .enum(["true", "false"])
-    .default("false")
-    .transform((v) => v === "true"),
-  // Absolute path to the Google service-account JSON key, handed to
-  // google-auth-library as `keyFile`. A path rather than the key material
-  // itself: the file is mounted into the container at deploy time and never
-  // baked into the image or committed.
-  GOOGLE_VERTEX_KEY_FILE: z.string().min(1).optional(),
-  GOOGLE_VERTEX_PROJECT: z.string().min(1).optional(),
-  GOOGLE_VERTEX_LOCATION: z.string().min(1).default("us-central1"),
-  GOOGLE_VERTEX_MODEL: z.string().min(1).default("gemini-2.5-flash"),
 });
 
 const clientEnvSchema = z.object({
@@ -131,11 +99,6 @@ const server = serverEnvSchema.parse({
   API_URL: process.env.API_URL,
   SLACK_ERROR_WEBHOOK_URL: process.env.SLACK_ERROR_WEBHOOK_URL,
   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
-  ASSISTANT_ENABLED: process.env.ASSISTANT_ENABLED,
-  GOOGLE_VERTEX_KEY_FILE: process.env.GOOGLE_VERTEX_KEY_FILE,
-  GOOGLE_VERTEX_PROJECT: process.env.GOOGLE_VERTEX_PROJECT,
-  GOOGLE_VERTEX_LOCATION: process.env.GOOGLE_VERTEX_LOCATION,
-  GOOGLE_VERTEX_MODEL: process.env.GOOGLE_VERTEX_MODEL,
 });
 
 const client = clientEnvSchema.parse({

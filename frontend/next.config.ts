@@ -21,10 +21,6 @@ const nextConfig: NextConfig = {
   // Emits a self-contained .next/standalone build (minimal traced
   // node_modules + a server.js entrypoint) for the Docker image.
   output: "standalone",
-  // google-auth-library reads the Vertex service-account key off disk and
-  // resolves optional transitive deps at runtime — bundling it breaks both,
-  // and the standalone output needs it traced as a real node_modules entry.
-  serverExternalPackages: ["google-auth-library"],
   experimental: {
     // Server Actions default to a 1MB request body — too small for a
     // real photo upload (modules/uploads/actions/upload-actions.ts takes

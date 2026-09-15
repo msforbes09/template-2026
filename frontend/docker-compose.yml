@@ -43,41 +43,6 @@ services:
       #   openssl rand -base64 32
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env (openssl rand -base64 32)}
       SLACK_ERROR_WEBHOOK_URL: ${SLACK_ERROR_WEBHOOK_URL:-}
-      # NOTE: the review and developer-application switches are NOT set here
-      # any more. They became runtime feature flags on 2026-09-02, served from
-      # GET common/feature-flags and toggled by a developer administrator, so
-      # this container needs no variable — and no restart — to follow them.
-      # The same-named vars still exist on the BACKEND as its defaults.
-      # ── Chat assistant (modules/assistant) ───────────────────────────────
-      # Off unless explicitly enabled: with this false the widget never mounts
-      # and /api/chat returns 503, so a deployment that hasn't set up Vertex
-      # simply doesn't have the feature. These are plain runtime vars, not
-      # build args — none is NEXT_PUBLIC_, and the kill switch is read per
-      # request so flipping it needs a restart, not a rebuild.
-      ASSISTANT_ENABLED: ${ASSISTANT_ENABLED:-false}
-      GOOGLE_VERTEX_PROJECT: ${GOOGLE_VERTEX_PROJECT:-}
-      GOOGLE_VERTEX_LOCATION: ${GOOGLE_VERTEX_LOCATION:-us-central1}
-      GOOGLE_VERTEX_MODEL: ${GOOGLE_VERTEX_MODEL:-gemini-2.5-flash}
-      # Path INSIDE the container, matching the mount below. Must be absolute:
-      # the standalone server runs from a different working directory than
-      # `next dev`, so a relative path resolves somewhere else in production.
-      GOOGLE_VERTEX_KEY_FILE: /run/secrets/vertex-sa.json
-    volumes:
-      # The service-account key, mounted read-only rather than baked into the
-      # image (.dockerignore excludes it from the build context for the same
-      # reason).
-      #
-      # Host path resolution, in order: GOOGLE_VERTEX_KEY_FILE_HOST, then
-      # GOOGLE_VERTEX_KEY_FILE (what you already set for local development),
-      # then ./secrets/vertex-sa.json. Falling back to the local path matters —
-      # defaulting straight to ./secrets/ meant an .env that worked with
-      # `npm run dev` silently mounted a non-existent path under Docker.
-      #
-      # If the host path doesn't exist Docker creates a DIRECTORY at the
-      # target; the app checks for a real file and reports that case by name
-      # instead of failing inside the auth library. Leave ASSISTANT_ENABLED
-      # false, or drop this volume, on deployments not using the assistant.
-      - ${GOOGLE_VERTEX_KEY_FILE_HOST:-${GOOGLE_VERTEX_KEY_FILE:-./secrets/vertex-sa.json}}:/run/secrets/vertex-sa.json:ro
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${PORT:-3000}/"]
       interval: 30s

@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { logError } from "@/lib/log-error";
 import { clientIpFromHeaders } from "@/lib/client-ip";
-import { checkRateLimit } from "@/modules/assistant/lib/rate-limit";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Reports a client-side render failure from an error.tsx boundary.
 //
