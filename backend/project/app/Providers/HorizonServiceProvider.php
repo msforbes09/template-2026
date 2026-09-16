@@ -2,35 +2,32 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\Request;
 use Laravel\Horizon\Horizon;
 use Laravel\Horizon\HorizonApplicationServiceProvider;
 
+/**
+ * Gates the Horizon dashboard. Administrators authenticate with bearer tokens
+ * from a separate origin, so a browser page cannot be protected by the API's
+ * guards; instead the admin console mints a signed handoff link
+ * (CreateHorizonAccessController) that marks the session as authorised
+ * (HorizonAccessController). The local environment stays open for convenience.
+ */
 class HorizonServiceProvider extends HorizonApplicationServiceProvider
 {
     /**
-     * Bootstrap any application services.
+     * Session key stamped by a followed handoff link.
      */
-    public function boot(): void
-    {
-        parent::boot();
-
-        // Horizon::routeSmsNotificationsTo('15556667777');
-        // Horizon::routeMailNotificationsTo('example@example.com');
-        // Horizon::routeSlackNotificationsTo('slack-webhook-url', '#channel');
-    }
+    public const SESSION_KEY = 'horizon_authorised_at';
 
     /**
-     * Register the Horizon gate.
-     *
-     * This gate determines who can access Horizon in non-local environments.
+     * Allow the dashboard in local, or for a session that followed a signed handoff.
      */
-    protected function gate(): void
+    protected function authorization(): void
     {
-        Gate::define('viewHorizon', function ($user = null) {
-            return in_array(optional($user)->email, [
-                //
-            ]);
+        Horizon::auth(function (Request $request): bool {
+            return $this->app->environment('local')
+                || $request->session()->has(self::SESSION_KEY);
         });
     }
 }
