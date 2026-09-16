@@ -175,7 +175,9 @@ return [
         ],
 
         'default' => [
-            'scheme' => env('REDIS_SCHEME'),
+            // `?: null`: an empty REDIS_SCHEME= must mean plain TCP, not a '' scheme the
+            // connector would prefix onto the host (RedisSchemeTest).
+            'scheme' => env('REDIS_SCHEME') ?: null,
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'username' => env('REDIS_USERNAME'),
@@ -189,7 +191,9 @@ return [
         ],
 
         'cache' => [
-            'scheme' => env('REDIS_SCHEME'),
+            // `?: null`: an empty REDIS_SCHEME= must mean plain TCP, not a '' scheme the
+            // connector would prefix onto the host (RedisSchemeTest).
+            'scheme' => env('REDIS_SCHEME') ?: null,
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'username' => env('REDIS_USERNAME'),

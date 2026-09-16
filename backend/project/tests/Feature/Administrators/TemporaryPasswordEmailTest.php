@@ -119,16 +119,17 @@ class TemporaryPasswordEmailTest extends TestCase
     }
 
     /**
-     * A pm2 worker is configured to process the `mailer` queue.
+     * The Horizon supervisor works the `mailer` queue in every environment, so the
+     * temporary-password mail is actually delivered rather than left queued.
      */
-    public function test_queue_workers_include_a_mailer_worker(): void
+    public function test_horizon_works_the_mailer_queue(): void
     {
-        $workers = json_decode(file_get_contents(base_path('queue-workers.json')), true);
+        $defaults = config('horizon.defaults.supervisor-1');
 
-        $mailer = collect($workers)->firstWhere('name', 'worker-mailer');
+        foreach (config('horizon.environments') as $environment => $supervisors) {
+            $queues = array_merge($defaults, $supervisors['supervisor-1'])['queue'];
 
-        $this->assertNotNull($mailer, 'worker-mailer is not defined in queue-workers.json');
-        $this->assertContains('queue:work', $mailer['args']);
-        $this->assertContains('--queue=mailer', $mailer['args']);
+            $this->assertContains('mailer', $queues, "$environment does not work the mailer queue");
+        }
     }
 }
