@@ -10,6 +10,14 @@ export type Administrator = {
   is_active: 0 | 1;
   with_temporary_password: 0 | 1;
   last_login_at: string | null;
+  // Password lifetime — returned by GET /profile only. `password_expires_at`
+  // is null when ADMIN_PASSWORD_EXPIRY_DAYS is 0 on the backend;
+  // `password_expiry_waives_remaining` counts the "remind me later"s left
+  // before the console gates the admin behind a forced change.
+  password_changed_at?: string | null;
+  password_expires_at?: string | null;
+  is_password_expired?: 0 | 1;
+  password_expiry_waives_remaining?: number;
   auth_validated: string | null;
   created_at: string | null;
   updated_at: string | null;

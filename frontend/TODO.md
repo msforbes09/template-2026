@@ -11,6 +11,8 @@ something is put off in a design or a review, add it here in the same change.
 
 ## Administrators
 
+- **Done (2026-09-16):** administrator password expiry on the console. `types/administrator.ts` gained the profile-only `password_changed_at`, `password_expires_at`, `is_password_expired`, `password_expiry_waives_remaining`; `modules/admin/lib/password-gate.ts` decides the forced-change reason (`temporary` | `expired`) and `ForcePasswordChangeModal` words each; `PasswordExpiryBanner` (dashboard page) renders `PasswordExpiryNotice` while postponements remain, whose "Remind me later" calls the `waivePasswordExpiry` action (`POST administrator/password/waive-expiry`) and refreshes.
+
 ## Notifications
 
 ## Content

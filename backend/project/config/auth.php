@@ -176,6 +176,12 @@ return [
         // The inactivity window above slides on every request, so without this a
         // token that keeps being used never expires at all.
         'token_absolute_minutes' => (int) env('ADMIN_TOKEN_ABSOLUTE_MINUTES', 480),
+
+        // Days a password stays valid after it is set (0 = never expires), and how
+        // many times an expired password may be postponed before the console is
+        // gated until it is changed.
+        'password_expiry_days' => (int) env('ADMIN_PASSWORD_EXPIRY_DAYS', 90),
+        'password_expiry_max_waives' => (int) env('ADMIN_PASSWORD_EXPIRY_MAX_WAIVES', 3),
         'two_factor' => [
             'enabled' => (bool) env('ADMIN_2FA_ENABLED', true),
             'trust_window' => (int) env('ADMIN_2FA_TRUST_WINDOW', 43200),

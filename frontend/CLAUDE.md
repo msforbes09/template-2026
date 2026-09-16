@@ -52,7 +52,7 @@ npm run build        # production build; prebuild runs lint + tests
 - **landing** — one placeholder hero; replace it per project.
 - **content** — the CMS blocks behind `/faqs`, `/privacy-policy`, `/terms-of-service` and the admin Contents CRUD.
 - **notifications** — the bell, the list, mark-read, and the realtime stream on `private-user.{uuid}`. The presentational map per type and the deep links live in `modules/notifications/lib/notification-content.ts`.
-- **admin** — the console shell (sidebar, header, nav gated per permission), login, change password, the static welcome page (`modules/admin/lib/welcome-links.ts`).
+- **admin** — the console shell (sidebar, header, nav gated per permission), login, change password, the static welcome page (`modules/admin/lib/welcome-links.ts`), and the password gates: `passwordGateReason()` decides when the forced-change modal shows (temporary password, or expired with no postponements left) and `PasswordExpiryBanner` offers "remind me later" on the dashboard while postponements remain.
 - **administrators**, **access-control** (roles, permissions), **users** (list and show only), **gallery**, **broadcasts** (all users, by status, or one uuid), **admin-logs** (audit, auth attempts, connections), **feature-flags** (`maintenance_mode` only, plus the "Open Horizon" handoff into the backend's queue dashboard), **uploads**.
 
 ## Non-negotiables (the rules most often gotten wrong)

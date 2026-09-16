@@ -28,6 +28,10 @@ class AdministratorProfileResource extends JsonResource
             'is_active' => (int) $this->is_active,
             'with_temporary_password' => (int) $this->with_temporary_password,
             'last_login_at' => $this->last_login_at?->format('Y-m-d H:i:s'),
+            'password_changed_at' => $this->password_changed_at?->format('Y-m-d H:i:s'),
+            'password_expires_at' => $this->passwordExpiresAt()?->format('Y-m-d H:i:s'),
+            'is_password_expired' => (int) $this->isPasswordExpired(),
+            'password_expiry_waives_remaining' => $this->passwordExpiryWaivesRemaining(),
             'permissions' => $this->currentAccessToken()?->abilities ?? [],
         ];
     }
