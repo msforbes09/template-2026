@@ -7,6 +7,8 @@ something is put off in a design or a review, add it here in the same change.
 
 ## Authentication & Authorization
 
+- **Deferred:** active-sessions list with per-session and revoke-all endpoints (`GET/DELETE administrator|user/sessions`). Both guards run single-session today (`Authenticates::authenticate()` deletes every prior token), so there is never more than one row to show. Revisit if multi-device sessions are ever allowed.
+
 ## Users
 
 ## Files
@@ -27,6 +29,8 @@ something is put off in a design or a review, add it here in the same change.
 ## Configuration
 
 ## Observability
+
+- **Deferred:** request correlation id. Accept or generate an `X-Request-ID` per request, echo it in the response, and stamp it on every log line and log-table row written while handling it, so one id ties a user report to its trace across the audit, auth-attempt and connection logs in OpenSearch. Frontend would surface it in error toasts as a support reference. Deferred until production logs need cross-table tracing; nothing depends on it yet.
 
 ## Deployment / CI-CD
 
