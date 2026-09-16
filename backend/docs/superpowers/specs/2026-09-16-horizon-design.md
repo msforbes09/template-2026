@@ -25,7 +25,7 @@ without a shared credential.
    Reverb, plus Horizon itself. `queue-workers.json` shrinks to three entries.
    The scheduler runs `horizon:snapshot` every five minutes for the metrics.
 4. **The dashboard is served on its own port.** nginx gains a second `server`
-   block (`COMPOSE_HORIZON_PORT`) that proxies only `/horizon*` to the app;
+   block (`COMPOSE_HORIZON_PORT`) that serves only `/horizon*` paths;
    the main port answers 404 for `/horizon`. A dev-server subdomain points at
    that port.
 5. **Access is a signed handoff from the admin console.**
@@ -42,9 +42,8 @@ without a shared credential.
 
 ### Backend
 
-- `composer require laravel/horizon`, `horizon:install`; assets published at
-  build via `horizon:publish` in `post-update-cmd` and committed under
-  `public/vendor/horizon`.
+- `composer require laravel/horizon`, `horizon:install`. Horizon 5.49 serves
+  its dashboard assets from the package, so nothing is published or committed.
 - `config/horizon.php`: `path => 'horizon'`, `use => 'default'` Redis
   connection, `middleware => ['web']`, supervisors as in decision 2;
   `local` runs 2 processes max, `staging` 4, `production` 8.
@@ -54,11 +53,12 @@ without a shared credential.
   decision 5. Session key `horizon_authorised_at`.
 - `POST api/v1/administrator/horizon/access` →
   `Administrators\Horizon\CreateHorizonAccessController`: returns
-  `{data: {url, expires_at}}`. `GET /horizon/access` (web, `signed:relative`)
+  `{data: {url, expires_at}}`. `GET /horizon-access` (web, `signed:relative`)
   → `HorizonAccessController`: stores the session flag, redirects to
   `/horizon`.
-- Routes: the web route is registered before Horizon's catch-all so the
-  `/horizon/access` path is ours. `ForceJsonResponse` stays global; it only
+- Routes: the landing path is `/horizon-access`, outside Horizon's own
+  `/horizon/{view}` catch-all (which is registered first and would win) but
+  under the `/horizon` prefix nginx routes to the dashboard listener. `ForceJsonResponse` stays global; it only
   sets the `Accept` header and Horizon's view still renders.
 - `queue-workers.json`: `horizon`, `worker-scheduler`, `reverb-server`.
 - `routes/console.php`: `horizon:snapshot` every five minutes.

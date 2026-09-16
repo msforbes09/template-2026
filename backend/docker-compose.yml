@@ -64,6 +64,7 @@ services:
       - app
     ports:
       - "${COMPOSE_WEBSERVER_PORT}:80"
+      - "${COMPOSE_HORIZON_PORT}:8081"
     networks:
       - app-local-network
 
