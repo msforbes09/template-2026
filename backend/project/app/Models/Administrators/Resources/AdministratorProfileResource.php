@@ -32,6 +32,10 @@ class AdministratorProfileResource extends JsonResource
             'password_expires_at' => $this->passwordExpiresAt()?->format('Y-m-d H:i:s'),
             'is_password_expired' => (int) $this->isPasswordExpired(),
             'password_expiry_waives_remaining' => $this->passwordExpiryWaivesRemaining(),
+            // The session window as the server sees it: `refresh.token` has just slid
+            // the expiry, so this is exactly when an idle client will be signed out.
+            'session_inactivity_minutes' => (int) config('auth.administrators.token_inactivity_minutes', 60),
+            'token_expires_at' => $this->tokenExpiresAt()?->format('Y-m-d H:i:s'),
             'permissions' => $this->currentAccessToken()?->abilities ?? [],
         ];
     }

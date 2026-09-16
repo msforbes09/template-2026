@@ -47,4 +47,24 @@ class UserAuthEndpointsTest extends TestCase
 
         $this->assertSame(0, $user->fresh()->tokens()->count());
     }
+
+    /**
+     * The profile tells the client when the server will expire the session, as
+     * slid by this very request, plus the inactivity window that defines it.
+     */
+    public function test_profile_exposes_the_session_window(): void
+    {
+        config(['auth.users.token_inactivity_minutes' => 60]);
+        $user = User::create([
+            'email' => 'window@example.com', 'first_name' => 'Alex', 'last_name' => 'Rivera',
+            'password' => 'Secret@123', 'email_verified_at' => now(), 'is_active' => true,
+        ]);
+        $token = $user->createToken('users', ['*'], now()->addMinutes(60))->plainTextToken;
+        $this->travel(20)->minutes();
+
+        $this->withToken($token)->getJson('/api/v1/user/profile')
+            ->assertOk()
+            ->assertJsonPath('data.session_inactivity_minutes', 60)
+            ->assertJsonPath('data.token_expires_at', now()->addMinutes(60)->format('Y-m-d H:i:s'));
+    }
 }

@@ -18,6 +18,11 @@ export type Administrator = {
   password_expires_at?: string | null;
   is_password_expired?: 0 | 1;
   password_expiry_waives_remaining?: number;
+  // The server's sliding session window — returned by GET /profile only.
+  // IdleSessionWatcher counts `session_inactivity_minutes` down from the
+  // render that read it; `token_expires_at` is informational (API timezone).
+  session_inactivity_minutes?: number;
+  token_expires_at?: string | null;
   auth_validated: string | null;
   created_at: string | null;
   updated_at: string | null;

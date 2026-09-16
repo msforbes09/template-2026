@@ -7,6 +7,9 @@ something is put off in a design or a review, add it here in the same change.
 
 ## Authentication & Authorization
 
+- **Done (2026-09-16):** idle-session warning for both audiences. `lib/idle-session.ts` (`idleSchedule`) turns the backend's `session_inactivity_minutes` into warn/expire offsets; `components/idle-session-watcher.tsx` shows an alert dialog with a live countdown 60 s before the server ceiling, "Stay signed in" calls the audience's keep-alive action (`GET /profile`, which slides the token) and restarts the window, and a refused keep-alive or a finished countdown signs out and hard-navigates to the login page. `AdminIdleSession` (console layout) and `ClientIdleSession` (site layout) mount it from the memoized profile read.
+- **Deferred:** silently sliding the session on user activity. The watcher counts from the last request on purpose (UI activity never reaches the server), so a user typing into a long form for the whole window still gets the warning. A throttled background keep-alive on activity (say, at most once per five minutes) would remove that friction at the cost of extra requests; not needed until a form routinely takes longer than the inactivity window.
+
 ## Users
 
 ## Administrators

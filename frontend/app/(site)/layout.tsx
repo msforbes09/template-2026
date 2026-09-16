@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { SiteHeader } from "@/modules/site/components/site-header";
 import { ConditionalSiteFooter } from "@/modules/site/components/conditional-site-footer";
 import { MaintenanceGate } from "@/modules/feature-flags/components/maintenance-gate";
+import { ClientIdleSession } from "@/modules/site/components/client-idle-session";
 
 // Wrapped in MaintenanceGate: while `maintenance_mode` is on this shell is
 // replaced wholesale rather than decorated with a banner. Every user/* endpoint
@@ -35,6 +36,9 @@ export default function SiteLayout({
           dynamic-param routes (see use-pathname.md). */}
       <Suspense fallback={null}>
         <ConditionalSiteFooter />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ClientIdleSession />
       </Suspense>
     </div>
     </MaintenanceGate>

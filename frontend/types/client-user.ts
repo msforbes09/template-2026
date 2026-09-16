@@ -57,4 +57,9 @@ export type ClientUserProfile = {
   details_editable_at?: string | null;
   photo_editable_at?: string | null;
   last_login_at: string | null;
+  // The server's sliding session window. IdleSessionWatcher counts
+  // `session_inactivity_minutes` down from the render that read it;
+  // `token_expires_at` is informational (API timezone).
+  session_inactivity_minutes?: number;
+  token_expires_at?: string | null;
 };

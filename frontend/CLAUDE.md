@@ -48,7 +48,8 @@ npm run build        # production build; prebuild runs lint + tests
 ## Modules
 
 - **client-auth** — registration (email OTP), login with email-OTP 2FA and trusted device, forgot/reset/change password, profile (`draft` → `completed` with edit cooldowns; `mobile_number` is a plain contact field), PSGC address combobox, delete account.
-- **site** — the public shell (header, footer, account menu) and the user dashboard cards.
+- **site** — the public shell (header, footer, account menu), the user dashboard cards, and `ClientIdleSession` (signed-in users only).
+- **idle session (both audiences)** — `components/idle-session-watcher.tsx` counts the backend's `session_inactivity_minutes` down from the render that read it, warns 60 seconds before the server would sign the user out, and either slides the token (`keepAdminSessionAlive` / `keepClientSessionAlive`, one `GET /profile`) or signs out. Mounted by `AdminIdleSession` in the console layout and `ClientIdleSession` in the site layout. Mouse and keyboard activity do not reset it: only a request moves the server's clock.
 - **landing** — one placeholder hero; replace it per project.
 - **content** — the CMS blocks behind `/faqs`, `/privacy-policy`, `/terms-of-service` and the admin Contents CRUD.
 - **notifications** — the bell, the list, mark-read, and the realtime stream on `private-user.{uuid}`. The presentational map per type and the deep links live in `modules/notifications/lib/notification-content.ts`.
