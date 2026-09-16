@@ -6,7 +6,7 @@ import { AdminLoginForm } from "@/modules/admin/components/admin-login-form";
 export function AdminLoginShell() {
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-[linear-gradient(135deg,#1452f0,#0b2db0)] p-12 lg:flex">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-primary bg-[linear-gradient(135deg,var(--primary),color-mix(in_oklab,var(--primary)_75%,black))] p-12 text-primary-foreground lg:flex">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgb(255_255_255/0.05)_1px,transparent_1px),linear-gradient(90deg,rgb(255_255_255/0.05)_1px,transparent_1px)] bg-size-[32px_32px]"
@@ -18,14 +18,14 @@ export function AdminLoginShell() {
           <span className="inline-flex size-11 items-center justify-center rounded-lg bg-white/10">
             <ShieldCheck aria-hidden className="size-5 text-highlight" />
           </span>
-          <h1 className="text-3xl font-semibold tracking-tight text-balance text-white">
+          <h1 className="text-3xl font-semibold tracking-tight text-balance">
             Administer the platform
           </h1>
-          <p className="text-sm leading-relaxed text-blue-100/90">
+          <p className="text-sm leading-relaxed text-primary-foreground/85">
             Manage accounts, content and announcements from one console.
           </p>
         </div>
-        <p className="relative text-xs text-blue-200/80">
+        <p className="relative text-xs text-primary-foreground/70">
           Restricted to authorized administrators.
         </p>
       </div>
