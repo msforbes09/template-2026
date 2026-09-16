@@ -7,9 +7,11 @@ use App\Events\Otp\OtpIssued;
 use App\Exceptions\InvalidOtpException;
 use App\Exceptions\PasswordUnchangedException;
 use App\Notifications\Users\PasswordChangedNotification;
+use App\Rules\NotRecentlyUsedPassword;
 use App\Services\Otp\OtpResult;
 use App\Services\Otp\OtpService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Password management for users: authenticated change, and forgot/reset via an
@@ -83,6 +85,11 @@ trait ManagesPassword
             throw new InvalidOtpException;
         }
 
+        // Only now, with the OTP proven: the history check must never run pre-auth.
+        if ($user->hasRecentlyUsedPassword($newPassword)) {
+            throw ValidationException::withMessages(['new_password' => [NotRecentlyUsedPassword::MESSAGE]]);
+        }
+
         if (Hash::check($newPassword, $user->password)) {
             throw new PasswordUnchangedException;
         }
@@ -99,10 +106,8 @@ trait ManagesPassword
      * The account a reset for this email would apply to — one that owns the
      * address and has a password — or null (no such account / SSO-only).
      */
-    public static function resettableAccount(string $email): ?static
+    protected static function resettableAccount(string $email): ?static
     {
-        $email = static::normalizeEmail($email);
-
         return static::query()->whereHashed('email', $email)->whereNotNull('password')->first();
     }
 }

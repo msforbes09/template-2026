@@ -11,13 +11,17 @@ use Illuminate\Database\Eloquent\Model;
  * Rejects a new password the account has held within its history window
  * (`auth.password_policy.history_limit`, current password included).
  *
- * Takes the owner explicitly because the account is resolved differently per
- * endpoint: the authenticated principal on a change, the address on a reset.
- * A null owner (unknown address on a reset) passes — existence is the reset
- * flow's own concern and must not leak through validation.
+ * Only for AUTHENTICATED change requests, where the owner is the principal. The
+ * reset path checks reuse inside resetPasswordWithOtp() after the OTP has been
+ * verified, so an unauthenticated caller can never probe an address's passwords.
  */
 class NotRecentlyUsedPassword implements ValidationRule
 {
+    /**
+     * The field message, shared with the post-verification check on a reset.
+     */
+    public const MESSAGE = 'You have used this password recently. Please choose a different one.';
+
     /**
      * @param  (Model&HasPasswordHistory)|null  $owner
      */
@@ -33,7 +37,7 @@ class NotRecentlyUsedPassword implements ValidationRule
         }
 
         if ($this->owner->hasRecentlyUsedPassword($value)) {
-            $fail('You have used this password recently. Please choose a different one.');
+            $fail(self::MESSAGE);
         }
     }
 }

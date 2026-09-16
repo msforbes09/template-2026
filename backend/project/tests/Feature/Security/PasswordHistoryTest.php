@@ -227,4 +227,34 @@ class PasswordHistoryTest extends TestCase
 
         $this->assertSame(0, $administrator->passwordHistories()->count());
     }
+
+    /**
+     * The reuse check on a reset runs only after the OTP is verified: a wrong
+     * code answers `invalid_otp` whether or not the guessed password was ever
+     * used, so the endpoint cannot be used to test passwords.
+     */
+    public function test_reset_with_wrong_otp_never_reveals_password_reuse(): void
+    {
+        Mail::fake();
+        $this->user();
+        User::sendPasswordResetOtp('user@example.com');
+
+        $this->postJson('/api/v1/user/reset-password', [
+            'email' => 'user@example.com', 'otp' => '000000',
+            'new_password' => 'Secret@123', 'new_password_confirmation' => 'Secret@123',
+        ])->assertStatus(400)->assertJsonPath('error', 'invalid_otp');
+    }
+
+    /**
+     * A later save of a freshly created model that does not touch the password
+     * records nothing more.
+     */
+    public function test_saving_other_attributes_records_no_extra_history(): void
+    {
+        $administrator = Administrator::factory()->create(['password' => 'First@123']);
+        $administrator->update(['first_name' => 'Renamed']);
+        $administrator->update(['last_name' => 'Again']);
+
+        $this->assertSame(1, $administrator->passwordHistories()->count());
+    }
 }

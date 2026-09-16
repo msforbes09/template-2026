@@ -4,7 +4,6 @@ namespace Tests\Feature\Users\Password;
 
 use App\Enums\AuthEventEnum;
 use App\Exceptions\InvalidOtpException;
-use App\Exceptions\PasswordUnchangedException;
 use App\Mail\Users\PasswordResetNoAccountMail;
 use App\Mail\Users\PasswordResetOtpMail;
 use App\Models\Misc\AuthAttempts\AuthAttempt;
@@ -12,6 +11,7 @@ use App\Models\Users\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 /**
@@ -87,7 +87,8 @@ class PasswordResetLogicTest extends TestCase
     }
 
     /**
-     * Resetting to the current password is rejected.
+     * Resetting to the current password is rejected — as the reuse check, which
+     * runs only after the OTP has been verified and covers the current hash.
      */
     public function test_reset_to_same_password_is_rejected(): void
     {
@@ -101,7 +102,7 @@ class PasswordResetLogicTest extends TestCase
             return true;
         });
 
-        $this->expectException(PasswordUnchangedException::class);
+        $this->expectException(ValidationException::class);
         User::resetPasswordWithOtp('user@example.com', $pin, 'Secret@123');
     }
 

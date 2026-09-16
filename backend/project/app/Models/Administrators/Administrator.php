@@ -115,7 +115,6 @@ class Administrator extends Authenticatable implements Auditable
         'photo_uuid',
         'password',
         'with_temporary_password',
-        'password_expiry_waives',
         'is_active',
         'is_developer',
         'last_login_at',
@@ -152,12 +151,14 @@ class Administrator extends Authenticatable implements Auditable
             'auth_validated' => 'datetime',
             'auth_token_expires_at' => 'datetime',
             'password_expiry_waives' => 'integer',
+            'password_expiry_waived_until' => 'datetime',
         ];
     }
 
     /**
-     * When the current password expires, or null when expiry is disabled or the
-     * change date is unknown.
+     * When the current password expires — the lifetime from its last change, or
+     * the end of the latest postponement if that is later. Null when expiry is
+     * disabled or the change date is unknown.
      */
     public function passwordExpiresAt(): ?CarbonInterface
     {
@@ -167,7 +168,10 @@ class Administrator extends Authenticatable implements Auditable
             return null;
         }
 
-        return $this->password_changed_at->copy()->addDays($days);
+        $expiresAt = $this->password_changed_at->copy()->addDays($days);
+        $waivedUntil = $this->password_expiry_waived_until;
+
+        return $waivedUntil !== null && $waivedUntil->greaterThan($expiresAt) ? $waivedUntil : $expiresAt;
     }
 
     /**
@@ -189,7 +193,9 @@ class Administrator extends Authenticatable implements Auditable
     }
 
     /**
-     * Use one postponement on an expired password.
+     * Use one postponement on an expired password: the expiry moves forward by
+     * `password_expiry_waive_days`, so the policy is enforced by the clock and
+     * the console is gated once the last postponement runs out.
      *
      * @throws PasswordExpiryWaiveUnavailableException
      */
@@ -199,7 +205,12 @@ class Administrator extends Authenticatable implements Auditable
             throw new PasswordExpiryWaiveUnavailableException;
         }
 
-        $this->update(['password_expiry_waives' => $this->password_expiry_waives + 1]);
+        $days = (int) config('auth.administrators.password_expiry_waive_days', 7);
+
+        $this->forceFill([
+            'password_expiry_waives' => $this->password_expiry_waives + 1,
+            'password_expiry_waived_until' => now()->addDays($days),
+        ])->save();
     }
 
     /**
@@ -210,6 +221,7 @@ class Administrator extends Authenticatable implements Auditable
         static::saving(function (self $administrator) {
             if ($administrator->isDirty('password') && ! $administrator->isDirty('password_expiry_waives')) {
                 $administrator->password_expiry_waives = 0;
+                $administrator->password_expiry_waived_until = null;
             }
         });
     }

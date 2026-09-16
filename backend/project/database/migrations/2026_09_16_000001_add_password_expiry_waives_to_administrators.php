@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * How many times an administrator has postponed an expired password since it
- * was last changed. Reset to zero on every password change.
+ * was last changed, and until when the latest postponement holds. Both reset
+ * on every password change.
  */
 return new class extends Migration
 {
@@ -17,6 +18,7 @@ return new class extends Migration
     {
         Schema::table('administrators', function (Blueprint $table) {
             $table->unsignedTinyInteger('password_expiry_waives')->default(0)->after('password_changed_at');
+            $table->timestamp('password_expiry_waived_until')->nullable()->after('password_expiry_waives');
         });
     }
 
@@ -26,7 +28,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('administrators', function (Blueprint $table) {
-            $table->dropColumn('password_expiry_waives');
+            $table->dropColumn(['password_expiry_waives', 'password_expiry_waived_until']);
         });
     }
 };

@@ -29,20 +29,30 @@ trait HasPasswordHistory
             }
         });
 
-        static::saved(function (self $model) {
-            $hash = $model->getAttributes()['password'] ?? null;
-
-            if ($hash === null || static::passwordHistoryLimit() <= 0) {
-                return;
+        // Two events rather than `saved` + `wasRecentlyCreated`: that flag stays
+        // true for the instance's whole lifetime, so a later save in the same
+        // request (a seeder's create-then-update) would record the hash twice.
+        static::created(fn (self $model) => $model->recordPasswordHistory());
+        static::updated(function (self $model) {
+            if ($model->wasChanged('password')) {
+                $model->recordPasswordHistory();
             }
-
-            if (! $model->wasRecentlyCreated && ! $model->wasChanged('password')) {
-                return;
-            }
-
-            $model->passwordHistories()->create(['password' => $hash]);
-            $model->prunePasswordHistory();
         });
+    }
+
+    /**
+     * Record the current hash, then prune. A no-op with no password or a 0 limit.
+     */
+    protected function recordPasswordHistory(): void
+    {
+        $hash = $this->getAttributes()['password'] ?? null;
+
+        if ($hash === null || static::passwordHistoryLimit() <= 0) {
+            return;
+        }
+
+        $this->passwordHistories()->create(['password' => $hash]);
+        $this->prunePasswordHistory();
     }
 
     /**

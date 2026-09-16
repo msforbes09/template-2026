@@ -11,8 +11,9 @@ use Illuminate\Support\Facades\Schema;
  * accounts so the age of the current password is known.
  *
  * Backfills a history row per existing account from its current hash and stamps
- * `password_changed_at` from `updated_at`, so the reuse, minimum-age and expiry
- * checks have a baseline on deploy day instead of treating every account as new.
+ * `password_changed_at` with the migration time (not `updated_at`, which every
+ * login touches), so the reuse and expiry checks start from a known point on
+ * deploy day: nobody is expired, and the first expiry lands a full lifetime later.
  */
 return new class extends Migration
 {
@@ -36,7 +37,7 @@ return new class extends Migration
                 $table->timestamp('password_changed_at')->nullable()->after('password');
             });
 
-            DB::table($tableName)->whereNotNull('password')->update(['password_changed_at' => DB::raw('updated_at')]);
+            DB::table($tableName)->whereNotNull('password')->update(['password_changed_at' => $now]);
 
             DB::table($tableName)
                 ->select(['id', 'password'])

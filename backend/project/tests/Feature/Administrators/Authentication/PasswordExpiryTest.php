@@ -111,9 +111,31 @@ class PasswordExpiryTest extends TestCase
         $this->postJson('/api/v1/administrator/password/waive-expiry')
             ->assertOk()
             ->assertJsonPath('data.password_expiry_waives_remaining', 2)
-            ->assertJsonPath('data.is_password_expired', 1);
+            ->assertJsonPath('data.is_password_expired', 0)
+            ->assertJsonPath('data.password_expires_at', now()->addDays(7)->format('Y-m-d H:i:s'));
 
         $this->assertSame(1, $administrator->fresh()->password_expiry_waives);
+    }
+
+    /**
+     * A postponement buys a fixed number of days, after which the password is
+     * expired again; once the last one runs out the console is gated. The policy
+     * is enforced by the clock, not by the client's cooperation.
+     */
+    public function test_postponements_run_out_and_the_gate_closes(): void
+    {
+        config(['auth.administrators.password_expiry_days' => 90, 'auth.administrators.password_expiry_max_waives' => 1, 'auth.administrators.password_expiry_waive_days' => 7]);
+        $this->defineProtectedRoute();
+        $administrator = $this->administrator(changedDaysAgo: 91, waives: 0);
+        Sanctum::actingAs($administrator, guard: 'administrators');
+
+        $this->postJson('/api/v1/administrator/password/waive-expiry')->assertOk();
+        $this->getJson('/__protected')->assertOk();
+
+        $this->travel(8)->days();
+        $this->assertTrue($administrator->fresh()->isPasswordExpired());
+        $this->getJson('/__protected')->assertStatus(403)->assertJsonPath('error', 'password_expired');
+        $this->postJson('/api/v1/administrator/password/waive-expiry')->assertStatus(400);
     }
 
     /**
@@ -162,6 +184,7 @@ class PasswordExpiryTest extends TestCase
 
         $fresh = $administrator->fresh();
         $this->assertSame(0, $fresh->password_expiry_waives);
+        $this->assertNull($fresh->password_expiry_waived_until);
         $this->assertFalse($fresh->isPasswordExpired());
     }
 }

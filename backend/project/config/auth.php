@@ -182,6 +182,7 @@ return [
         // gated until it is changed.
         'password_expiry_days' => (int) env('ADMIN_PASSWORD_EXPIRY_DAYS', 90),
         'password_expiry_max_waives' => (int) env('ADMIN_PASSWORD_EXPIRY_MAX_WAIVES', 3),
+        'password_expiry_waive_days' => (int) env('ADMIN_PASSWORD_EXPIRY_WAIVE_DAYS', 7),
         'two_factor' => [
             'enabled' => (bool) env('ADMIN_2FA_ENABLED', true),
             'trust_window' => (int) env('ADMIN_2FA_TRUST_WINDOW', 43200),

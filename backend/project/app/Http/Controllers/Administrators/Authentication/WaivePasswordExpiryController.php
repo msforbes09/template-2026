@@ -18,7 +18,7 @@ class WaivePasswordExpiryController extends Controller
     #[OA\Post(
         path: '/password/waive-expiry',
         summary: 'Postpone an expired password',
-        description: 'Uses one of ADMIN_PASSWORD_EXPIRY_MAX_WAIVES postponements on an expired password and returns the refreshed profile. Refused when the password has not expired or no postponements remain; the counter resets on the next password change.',
+        description: 'Uses one of ADMIN_PASSWORD_EXPIRY_MAX_WAIVES postponements on an expired password: the expiry moves ADMIN_PASSWORD_EXPIRY_WAIVE_DAYS forward and the refreshed profile is returned. Refused when the password has not expired or no postponements remain; both reset on the next password change.',
         security: [['bearerAuth' => []]],
         tags: ['Authentication'],
         responses: [

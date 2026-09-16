@@ -2,8 +2,6 @@
 
 namespace App\Models\Users\Requests;
 
-use App\Models\Users\User;
-use App\Rules\NotRecentlyUsedPassword;
 use App\Rules\Turnstile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -32,12 +30,10 @@ class ResetUserPasswordRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'otp' => ['required', 'string'],
-            'new_password' => [
-                'required',
-                'confirmed',
-                Password::min(8)->mixedCase()->numbers()->symbols(),
-                new NotRecentlyUsedPassword(User::resettableAccount((string) $this->input('email'))),
-            ],
+            // Reuse against the account's history is checked in resetPasswordWithOtp(),
+            // AFTER the OTP is verified: a rule here would run pre-auth and let anyone
+            // test passwords against an address with a garbage code.
+            'new_password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
             'captcha' => [Rule::requiredIf((bool) config('services.turnstile.enabled')), new Turnstile],
         ];
     }
