@@ -135,7 +135,7 @@
             urls: urls,
             "urls.primaryName": "{{ $documentationTitle }}",
             tagsSorter: function (a, b) {
-                var order = ['Registration', 'Authentication', 'Profile', 'Password', 'Activation', 'Users', 'eGov Events', 'Projects', 'Project Reviews', 'Catalog Reviews', 'ApiCatalogs', 'Access', 'Administrators', 'Contents', 'Documentations', 'Feature Flags', 'OTP', 'Files'];
+                var order = ['Registration', 'Authentication', 'Profile', 'Password', 'Activation', 'Users', 'eGov Events', 'Projects', 'Project Reviews', 'Catalog Reviews', 'ApiCatalogs', 'Access', 'Administrators', 'Contents', 'Documentations', 'Feature Flags', 'Horizon', 'OTP', 'Files'];
                 var ia = order.indexOf(a);
                 var ib = order.indexOf(b);
                 if (ia === -1 && ib === -1) return a.localeCompare(b);

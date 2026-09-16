@@ -24,3 +24,12 @@ New env vars, queues, workers, external services.
 ```
 
 See `2026-09-15-example-production-release.md` for a filled-in example.
+
+## Standing prerequisites (every environment)
+
+- A reachable Redis: Horizon (queues), cache and sessions all run on it.
+  `REDIS_HOST`/`REDIS_PASSWORD`/`REDIS_SCHEME` per environment.
+- `COMPOSE_HORIZON_PORT` published and its subdomain routed to it;
+  `HORIZON_URL` set to that public origin so the admin console's handoff
+  link resolves.
+- After each deploy: `php artisan horizon:terminate` (pm2 relaunches it).

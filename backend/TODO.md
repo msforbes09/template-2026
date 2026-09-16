@@ -32,6 +32,9 @@ something is put off in a design or a review, add it here in the same change.
 
 ## Ops / Docker
 
+- **Done (2026-09-16):** queue workers moved from five pm2 `queue:work` processes to Laravel Horizon on Redis (`config/horizon.php`, one supervisor per environment over `default, mailer, audit, connection, search`); queue, cache and sessions on Redis; dashboard on its own nginx listener (`COMPOSE_HORIZON_PORT`) gated by a signed handoff from the admin console (`POST administrator/horizon/access`, developer-access). Redis stays outside the compose stack by decision. Spec: `docs/superpowers/specs/2026-09-16-horizon-design.md`.
+- **Deferred:** Horizon notifications (long-wait alerts to Slack/mail) — no channel chosen yet.
+
 ## API Documentation
 
 ## Realtime / Broadcasting

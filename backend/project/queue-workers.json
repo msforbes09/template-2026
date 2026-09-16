@@ -1,5 +1,18 @@
 [
     {
+        "name": "horizon",
+        "interpreter": "php",
+        "script": "artisan",
+        "args": [
+            "horizon"
+        ],
+        "instances": 1,
+        "exec_mode": "fork",
+        "autostart": true,
+        "watch": false,
+        "max_memory_restart": "1G"
+    },
+    {
         "name": "worker-scheduler",
         "interpreter": "php",
         "script": "artisan",
@@ -11,85 +24,6 @@
         "exec_mode": "fork",
         "cron": "* * * * *",
         "autorestart": false,
-        "watch": false,
-        "max_memory_restart": "1G"
-    },
-    {
-        "name": "worker-default",
-        "interpreter": "php",
-        "script": "artisan",
-        "args": [
-            "queue:work",
-            "--tries=3",
-            "--timeout=0"
-        ],
-        "instances": 1,
-        "exec_mode": "fork",
-        "autostart": true,
-        "watch": false,
-        "max_memory_restart": "1G"
-    },
-    {
-        "name": "worker-mailer",
-        "interpreter": "php",
-        "script": "artisan",
-        "args": [
-            "queue:work",
-            "--queue=mailer",
-            "--tries=3",
-            "--timeout=0"
-        ],
-        "instances": 1,
-        "exec_mode": "fork",
-        "autostart": true,
-        "watch": false,
-        "max_memory_restart": "1G"
-    },
-    {
-        "name": "worker-audit",
-        "interpreter": "php",
-        "script": "artisan",
-        "args": [
-            "queue:work",
-            "--queue=audit",
-            "--tries=3",
-            "--timeout=0"
-        ],
-        "instances": 1,
-        "exec_mode": "fork",
-        "autostart": true,
-        "watch": false,
-        "max_memory_restart": "1G"
-    },
-    {
-        "name": "worker-connection",
-        "interpreter": "php",
-        "script": "artisan",
-        "args": [
-            "queue:work",
-            "--queue=connection",
-            "--tries=3",
-            "--timeout=0"
-        ],
-        "instances": 1,
-        "exec_mode": "fork",
-        "autostart": true,
-        "watch": false,
-        "max_memory_restart": "1G"
-    },
-    {
-        "name": "worker-search",
-        "interpreter": "php",
-        "script": "artisan",
-        "args": [
-            "queue:work",
-            "--queue=search",
-            "--tries=3",
-            "--timeout=0"
-        ],
-        "instances": 1,
-        "exec_mode": "fork",
-        "autostart": true,
         "watch": false,
         "max_memory_restart": "1G"
     },

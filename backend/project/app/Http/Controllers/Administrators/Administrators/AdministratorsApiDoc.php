@@ -25,6 +25,7 @@ use OpenApi\Attributes as OA;
 #[OA\Tag(name: 'Broadcasts', description: 'Announcements pushed into the user notification center (all / filtered / single user), with history.')]
 #[OA\Tag(name: 'Gallery', description: 'Public gallery images (list / upload / delete).')]
 #[OA\Tag(name: 'Logs', description: 'Other operational logs (connections, authentication attempts, audit trail) — read-only lists, OpenSearch-backed with MySQL fallback.')]
+#[OA\Tag(name: 'Horizon', description: 'Signed handoff into the Horizon queue dashboard, reserved for developer admins via the developer-access login-time ability.')]
 #[OA\Tag(name: 'Feature Flags', description: 'Runtime feature flags — list + toggle (developer applications, review surfaces, maintenance mode). The whole surface is reserved for developer admins via the developer-access login-time ability.')]
 #[OA\Schema(schema: 'File', type: 'object', properties: [
     new OA\Property(property: 'uuid', type: 'string', example: '9e2be7f8-9853-43a2-8b8b-a216a3585951'),

@@ -35,6 +35,7 @@ use App\Http\Controllers\Administrators\FeatureFlags\UpdateFeatureFlagController
 use App\Http\Controllers\Administrators\Galleries\CreateGalleryController;
 use App\Http\Controllers\Administrators\Galleries\DeleteGalleryController;
 use App\Http\Controllers\Administrators\Galleries\ListGalleryController;
+use App\Http\Controllers\Administrators\Horizon\CreateHorizonAccessController;
 use App\Http\Controllers\Administrators\Logs\ListAuditLogController;
 use App\Http\Controllers\Administrators\Logs\ListAuthAttemptLogController;
 use App\Http\Controllers\Administrators\Logs\ListConnectionLogController;
@@ -152,6 +153,10 @@ Route::prefix('administrator')->group(function () {
             // developer-access VIRTUAL ability (granted at login to is_developer
             // admins only, never via roles or seeding) — feature flags are a
             // developer/ops concern, not a delegated admin task.
+            // Developer-only: mint a signed link into the Horizon dashboard.
+            Route::post('horizon/access', CreateHorizonAccessController::class)
+                ->middleware('abilities:'.PermissionEnum::DEVELOPER_ACCESS);
+
             Route::prefix('feature-flags')->middleware('abilities:'.PermissionEnum::DEVELOPER_ACCESS)->group(function () {
                 Route::get('/', ListFeatureFlagsController::class);
                 Route::put('{name}', UpdateFeatureFlagController::class);

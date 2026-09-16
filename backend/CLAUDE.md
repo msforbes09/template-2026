@@ -20,6 +20,7 @@ This is a Dockerized workspace, not a bare Laravel app. Two levels matter:
 - **nginx** — reverse proxy in front of PHP-FPM (see `ops/docker/nginx/`)
 - **SQLite** default DB for local/testing; the fpm image also bundles `pdo_mysql` and `redis` extensions for other environments
 - **PHPUnit 12** for testing; **Laravel Pint** for code style
+- **Laravel Horizon** on Redis for every queue worker (`config/horizon.php`, pm2 `horizon` process); Redis also backs the cache and sessions. Redis itself runs outside this workspace
 - **Laravel Sanctum** bearer tokens on two guards: `administrators` (`api/v1/administrator/*`) and `users` (`api/v1/user/*`); `spatie/laravel-permission` for admin roles and permissions
 - **owen-it/laravel-auditing** for the audit trail; **laravel/scout** + OpenSearch drivers for the optional search read path; **laravel/reverb** for WebSockets
 - **darkaonline/l5-swagger** for OpenAPI docs (see *API Documentation* below)
@@ -44,6 +45,8 @@ php artisan test --testsuite=Unit          # or Feature
 
 php artisan pail                           # tail application logs
 php artisan l5-swagger:generate            # regenerate the OpenAPI JSON
+php artisan horizon:terminate              # restart the Horizon workers (pm2 relaunches them)
+php artisan horizon:status                 # is Horizon running
 ```
 
 Docker (from the **workspace root**):
@@ -62,11 +65,13 @@ The `app` container boots via `project/entry-point.sh`, which on every start:
 1. `composer dump-autoload`
 2. `php artisan optimize` — cache config/routes/views
 3. When `SCOUT_DRIVER=opensearch`: `opensearch:apply-lifecycle` and `opensearch:migrate` (both `|| true`, so an unreachable cluster never blocks boot)
-4. `pm2 start queue-workers.json` — launch background workers under pm2
+4. `pm2 start queue-workers.json` — launch Horizon, the scheduler and Reverb under pm2
 5. `php artisan test:logger "Container started"` — a boot notice through the log pipeline
 6. `php-fpm`
 
-`project/queue-workers.json` defines the pm2-managed processes: **worker-scheduler** (`schedule:run` every minute), **worker-default** (`queue:work`), dedicated per-queue workers **mailer**, **audit**, **connection**, **search**, and **reverb-server**. **A new dedicated queue needs a matching `worker-*` entry here.** The default queue and scheduler both rely on the DB connection (`QUEUE_CONNECTION=database`).
+`project/queue-workers.json` defines the pm2-managed processes: **horizon** (`php artisan horizon`, which supervises every queue worker), **worker-scheduler** (`schedule:run` every minute) and **reverb-server**. Queues, process counts, tries and timeouts live in `config/horizon.php`, one supervisor per environment. **A new dedicated queue is added to the supervisor's `queue` list there** (`HorizonConfigTest` pins it); `QueueWorkersTest` pins the pm2 list. The scheduler runs `horizon:snapshot` every five minutes for the dashboard metrics.
+
+The Horizon dashboard is served by nginx on its own listener (`:8081` → `COMPOSE_HORIZON_PORT`, a subdomain on servers) and never on the API port. It opens freely in `local`; elsewhere the admin console's "Open Horizon" button calls `POST administrator/horizon/access` (developer admins only) for a one-minute signed link that authorises the browser session (`HorizonServiceProvider`).
 
 Logs default to file; a `cloudwatch` channel (`config/logging.php` → `App\Logging\CloudWatchLoggerFactory`) ships them to AWS CloudWatch when enabled per environment via `LOG_STACK=single,cloudwatch`. It is IAM-role-safe and wrapped so a CloudWatch outage never breaks a request.
 
@@ -90,6 +95,8 @@ Logs default to file; a `cloudwatch` channel (`config/logging.php` → `App\Logg
 
 - **PHP code**: reloads live (`opcache.validate_timestamps=1` in the `develop` image).
 - **Cached config/routes**: `entry-point.sh` runs `php artisan optimize` on start; run `php artisan optimize:clear` inside the container after config/route changes.
+- **Queue workers hold config in memory**: after any config or code change that a job depends on, also run `php artisan horizon:terminate` inside the container — pm2 relaunches Horizon with the fresh state. Without it the workers keep the old config (a renamed OTP type once failed every reset email this way).
+- **Redis** is not part of the compose stack: run it from a standalone compose file on the host and set `REDIS_HOST=host.docker.internal`.
 - **Image config** (`user.ini`, `www.conf`, nginx confs, Dockerfiles): requires `docker compose build`.
 
 ## Testing Notes
