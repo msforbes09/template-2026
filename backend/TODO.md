@@ -7,6 +7,8 @@ something is put off in a design or a review, add it here in the same change.
 
 ## Authentication & Authorization
 
+- **Done (2026-09-16):** password history and minimum age on both guards. `password_histories` (morph `owner`, hash per set, pruned to `PASSWORD_HISTORY_LIMIT`, default 5) and `password_changed_at` on `administrators` and `users`, both maintained by `HasPasswordHistory` model events so every set path is covered; the migration backfills from the current hash and `updated_at`. `NotRecentlyUsedPassword` on the admin change, user change and user reset requests (`422` on `new_password`); `assertPasswordOldEnoughToChange()` in `changePassword()` / `updatePassword()` throws `password_changed_too_recently` (`400`, `meta.available_at`) inside `PASSWORD_MIN_AGE_HOURS` (default 24) — temporary-password changes and OTP resets exempt. Reset-to-current-password is now the `422` reuse error rather than `password_unchanged`.
+
 - **Deferred:** active-sessions list with per-session and revoke-all endpoints (`GET/DELETE administrator|user/sessions`). Both guards run single-session today (`Authenticates::authenticate()` deletes every prior token), so there is never more than one row to show. Revisit if multi-device sessions are ever allowed.
 
 ## Users

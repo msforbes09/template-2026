@@ -34,6 +34,8 @@ trait ManagesPassword
      */
     public function updatePassword(string $newPassword): string
     {
+        $this->assertPasswordOldEnoughToChange();
+
         $this->update(['password' => $newPassword]);
         $this->resetTwoFactorState();
         static::recordAuthEvent(AuthEventEnum::PASSWORD_CHANGED, $this->email, $this);
@@ -97,8 +99,10 @@ trait ManagesPassword
      * The account a reset for this email would apply to — one that owns the
      * address and has a password — or null (no such account / SSO-only).
      */
-    protected static function resettableAccount(string $email): ?static
+    public static function resettableAccount(string $email): ?static
     {
+        $email = static::normalizeEmail($email);
+
         return static::query()->whereHashed('email', $email)->whereNotNull('password')->first();
     }
 }

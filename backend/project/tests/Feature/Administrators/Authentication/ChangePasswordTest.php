@@ -46,6 +46,8 @@ class ChangePasswordTest extends TestCase
     {
         $administrator = Administrator::factory()->create(['password' => 'Current@123', 'with_temporary_password' => false]);
         $oldToken = $administrator->createToken('old')->plainTextToken;
+        // Past the minimum password age (travelling instead would also expire the token).
+        $administrator->forceFill(['password_changed_at' => now()->subDays(2)])->save();
 
         $response = $this->withToken($oldToken)->postJson('/api/v1/administrator/change-password', [
             'current_password' => 'Current@123',

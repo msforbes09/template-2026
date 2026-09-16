@@ -139,6 +139,7 @@ class AuthAttemptLogTest extends TestCase
     public function test_a_password_change_is_recorded(): void
     {
         $admin = $this->admin();
+        $this->travel(25)->hours(); // past the minimum password age
 
         $admin->changePassword('a-new-password');
 

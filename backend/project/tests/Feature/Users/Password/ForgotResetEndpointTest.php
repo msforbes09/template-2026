@@ -84,7 +84,7 @@ class ForgotResetEndpointTest extends TestCase
     /**
      * Resetting to the current password is rejected.
      */
-    public function test_reset_to_same_password_returns_400(): void
+    public function test_reset_to_same_password_is_a_validation_error(): void
     {
         Mail::fake();
         $this->user();
@@ -99,6 +99,6 @@ class ForgotResetEndpointTest extends TestCase
         $this->postJson('/api/v1/user/reset-password', [
             'email' => 'user@example.com', 'otp' => $pin,
             'new_password' => 'Secret@123', 'new_password_confirmation' => 'Secret@123',
-        ])->assertStatus(400)->assertJson(['error' => 'password_unchanged']);
+        ])->assertStatus(422)->assertJsonValidationErrors('new_password');
     }
 }

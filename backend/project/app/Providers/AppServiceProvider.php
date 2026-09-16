@@ -20,6 +20,7 @@ use App\Models\Misc\Connections\Connection;
 use App\Models\Misc\Files\File;
 use App\Models\Misc\Galleries\Gallery;
 use App\Models\Misc\Otps\Otp;
+use App\Models\Misc\PasswordHistories\PasswordHistory;
 use App\Models\Notifications\Notification;
 use App\Models\Users\User;
 use App\Notifications\Channels\DatabaseChannel;
@@ -69,6 +70,7 @@ class AppServiceProvider extends ServiceProvider
             'Permission' => Permission::class,
             'PermissionGroup' => PermissionGroup::class,
             'Otp' => Otp::class,
+            'PasswordHistory' => PasswordHistory::class,
             'Audit' => Audit::class,
             'AuthAttempt' => AuthAttempt::class,
             'Connection' => Connection::class,

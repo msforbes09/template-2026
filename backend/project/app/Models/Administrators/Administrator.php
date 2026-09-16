@@ -8,6 +8,7 @@ use App\Models\Administrators\Concerns\AdministratorNotifications;
 use App\Models\Administrators\Concerns\TwoFactorAuthenticates;
 use App\Models\Concerns\Authenticates;
 use App\Models\Concerns\Filterable;
+use App\Models\Concerns\HasPasswordHistory;
 use App\Models\Concerns\UploadsFiles;
 use App\Models\Misc\Files\File;
 use Database\Factories\Administrators\AdministratorFactory;
@@ -35,6 +36,7 @@ class Administrator extends Authenticatable implements Auditable
     /** @use HasFactory<AdministratorFactory> */
     use HasFactory;
 
+    use HasPasswordHistory;
     use HasRoles;
     use SoftDeletes;
     use TwoFactorAuthenticates;

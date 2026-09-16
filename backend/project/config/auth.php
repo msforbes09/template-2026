@@ -160,6 +160,15 @@ return [
     |
     */
 
+    'password_policy' => [
+        // Block reuse of the last N passwords, the current one included. 0 disables.
+        'history_limit' => (int) env('PASSWORD_HISTORY_LIMIT', 5),
+
+        // Hours a password must be held before it may be changed voluntarily; resets
+        // and forced changes are exempt. 0 disables.
+        'min_age_hours' => (int) env('PASSWORD_MIN_AGE_HOURS', 24),
+    ],
+
     'administrators' => [
         'token_inactivity_minutes' => (int) env('ADMIN_TOKEN_INACTIVITY_MINUTES', 60),
 

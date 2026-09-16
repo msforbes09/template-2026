@@ -31,6 +31,7 @@ class ChangePasswordTest extends TestCase
     public function test_change_password_succeeds(): void
     {
         Sanctum::actingAs($this->user(), ['*'], 'users');
+        $this->travel(25)->hours(); // past the minimum password age
 
         $this->postJson('/api/v1/user/change-password', [
             'current_password' => 'Secret@123',

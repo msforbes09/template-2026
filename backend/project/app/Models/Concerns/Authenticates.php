@@ -124,6 +124,11 @@ trait Authenticates
      */
     public function changePassword(string $password): string
     {
+        // The forced change of a temporary password is exempt from the minimum age.
+        if (! $this->with_temporary_password) {
+            $this->assertPasswordOldEnoughToChange();
+        }
+
         $this->update([
             'password' => $password,
             'with_temporary_password' => false,

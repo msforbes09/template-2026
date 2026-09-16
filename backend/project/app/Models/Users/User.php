@@ -9,6 +9,7 @@ use App\Models\Concerns\Authenticates;
 use App\Models\Concerns\EncryptsPii;
 use App\Models\Concerns\Filterable;
 use App\Models\Concerns\HasAddress;
+use App\Models\Concerns\HasPasswordHistory;
 use App\Models\Concerns\UploadsFiles;
 use App\Models\Misc\Files\File;
 use App\Models\Notifications\Notification;
@@ -45,6 +46,7 @@ class User extends Authenticatable implements Auditable
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
+    use HasPasswordHistory;
     use HasUuids;
     use ManagesPassword;
     use ManagesProfile;

@@ -34,11 +34,8 @@ class ResetPasswordController extends Controller
         )),
         responses: [
             new OA\Response(response: 200, description: 'Reset', content: new OA\JsonContent(properties: [new OA\Property(property: 'token', type: 'string', example: '9|abc...plaintext')])),
-            new OA\Response(response: 400, description: 'Invalid code or unchanged password', content: new OA\JsonContent(ref: '#/components/schemas/BadRequestError', examples: [
-                new OA\Examples(example: 'invalid_otp', summary: 'Wrong or expired code', value: ['error' => 'invalid_otp', 'message' => 'The code is invalid or has expired.', 'error_description' => 'The code is invalid or has expired.']),
-                new OA\Examples(example: 'password_unchanged', summary: 'Same as current', value: ['error' => 'password_unchanged', 'message' => 'The new password must be different from your current password.', 'error_description' => 'The new password must be different from your current password.']),
-            ])),
-            new OA\Response(response: 422, description: 'Validation error', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
+            new OA\Response(response: 400, description: 'Invalid code', content: new OA\JsonContent(ref: '#/components/schemas/BadRequestError', example: ['error' => 'invalid_otp', 'message' => 'The code is invalid or has expired.', 'error_description' => 'The code is invalid or has expired.'])),
+            new OA\Response(response: 422, description: 'Validation error (weak, or a recently used password — the current one included)', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError', example: ['message' => 'You have used this password recently. Please choose a different one.', 'errors' => ['new_password' => ['You have used this password recently. Please choose a different one.']]])),
             new OA\Response(response: 429, description: 'OTP locked / too many requests', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsError')),
         ],
     )]
