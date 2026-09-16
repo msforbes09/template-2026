@@ -60,15 +60,73 @@ describe("IdleSessionWatcher", () => {
     expect(screen.getByRole("alertdialog")).toBeInTheDocument();
   });
 
-  it("signs out and leaves when the countdown reaches zero", async () => {
+  it("asks the server at zero and signs out only when the session is really gone", async () => {
+    const props = mount({
+      keepAlive: vi.fn().mockResolvedValue({ ok: false, status: 401, message: "Unauthenticated.", errors: {} }),
+    });
+    act(() => vi.advanceTimersByTime(10 * MINUTE));
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(props.keepAlive).toHaveBeenCalledTimes(1);
+    expect(props.signOut).toHaveBeenCalledTimes(1);
+    expect(props.navigate).toHaveBeenCalledWith("/admin/login");
+  });
+
+  it("keeps going when the server says the session is still alive at zero", async () => {
     const props = mount();
     act(() => vi.advanceTimersByTime(10 * MINUTE));
     await act(async () => {
       await Promise.resolve();
     });
 
+    expect(props.keepAlive).toHaveBeenCalledTimes(1);
+    expect(props.signOut).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    act(() => vi.advanceTimersByTime(9 * MINUTE));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+  });
+
+  it("works with the production defaults, where no navigate is injected", async () => {
+    const props = {
+      windowMinutes: 10,
+      keepAlive: vi.fn().mockResolvedValue({ ok: false, status: 401, message: "Unauthenticated.", errors: {} }),
+      signOut: vi.fn().mockResolvedValue(undefined),
+      redirectTo: "/admin/login",
+    };
+    const location = { href: "" };
+    Object.defineProperty(window, "location", { value: location, writable: true, configurable: true });
+    render(<IdleSessionWatcher {...props} />);
+
+    act(() => vi.advanceTimersByTime(9 * MINUTE));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(30_000));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(/30 seconds/i);
+
+    act(() => vi.advanceTimersByTime(30_000));
+    await act(async () => {
+      await Promise.resolve();
+    });
     expect(props.signOut).toHaveBeenCalledTimes(1);
-    expect(props.navigate).toHaveBeenCalledWith("/admin/login");
+    expect(location.href).toBe("/admin/login");
+  });
+
+  it("does not restart the countdown when the parent re-renders with new callbacks", () => {
+    const first = {
+      windowMinutes: 10,
+      keepAlive: vi.fn(),
+      signOut: vi.fn(),
+      redirectTo: "/admin/login",
+      navigate: vi.fn(),
+    };
+    const { rerender } = render(<IdleSessionWatcher {...first} />);
+    act(() => vi.advanceTimersByTime(9 * MINUTE + 20_000));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(/40 seconds/i);
+
+    rerender(<IdleSessionWatcher {...first} keepAlive={vi.fn()} signOut={vi.fn()} navigate={vi.fn()} />);
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(/30 seconds/i);
   });
 
   it("signs out when the keep-alive is refused", async () => {

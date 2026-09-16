@@ -26,7 +26,7 @@ export function PasswordExpiryNotice({
     startTransition(async () => {
       const result = await waivePasswordExpiry();
       if (result.ok) {
-        toast.success("Reminder postponed. You'll see this again on your next sign-in.");
+        toast.success("Password expiry postponed. You'll be reminded again when it runs out.");
         router.refresh();
         return;
       }

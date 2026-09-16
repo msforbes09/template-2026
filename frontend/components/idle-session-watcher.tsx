@@ -15,6 +15,14 @@ import { idleSchedule } from "@/lib/idle-session";
 
 export type KeepAliveResult = ActionResult<{ session_inactivity_minutes?: number }>;
 
+// A FULL PAGE LOAD, as every sign-out in this app does: cacheComponents keeps
+// hidden routes' state alive across soft navigations. Module-level so its
+// identity is stable — a default written inline in the parameter list is a
+// new function on every render, which would churn every hook that lists it.
+function hardNavigate(href: string) {
+  window.location.href = href;
+}
+
 // The client half of the backend's sliding session: the server expires a
 // bearer token `session_inactivity_minutes` after its last request, so this
 // counts that same window down from the render that read it, warns one
@@ -26,17 +34,18 @@ export type KeepAliveResult = ActionResult<{ session_inactivity_minutes?: number
 // do not reach the server, so they do not move its clock. The window restarts
 // only when a request does — a navigation re-renders the mount with a fresh
 // value, and "Stay signed in" makes one on purpose.
+//
+// When the countdown reaches zero the server is asked, not assumed: another
+// tab or a server action may have slid the token without this mount noticing,
+// and signing out then would revoke a live session. A refused keep-alive is
+// the real "expired" signal; a successful one just restarts the window.
 export function IdleSessionWatcher({
   windowMinutes,
   warningSeconds = 60,
   keepAlive,
   signOut,
   redirectTo,
-  navigate = (href) => {
-    // A FULL PAGE LOAD, as every sign-out in this app does: cacheComponents
-    // keeps hidden routes' state alive across soft navigations.
-    window.location.href = href;
-  },
+  navigate = hardNavigate,
 }: {
   windowMinutes: number | undefined;
   warningSeconds?: number;
@@ -60,13 +69,35 @@ export function IdleSessionWatcher({
   const [remaining, setRemaining] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const leaving = useRef(false);
+  // The callbacks live in a ref so the timer effect never restarts because a
+  // parent re-rendered with a new function identity. Updated in an effect, not
+  // during render, as the compiler requires; the timers only read it later.
+  const callbacks = useRef({ keepAlive, signOut, navigate, redirectTo });
+  useEffect(() => {
+    callbacks.current = { keepAlive, signOut, navigate, redirectTo };
+  });
 
   const leave = useCallback(async () => {
     if (leaving.current) return;
     leaving.current = true;
-    await signOut();
-    navigate(redirectTo);
-  }, [navigate, redirectTo, signOut]);
+    await callbacks.current.signOut();
+    callbacks.current.navigate(callbacks.current.redirectTo);
+  }, []);
+
+  // Ask the server whether the session is still alive; restart the window if
+  // it is, leave if it is not.
+  const confirmOrLeave = useCallback(async () => {
+    setBusy(true);
+    const result = await callbacks.current.keepAlive();
+    setBusy(false);
+    if (!result.ok) {
+      await leave();
+      return;
+    }
+    if (result.data.session_inactivity_minutes) setMinutes(result.data.session_inactivity_minutes);
+    setRemaining(null);
+    setCycle((n) => n + 1);
+  }, [leave]);
 
   useEffect(() => {
     const schedule = idleSchedule(minutes, warningSeconds);
@@ -81,7 +112,7 @@ export function IdleSessionWatcher({
         setRemaining(left);
         if (left === 0) {
           clearInterval(tick);
-          void leave();
+          void confirmOrLeave();
         }
       };
       update();
@@ -91,22 +122,8 @@ export function IdleSessionWatcher({
     return () => {
       clearTimeout(warn);
       clearInterval(tick);
-      setRemaining(null);
     };
-  }, [minutes, warningSeconds, cycle, leave]);
-
-  async function stay() {
-    setBusy(true);
-    const result = await keepAlive();
-    setBusy(false);
-    if (!result.ok) {
-      await leave();
-      return;
-    }
-    if (result.data.session_inactivity_minutes) setMinutes(result.data.session_inactivity_minutes);
-    setRemaining(null);
-    setCycle((n) => n + 1);
-  }
+  }, [minutes, warningSeconds, cycle, confirmOrLeave]);
 
   if (remaining === null) return null;
 
@@ -125,7 +142,7 @@ export function IdleSessionWatcher({
             disabled={busy}
             onClick={(event) => {
               event.preventDefault();
-              void stay();
+              void confirmOrLeave();
             }}
           >
             Stay signed in
