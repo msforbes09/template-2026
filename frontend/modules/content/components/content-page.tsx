@@ -23,7 +23,7 @@ export function ContentPage({
         <div className="mb-6 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.04em] text-primary">
           <span
             aria-hidden
-            className="h-px w-8 bg-gradient-to-r from-primary via-destructive to-sun"
+            className="h-px w-8 bg-gradient-to-r from-primary via-destructive to-highlight"
           />
           {kicker}
         </div>
