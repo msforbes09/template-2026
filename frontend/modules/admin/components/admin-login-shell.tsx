@@ -16,7 +16,7 @@ export function AdminLoginShell() {
         </Link>
         <div className="relative max-w-md space-y-4">
           <span className="inline-flex size-11 items-center justify-center rounded-lg bg-white/10">
-            <ShieldCheck aria-hidden className="size-5 text-sun" />
+            <ShieldCheck aria-hidden className="size-5 text-highlight" />
           </span>
           <h1 className="text-3xl font-semibold tracking-tight text-balance text-white">
             Administer the platform

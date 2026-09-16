@@ -90,7 +90,7 @@ export function AuthCard({
           <PanelLockup />
           <div className="mt-10 max-w-xl xl:mt-12">
             <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-white/70">
-              <span aria-hidden className="size-1.5 rounded-full bg-sun" />
+              <span aria-hidden className="size-1.5 rounded-full bg-highlight" />
               {env.NEXT_PUBLIC_APP_NAME}
             </p>
             <h2 className="mt-4 text-[clamp(1.9rem,2.6vw,2.75rem)] font-semibold leading-[1.08] tracking-tight text-white">
