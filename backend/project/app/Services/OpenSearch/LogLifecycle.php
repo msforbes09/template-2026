@@ -175,11 +175,11 @@ class LogLifecycle
 
     /**
      * The retention window in days (ISM has no month unit): months * 365 / 12, so
-     * 12 months resolves to exactly 365 days.
+     * the default 3 months resolves to 91 days and 12 to exactly 365.
      */
     private function retentionDays(): int
     {
-        $months = (int) config('opensearch.lifecycle.retention_months', 12);
+        $months = (int) config('opensearch.lifecycle.retention_months', 3);
 
         return (int) round($months * 365 / 12);
     }

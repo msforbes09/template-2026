@@ -19,35 +19,6 @@ services:
       - app-local-network
     cap_add:
       - SYS_PTRACE
-    # Uncomment when running OpenSearch locally (see below).
-    # depends_on:
-    #   - opensearch
-
-  # Local OpenSearch for log analytics — OPTIONAL and off by default. To enable:
-  # uncomment this service and the `depends_on` above, then set
-  # SCOUT_DRIVER=opensearch and OPENSEARCH_READ_ENABLED=true in project/.env.
-  # Single-node, security plugin disabled (plain HTTP on 9200) — access in real
-  # environments is infra-gated (VPC), so the app never signs requests.
-  # opensearch:
-  #   image: opensearchproject/opensearch:3
-  #   container_name: ${COMPOSE_PROJECT_NAME}-os
-  #   restart: unless-stopped
-  #   environment:
-  #     - discovery.type=single-node
-  #     - bootstrap.memory_lock=true
-  #     - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-  #     - "DISABLE_INSTALL_DEMO_CONFIG=true"
-  #     - "DISABLE_SECURITY_PLUGIN=true"
-  #   ulimits:
-  #     memlock:
-  #       soft: -1
-  #       hard: -1
-  #   volumes:
-  #     - ./data-opensearch:/usr/share/opensearch/data:delegated
-  #   ports:
-  #     - "${COMPOSE_OS_PORT}:9200"
-  #   networks:
-  #     - app-local-network
 
   nginx:
     build:

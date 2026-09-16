@@ -23,7 +23,7 @@ class BackfillLogsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'opensearch:backfill-logs {--model= : One resource key (gateway_logs|connections|auth_attempts|audits); all if omitted} {--months=12 : How many months back to scan, including the current} {--chunk=500 : Rows per bulk request}';
+    protected $signature = 'opensearch:backfill-logs {--model= : One resource key (gateway_logs|connections|auth_attempts|audits); all if omitted} {--months=3 : How many months back to scan, including the current (matches the default retention)} {--chunk=500 : Rows per bulk request}';
 
     /**
      * The console command description.

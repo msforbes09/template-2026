@@ -13,13 +13,13 @@ return [
     | deletes backing indices past the retention window — OpenSearch manages it,
     | no Laravel scheduler. Applied at deploy by `opensearch:apply-lifecycle`.
     | Retention is expressed in months but converted to days (ISM has no month
-    | unit); 12 months => 365d.
+    | unit); 3 months => 91d. Older history stays in the monthly MySQL tables.
     |
     */
 
     'policy_id' => env('OPENSEARCH_LIFECYCLE_POLICY_ID', 'template_logs_policy'),
 
-    'retention_months' => max(1, (int) env('OPENSEARCH_LOG_RETENTION_MONTHS', 12)),
+    'retention_months' => max(1, (int) env('OPENSEARCH_LOG_RETENTION_MONTHS', 3)),
 
     'rollover_age' => env('OPENSEARCH_LOG_ROLLOVER_AGE', '30d'),
 
