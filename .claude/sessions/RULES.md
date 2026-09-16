@@ -36,6 +36,13 @@ merge, explicit first push, TDD Iron Law). These are the practices layered on to
 - Browser automation is localhost-only. Never point Claude-driven tabs at staging
   or production.
 
+## Agents
+- `backend-developer` / `frontend-developer` implement an agreed todo item under the
+  TDD loop; `skeptic-reviewer` reviews the diff and `qa-tester` runs the baselines
+  and localhost checks before the PR is opened. Agents never commit, push or merge.
+- The PreToolUse hooks in `.claude/hooks/` block the destructive commands listed in
+  the root `CLAUDE.md`; a blocked command is the user's to run.
+
 ## Session hygiene
 - At session start: read the newest dated file in this folder.
 - At session end (user says "clear"/"store"): write/update `YYYY-MM-DD.md` here —
