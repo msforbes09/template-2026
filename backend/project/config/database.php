@@ -90,7 +90,7 @@ return [
             'url' => env('DB_LOGS_URL', env('DB_URL')),
             'host' => env('DB_LOGS_HOST', env('DB_HOST', '127.0.0.1')),
             'port' => env('DB_LOGS_PORT', env('DB_PORT', '3306')),
-            'database' => env('DB_LOGS_DATABASE', 'template-logs'),
+            'database' => env('DB_LOGS_DATABASE', env('DB_DATABASE', 'laravel')),
             'username' => env('DB_LOGS_USERNAME', env('DB_USERNAME', 'root')),
             'password' => env('DB_LOGS_PASSWORD', env('DB_PASSWORD', '')),
             'unix_socket' => env('DB_LOGS_SOCKET', env('DB_SOCKET', '')),
