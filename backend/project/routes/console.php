@@ -17,6 +17,9 @@ Artisan::command('inspire', function () {
 // Prune expired, unlocked one-time PINs (and any other Prunable models) daily.
 Schedule::command('model:prune')->daily()->onOneServer();
 
+// Horizon's throughput / wait-time graphs are built from these snapshots.
+Schedule::command('horizon:snapshot')->everyFiveMinutes()->onOneServer();
+
 // Prune failed queue jobs after a week — failed payloads can reference user
 // data (even encrypted ones don't belong in `failed_jobs` indefinitely).
 Schedule::command('queue:prune-failed', ['--hours' => 168])->daily()->onOneServer();
