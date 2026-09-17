@@ -10,11 +10,17 @@ import { getHorizonAccessUrl } from "@/modules/feature-flags/actions/horizon-act
 // the click handler, while the browser still counts it as a user gesture, and
 // only pointed at the signed link once the server action returns — opening it
 // after the await would trip popup blockers.
+//
+// Not opened with the `noopener` feature: per spec window.open then returns
+// null, so the tab could never be pointed anywhere and sat on about:blank.
+// The opener reference is severed by hand instead, which gives the same
+// isolation while keeping our handle on the tab.
 export function OpenHorizonButton() {
   const [isPending, startTransition] = useTransition();
 
   function handleClick() {
-    const tab = window.open("about:blank", "_blank", "noopener");
+    const tab = window.open("about:blank", "_blank");
+    if (tab) tab.opener = null;
 
     startTransition(async () => {
       const result = await getHorizonAccessUrl();
