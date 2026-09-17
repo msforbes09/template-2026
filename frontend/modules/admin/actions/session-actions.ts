@@ -8,6 +8,8 @@ import { logError } from "@/lib/log-error";
 import { verifyAccessToken, identityMatches } from "@/lib/auth/verify-access-token";
 import { clearLocalAdminSession } from "@/modules/admin/lib/clear-local-admin-session";
 import type { WriteSessionResult } from "@/lib/auth/write-session-result";
+import type { ActionResult } from "@/lib/action-result";
+import { requireAdminSession } from "@/lib/auth/dal";
 
 function normalizeSameSite(value: string | undefined) {
   return value?.toLowerCase() as "strict" | "lax" | "none" | undefined;
@@ -74,4 +76,28 @@ export async function clearAdminSession() {
   }
 
   await clearLocalAdminSession();
+}
+
+// One cheap authenticated request so the backend slides the session's
+// inactivity window (`refresh.token` runs on every authenticated route), and
+// the window length back so the client restarts its own countdown from it.
+// Used by IdleSessionWatcher's "Stay signed in"; a failure means the token is
+// already gone and the caller signs out.
+export async function keepAdminSessionAlive(): Promise<ActionResult<{ session_inactivity_minutes?: number }>> {
+  await requireAdminSession();
+
+  try {
+    const { data } = await apiFetch<{ data: { session_inactivity_minutes?: number } }>(
+      "/profile",
+      {},
+      "admin",
+    );
+    return { ok: true, data: { session_inactivity_minutes: data.session_inactivity_minutes } };
+  } catch (err) {
+    if (isApiError(err)) {
+      return { ok: false, status: err.status, message: err.message, errors: err.errors };
+    }
+    await logError(err, { where: "keepAdminSessionAlive action", audience: "admin" });
+    return { ok: false, status: 500, message: "Something went wrong.", errors: {} };
+  }
 }

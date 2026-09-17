@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { AdminSidebar, AdminSidebarSkeleton } from "@/modules/admin/components/admin-sidebar";
 import { AdminHeader } from "@/modules/admin/components/admin-header";
 import { ForcePasswordChangeGate } from "@/modules/admin/components/force-password-change-gate";
+import { AdminIdleSession } from "@/modules/admin/components/admin-idle-session";
 
 function AdminHeaderSkeleton() {
   return (
@@ -45,6 +46,9 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
       </div>
       <Suspense fallback={null}>
         <ForcePasswordChangeGate />
+      </Suspense>
+      <Suspense fallback={null}>
+        <AdminIdleSession />
       </Suspense>
     </div>
   );

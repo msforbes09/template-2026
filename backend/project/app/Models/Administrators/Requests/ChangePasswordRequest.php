@@ -2,6 +2,8 @@
 
 namespace App\Models\Administrators\Requests;
 
+use App\Models\Administrators\Administrator;
+use App\Rules\NotRecentlyUsedPassword;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -32,6 +34,7 @@ class ChangePasswordRequest extends FormRequest
                 'confirmed',
                 'different:current_password',
                 Password::min(8)->mixedCase()->numbers()->symbols(),
+                new NotRecentlyUsedPassword(Administrator::authenticated()),
             ],
         ];
     }

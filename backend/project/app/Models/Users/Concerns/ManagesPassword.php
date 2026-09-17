@@ -7,9 +7,11 @@ use App\Events\Otp\OtpIssued;
 use App\Exceptions\InvalidOtpException;
 use App\Exceptions\PasswordUnchangedException;
 use App\Notifications\Users\PasswordChangedNotification;
+use App\Rules\NotRecentlyUsedPassword;
 use App\Services\Otp\OtpResult;
 use App\Services\Otp\OtpService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Password management for users: authenticated change, and forgot/reset via an
@@ -34,6 +36,8 @@ trait ManagesPassword
      */
     public function updatePassword(string $newPassword): string
     {
+        $this->assertPasswordOldEnoughToChange();
+
         $this->update(['password' => $newPassword]);
         $this->resetTwoFactorState();
         static::recordAuthEvent(AuthEventEnum::PASSWORD_CHANGED, $this->email, $this);
@@ -79,6 +83,11 @@ trait ManagesPassword
 
         if (! $user) {
             throw new InvalidOtpException;
+        }
+
+        // Only now, with the OTP proven: the history check must never run pre-auth.
+        if ($user->hasRecentlyUsedPassword($newPassword)) {
+            throw ValidationException::withMessages(['new_password' => [NotRecentlyUsedPassword::MESSAGE]]);
         }
 
         if (Hash::check($newPassword, $user->password)) {

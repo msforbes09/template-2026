@@ -160,6 +160,15 @@ return [
     |
     */
 
+    'password_policy' => [
+        // Block reuse of the last N passwords, the current one included. 0 disables.
+        'history_limit' => (int) env('PASSWORD_HISTORY_LIMIT', 5),
+
+        // Hours a password must be held before it may be changed voluntarily; resets
+        // and forced changes are exempt. 0 disables.
+        'min_age_hours' => (int) env('PASSWORD_MIN_AGE_HOURS', 24),
+    ],
+
     'administrators' => [
         'token_inactivity_minutes' => (int) env('ADMIN_TOKEN_INACTIVITY_MINUTES', 60),
 
@@ -167,6 +176,13 @@ return [
         // The inactivity window above slides on every request, so without this a
         // token that keeps being used never expires at all.
         'token_absolute_minutes' => (int) env('ADMIN_TOKEN_ABSOLUTE_MINUTES', 480),
+
+        // Days a password stays valid after it is set (0 = never expires), and how
+        // many times an expired password may be postponed before the console is
+        // gated until it is changed.
+        'password_expiry_days' => (int) env('ADMIN_PASSWORD_EXPIRY_DAYS', 90),
+        'password_expiry_max_waives' => (int) env('ADMIN_PASSWORD_EXPIRY_MAX_WAIVES', 3),
+        'password_expiry_waive_days' => (int) env('ADMIN_PASSWORD_EXPIRY_WAIVE_DAYS', 7),
         'two_factor' => [
             'enabled' => (bool) env('ADMIN_2FA_ENABLED', true),
             'trust_window' => (int) env('ADMIN_2FA_TRUST_WINDOW', 43200),

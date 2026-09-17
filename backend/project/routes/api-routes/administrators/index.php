@@ -14,6 +14,7 @@ use App\Http\Controllers\Administrators\Authentication\ChangePasswordController;
 use App\Http\Controllers\Administrators\Authentication\LogoutController;
 use App\Http\Controllers\Administrators\Authentication\ProfileController;
 use App\Http\Controllers\Administrators\Authentication\TwoFactorAuthenticateController;
+use App\Http\Controllers\Administrators\Authentication\WaivePasswordExpiryController;
 use App\Http\Controllers\Administrators\Broadcasting\BroadcastAuthController;
 use App\Http\Controllers\Administrators\Broadcasts\DeleteBroadcastController;
 use App\Http\Controllers\Administrators\Broadcasts\ListBroadcastController;
@@ -72,6 +73,7 @@ Route::prefix('administrator')->group(function () {
     Route::middleware(['auth:administrators', 'refresh.token', 'maintenance:admin'])->group(function () {
         Route::get('profile', ProfileController::class);
         Route::post('change-password', ChangePasswordController::class);
+        Route::post('password/waive-expiry', WaivePasswordExpiryController::class);
         Route::post('logout', LogoutController::class)->withoutMiddleware('maintenance:admin');
 
         // Administrators management — requires an authenticated admin whose

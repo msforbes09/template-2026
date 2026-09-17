@@ -30,6 +30,9 @@ class ResetUserPasswordRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'otp' => ['required', 'string'],
+            // Reuse against the account's history is checked in resetPasswordWithOtp(),
+            // AFTER the OTP is verified: a rule here would run pre-auth and let anyone
+            // test passwords against an address with a garbage code.
             'new_password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
             'captcha' => [Rule::requiredIf((bool) config('services.turnstile.enabled')), new Turnstile],
         ];

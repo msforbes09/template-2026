@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\PasswordExpiredException;
 use App\Exceptions\TemporaryPasswordException;
 use App\Models\Administrators\Administrator;
 use Closure;
@@ -9,8 +10,9 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Block administrators who still hold a temporary password from any route
- * that requires a changed password (self-service routes omit this middleware).
+ * Block administrators who still hold a temporary password, or whose password
+ * has expired with no postponements left, from any route that requires a
+ * current password (self-service routes omit this middleware).
  */
 class EnsurePasswordChanged
 {
@@ -21,8 +23,14 @@ class EnsurePasswordChanged
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Administrator::authenticated()?->with_temporary_password) {
+        $administrator = Administrator::authenticated();
+
+        if ($administrator?->with_temporary_password) {
             throw new TemporaryPasswordException;
+        }
+
+        if ($administrator?->isPasswordExpired() && $administrator->passwordExpiryWaivesRemaining() === 0) {
+            throw new PasswordExpiredException;
         }
 
         return $next($request);

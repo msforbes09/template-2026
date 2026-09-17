@@ -6,7 +6,9 @@ use App\Enums\AuthEventEnum;
 use App\Exceptions\InactiveAccountException;
 use App\Exceptions\InvalidCredentialsException;
 use App\Services\Security\AuthAttemptRecorder;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * Token authentication for a model.
@@ -124,6 +126,11 @@ trait Authenticates
      */
     public function changePassword(string $password): string
     {
+        // The forced change of a temporary password is exempt from the minimum age.
+        if (! $this->with_temporary_password) {
+            $this->assertPasswordOldEnoughToChange();
+        }
+
         $this->update([
             'password' => $password,
             'with_temporary_password' => false,
@@ -133,6 +140,19 @@ trait Authenticates
         static::recordAuthEvent(AuthEventEnum::PASSWORD_CHANGED, $this->email, $this);
 
         return $this->authenticate();
+    }
+
+    /**
+     * When the bearer token behind the current request expires, or null when the
+     * request carries no persisted token (no token, or a test double: Sanctum's
+     * actingAs() token is a mock that answers false to any attribute).
+     */
+    public function tokenExpiresAt(): ?CarbonInterface
+    {
+        $token = $this->currentAccessToken();
+        $expiresAt = $token instanceof PersonalAccessToken ? $token->expires_at : null;
+
+        return $expiresAt instanceof CarbonInterface ? $expiresAt : null;
     }
 
     /**

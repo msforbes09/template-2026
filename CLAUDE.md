@@ -52,3 +52,8 @@ Cross-cutting tasks: apply each half's own rules to the files in that half, and 
 
 - **`RULES.md`** — the standing working agreements (branch/PR rhythm, verification baselines, TDD loop). Read it at the start of every session, alongside this file.
 - **`YYYY-MM-DD.md`** — one file per working day: what shipped, pending work with resume-cold detail, environment gotchas. Read the **newest** one at session start; when the user wraps up a session, write/update today's file (minimal — important things only).
+
+## Guardrails and agents — `.claude/`
+
+- **`settings.json` + `hooks/`** — a deny list and two PreToolUse hooks enforce the hard rules at the tool layer: no edits to `.env` files or key material, no force-push, hard reset, destructive SQL, database-wiping artisan commands or Docker volume removal. A blocked command is one the user runs by hand.
+- **`agents/`** — four project agents with persistent memory under `agent-memory/`: `backend-developer` and `frontend-developer` implement under each half's rules and the TDD loop; `skeptic-reviewer` (adversarial, read-only) and `qa-tester` (baselines + localhost browser checks, read-only) gate the result before a PR. Each agent reads the half's `CLAUDE.md` and working rules first; the agent files point at those rather than restating them.

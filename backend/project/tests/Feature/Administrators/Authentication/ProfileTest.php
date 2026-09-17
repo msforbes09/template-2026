@@ -40,4 +40,21 @@ class ProfileTest extends TestCase
         $response->assertStatus(401);
         $response->assertJson(['error' => 'unauthenticated']);
     }
+
+    /**
+     * The profile tells the client when the server will expire the session, as
+     * slid by this very request, plus the inactivity window that defines it.
+     */
+    public function test_profile_exposes_the_session_window(): void
+    {
+        config(['auth.administrators.token_inactivity_minutes' => 60]);
+        $administrator = Administrator::factory()->create();
+        $token = $administrator->createToken('administrator', ['*'], now()->addMinutes(60))->plainTextToken;
+        $this->travel(20)->minutes();
+
+        $this->withToken($token)->getJson('/api/v1/administrator/profile')
+            ->assertOk()
+            ->assertJsonPath('data.session_inactivity_minutes', 60)
+            ->assertJsonPath('data.token_expires_at', now()->addMinutes(60)->format('Y-m-d H:i:s'));
+    }
 }

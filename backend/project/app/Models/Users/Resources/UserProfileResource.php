@@ -51,6 +51,8 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'profile_completed_at', type: 'string', nullable: true, example: '2026-08-21 10:12:45'),
         new OA\Property(property: 'details_editable_at', type: 'string', nullable: true, description: 'The day the profile details may next change (from its start); null = editable now.', example: '2026-09-20'),
         new OA\Property(property: 'photo_editable_at', type: 'string', nullable: true, description: 'When the photo may next change; null = editable now.', example: null),
+        new OA\Property(property: 'session_inactivity_minutes', type: 'integer', example: 60, description: 'The idle window after which the server expires the session.'),
+        new OA\Property(property: 'token_expires_at', type: 'string', nullable: true, example: '2026-07-07 11:30:00', description: 'When the current session expires if no further request slides it.'),
     ],
 )]
 class UserProfileResource extends JsonResource
@@ -82,6 +84,10 @@ class UserProfileResource extends JsonResource
             'profile_completed_at' => $this->profile_completed_at?->format('Y-m-d H:i:s'),
             'details_editable_at' => $this->nextChangeAllowedAt('details_changed_at')?->format('Y-m-d'),
             'photo_editable_at' => $this->nextChangeAllowedAt('photo_changed_at')?->format('Y-m-d'),
+            // The session window as the server sees it: `refresh.user.token` has just
+            // slid the expiry, so this is exactly when an idle client will be signed out.
+            'session_inactivity_minutes' => (int) config('auth.users.token_inactivity_minutes', 60),
+            'token_expires_at' => $this->tokenExpiresAt()?->format('Y-m-d H:i:s'),
         ];
     }
 }

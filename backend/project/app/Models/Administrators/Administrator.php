@@ -4,12 +4,15 @@ namespace App\Models\Administrators;
 
 use App\Enums\PermissionEnum;
 use App\Events\Administrators\TemporaryPasswordIssued;
+use App\Exceptions\PasswordExpiryWaiveUnavailableException;
 use App\Models\Administrators\Concerns\AdministratorNotifications;
 use App\Models\Administrators\Concerns\TwoFactorAuthenticates;
 use App\Models\Concerns\Authenticates;
 use App\Models\Concerns\Filterable;
+use App\Models\Concerns\HasPasswordHistory;
 use App\Models\Concerns\UploadsFiles;
 use App\Models\Misc\Files\File;
+use Carbon\CarbonInterface;
 use Database\Factories\Administrators\AdministratorFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,6 +38,7 @@ class Administrator extends Authenticatable implements Auditable
     /** @use HasFactory<AdministratorFactory> */
     use HasFactory;
 
+    use HasPasswordHistory;
     use HasRoles;
     use SoftDeletes;
     use TwoFactorAuthenticates;
@@ -146,7 +150,80 @@ class Administrator extends Authenticatable implements Auditable
             'last_login_at' => 'datetime',
             'auth_validated' => 'datetime',
             'auth_token_expires_at' => 'datetime',
+            'password_expiry_waives' => 'integer',
+            'password_expiry_waived_until' => 'datetime',
         ];
+    }
+
+    /**
+     * When the current password expires — the lifetime from its last change, or
+     * the end of the latest postponement if that is later. Null when expiry is
+     * disabled or the change date is unknown.
+     */
+    public function passwordExpiresAt(): ?CarbonInterface
+    {
+        $days = (int) config('auth.administrators.password_expiry_days', 90);
+
+        if ($days <= 0 || $this->password_changed_at === null) {
+            return null;
+        }
+
+        $expiresAt = $this->password_changed_at->copy()->addDays($days);
+        $waivedUntil = $this->password_expiry_waived_until;
+
+        return $waivedUntil !== null && $waivedUntil->greaterThan($expiresAt) ? $waivedUntil : $expiresAt;
+    }
+
+    /**
+     * Whether the current password is past its expiry date.
+     */
+    public function isPasswordExpired(): bool
+    {
+        return $this->passwordExpiresAt()?->isPast() ?? false;
+    }
+
+    /**
+     * How many more times an expired password may be postponed.
+     */
+    public function passwordExpiryWaivesRemaining(): int
+    {
+        $max = (int) config('auth.administrators.password_expiry_max_waives', 3);
+
+        return max(0, $max - (int) $this->password_expiry_waives);
+    }
+
+    /**
+     * Use one postponement on an expired password: the expiry moves forward by
+     * `password_expiry_waive_days`, so the policy is enforced by the clock and
+     * the console is gated once the last postponement runs out.
+     *
+     * @throws PasswordExpiryWaiveUnavailableException
+     */
+    public function waivePasswordExpiry(): void
+    {
+        if (! $this->isPasswordExpired() || $this->passwordExpiryWaivesRemaining() === 0) {
+            throw new PasswordExpiryWaiveUnavailableException;
+        }
+
+        $days = (int) config('auth.administrators.password_expiry_waive_days', 7);
+
+        $this->forceFill([
+            'password_expiry_waives' => $this->password_expiry_waives + 1,
+            'password_expiry_waived_until' => now()->addDays($days),
+        ])->save();
+    }
+
+    /**
+     * Bootstrap the model: a new password starts a fresh expiry lifetime.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (self $administrator) {
+            if ($administrator->isDirty('password') && ! $administrator->isDirty('password_expiry_waives')) {
+                $administrator->password_expiry_waives = 0;
+                $administrator->password_expiry_waived_until = null;
+            }
+        });
     }
 
     /**
